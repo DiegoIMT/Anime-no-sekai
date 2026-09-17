@@ -310,9 +310,9 @@ function openProductForm(p=null,duplicating=false){
  <section class="formSection"><div class="formSectionTitle"><span>01</span><div><h2>Información</h2><p>Datos principales de la figura.</p></div></div><div class="formGrid">
  <label>SKU<div class="readonlyField">${editing?escapeHtml(p.sku):'Se generará automáticamente'}</div><small class="fieldHint">${editing?'Identificador interno del producto.':duplicating?'La copia recibirá un SKU nuevo al guardarse.':'Supabase asignará el siguiente código ANS-XXXXX al guardar.'}</small></label>
  <label>Estado<select name="estado"><option value="disponible">Disponible</option><option value="apartada">Apartada</option><option value="vendida">Vendida</option><option value="proximamente">Próximamente</option></select></label>
- <label>Nombre<input name="nombre" maxlength="150" required value="${attr(p?.nombre||'')}"></label><div class="catalogField"><span>Personaje</span><div class="catalogPicker"><select name="personaje_id" id="personajeSelect" disabled><option value="">Selecciona primero una franquicia…</option></select><button class="catalogAdd" id="addPersonaje" type="button" disabled>＋ Nuevo</button></div><small class="fieldHint">Los personajes disponibles dependen de la franquicia seleccionada.</small></div>
- <div class="catalogField"><span>Franquicia</span><div class="catalogPicker"><select name="franquicia_id" id="franquiciaSelect"><option value="">Cargando franquicias…</option></select><button class="catalogAdd" id="addFranquicia" type="button">＋ Nueva</button></div><small class="fieldHint">Selecciona una franquicia existente o créala sin salir del producto.</small></div>
- <div class="catalogField"><span>Fabricante</span><div class="catalogPicker"><select name="fabricante_id" id="fabricanteSelect"><option value="">Cargando fabricantes…</option></select><button class="catalogAdd" id="addFabricante" type="button">＋ Nuevo</button></div><small class="fieldHint">Los fabricantes se reutilizan en las siguientes figuras.</small></div>
+ <label>Nombre<input name="nombre" maxlength="150" required value="${attr(p?.nombre||'')}"></label><div class="catalogField"><span>Personaje</span><div class="catalogPicker"><div class="searchableSelect" id="personajeCombo"><input class="searchableSelectInput" id="personajeSearch" type="text" autocomplete="off" placeholder="Selecciona primero una franquicia…" disabled><button class="searchableSelectArrow" type="button" tabindex="-1" aria-label="Mostrar personajes">⌄</button><div class="searchableSelectMenu"></div><select name="personaje_id" id="personajeSelect" class="catalogNativeSelect" disabled><option value="">Selecciona primero una franquicia…</option></select></div><button class="catalogAdd" id="addPersonaje" type="button" disabled>＋ Nuevo</button></div><small class="fieldHint">Escribe para buscar. Los personajes dependen de la franquicia seleccionada.</small></div>
+ <div class="catalogField"><span>Franquicia</span><div class="catalogPicker"><div class="searchableSelect" id="franquiciaCombo"><input class="searchableSelectInput" id="franquiciaSearch" type="text" autocomplete="off" placeholder="Buscar franquicia…"><button class="searchableSelectArrow" type="button" tabindex="-1" aria-label="Mostrar franquicias">⌄</button><div class="searchableSelectMenu"></div><select name="franquicia_id" id="franquiciaSelect" class="catalogNativeSelect"><option value="">Cargando franquicias…</option></select></div><button class="catalogAdd" id="addFranquicia" type="button">＋ Nueva</button></div><small class="fieldHint">Escribe para buscar una franquicia existente o créala sin salir del producto.</small></div>
+ <div class="catalogField"><span>Fabricante</span><div class="catalogPicker"><div class="searchableSelect" id="fabricanteCombo"><input class="searchableSelectInput" id="fabricanteSearch" type="text" autocomplete="off" placeholder="Buscar fabricante…"><button class="searchableSelectArrow" type="button" tabindex="-1" aria-label="Mostrar fabricantes">⌄</button><div class="searchableSelectMenu"></div><select name="fabricante_id" id="fabricanteSelect" class="catalogNativeSelect"><option value="">Cargando fabricantes…</option></select></div><button class="catalogAdd" id="addFabricante" type="button">＋ Nuevo</button></div><small class="fieldHint">Escribe para buscar un fabricante existente.</small></div>
  </div></section>
  <section class="formSection"><div class="formSectionTitle"><span>02</span><div><h2>Precio e inventario</h2><p>Precio de venta y disponibilidad.</p></div></div><div class="formGrid"><label>Precio normal <span class="required">*</span><div class="moneyInput"><span>$</span><input name="precio" type="number" min="0" step="0.01" required value="${attr(p?.precio??'')}"></div></label><label>Precio oferta <small>(opcional)</small><div class="moneyInput"><span>$</span><input name="precio_oferta" type="number" min="0" step="0.01" value="${attr(p?.precio_oferta??'')}"></div></label><label>Stock<input name="stock" type="number" min="0" step="1" required value="${attr(p?.stock??1)}"></label><label>Procedencia<input name="procedencia" value="${attr(p?.procedencia||'Japón')}"></label></div></section>
  <section class="formSection"><div class="formSectionTitle"><span>03</span><div><h2>Estado físico</h2><p>Condición de la pieza y su empaque.</p></div></div><div class="formGrid"><label>Condición figura<select name="condicion_figura"><option>Nueva</option><option>Usada - Excelente</option><option>Usada - Buena</option><option>Usada - Con detalles</option></select></label><label>Condición caja<select name="condicion_caja"><option value="">Seleccionar…</option><option>Excelente</option><option>Buena</option><option>Con detalles</option><option>Sin caja</option></select></label></div></section>
@@ -330,6 +330,9 @@ function openProductForm(p=null,duplicating=false){
  document.getElementById('addFabricante').onclick=()=>openCatalogModal('fabricantes','fabricanteSelect','Nuevo fabricante');
  document.getElementById('addPersonaje').onclick=()=>{const franquiciaId=document.getElementById('franquiciaSelect')?.value;if(franquiciaId)openCatalogModal('personajes','personajeSelect','Nuevo personaje',{franquicia_id:franquiciaId});};
  document.getElementById('franquiciaSelect').onchange=()=>loadCharactersForFranchise(null);
+ initCatalogCombobox('franquiciaSelect','franquiciaSearch');
+ initCatalogCombobox('personajeSelect','personajeSearch');
+ initCatalogCombobox('fabricanteSelect','fabricanteSearch');
  loadProductCatalogs(p);
  if(editing) loadExistingProductImages(p.id);
 }
@@ -348,18 +351,31 @@ async function loadProductCatalogs(product=null){
 async function loadCharactersForFranchise(product=null){
  const franquiciaId=document.getElementById('franquiciaSelect')?.value||'';
  const select=document.getElementById('personajeSelect'),add=document.getElementById('addPersonaje');if(!select||!add)return;
- if(!franquiciaId){select.innerHTML='<option value="">Selecciona primero una franquicia…</option>';select.disabled=true;add.disabled=true;return}
+ if(!franquiciaId){select.innerHTML='<option value="">Selecciona primero una franquicia…</option>';select.disabled=true;add.disabled=true;syncCatalogCombobox('personajeSelect');return}
  select.disabled=true;add.disabled=true;select.innerHTML='<option value="">Cargando personajes…</option>';
  const {data,error}=await supabaseClient.from('personajes').select('id,nombre').eq('franquicia_id',franquiciaId).order('nombre',{ascending:true});
  if(error){select.innerHTML='<option value="">No fue posible cargar personajes</option>';showProductMessage('No fue posible cargar los personajes: '+error.message,true);return}
- fillCatalogSelect('personajeSelect',data||[],product?.personaje_id,product?.personaje,'Sin personaje');select.disabled=false;add.disabled=false;
+ fillCatalogSelect('personajeSelect',data||[],product?.personaje_id,product?.personaje,'Sin personaje');select.disabled=false;add.disabled=false;syncCatalogCombobox('personajeSelect');
 }
 function fillCatalogSelect(id,items,selectedId,legacyName,emptyLabel){
  const select=document.getElementById(id);if(!select)return;
  select.innerHTML=`<option value="">${escapeHtml(emptyLabel)}</option>`+items.map(x=>`<option value="${attr(x.id)}" data-name="${attr(x.nombre)}">${escapeHtml(x.nombre)}</option>`).join('');
  let value=selectedId||'';
  if(!value&&legacyName){const match=items.find(x=>x.nombre.trim().toLowerCase()===legacyName.trim().toLowerCase());if(match)value=match.id}
- select.value=value;
+ select.value=value; syncCatalogCombobox(id);
+}
+function normalizeCatalogText(v){return (v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim()}
+function syncCatalogCombobox(selectId){
+ const select=document.getElementById(selectId);if(!select)return;const input=select.closest('.searchableSelect')?.querySelector('.searchableSelectInput');if(!input)return;
+ const option=select.selectedOptions?.[0];input.value=select.value?(option?.dataset?.name||option?.textContent||''):'';input.disabled=select.disabled;
+}
+function initCatalogCombobox(selectId,inputId){
+ const select=document.getElementById(selectId),input=document.getElementById(inputId);if(!select||!input)return;const root=input.closest('.searchableSelect'),menu=root.querySelector('.searchableSelectMenu'),arrow=root.querySelector('.searchableSelectArrow');
+ const close=()=>{root.classList.remove('open');menu.innerHTML=''};
+ const render=()=>{if(input.disabled)return;const q=normalizeCatalogText(input.value);const options=[...select.options].filter(o=>o.value&&(!q||normalizeCatalogText(o.dataset.name||o.textContent).includes(q)));menu.innerHTML=options.length?options.map(o=>`<button type="button" data-value="${attr(o.value)}">${escapeHtml(o.dataset.name||o.textContent)}</button>`).join(''):'<div class="searchableSelectEmpty">Sin coincidencias</div>';root.classList.add('open');menu.querySelectorAll('[data-value]').forEach(b=>b.onclick=()=>{select.value=b.dataset.value;syncCatalogCombobox(selectId);close();select.dispatchEvent(new Event('change',{bubbles:true}));});};
+ input.addEventListener('focus',()=>{input.select();render()});input.addEventListener('input',render);input.addEventListener('keydown',e=>{if(e.key==='Escape'){syncCatalogCombobox(selectId);close();input.blur()}else if(e.key==='Enter'){const first=menu.querySelector('[data-value]');if(first){e.preventDefault();first.click()}}});
+ arrow.onclick=()=>{if(input.disabled)return;if(root.classList.contains('open'))close();else{input.focus();render()}};
+ input.addEventListener('blur',()=>setTimeout(()=>{if(!root.contains(document.activeElement)){syncCatalogCombobox(selectId);close()}},120));
 }
 function openCatalogModal(table,selectId,title,extraData=null,onCreated=null){
  document.getElementById('catalogModalBackdrop')?.remove();
@@ -377,7 +393,7 @@ async function createCatalogItem(e,table,selectId,modal,extraData=null,onCreated
  const nombre=input.value.trim();if(!nombre)return;button.disabled=true;msg.textContent='Creando…';msg.className='catalogModalMessage';
  const {data,error}=await supabaseClient.from(table).insert({nombre,...(extraData||{})}).select('id,nombre').single();
  if(error){msg.textContent=error.code==='23505'?'Ese nombre ya existe en el catálogo.':'No se pudo crear: '+error.message;msg.className='catalogModalMessage error';button.disabled=false;return}
- const select=document.getElementById(selectId);if(select){const option=document.createElement('option');option.value=data.id;option.dataset.name=data.nombre;option.textContent=data.nombre;select.appendChild(option);select.value=data.id}
+ const select=document.getElementById(selectId);if(select){const option=document.createElement('option');option.value=data.id;option.dataset.name=data.nombre;option.textContent=data.nombre;select.appendChild(option);select.value=data.id;syncCatalogCombobox(selectId);select.dispatchEvent(new Event('change',{bubbles:true}))}
  modal.remove();if(onCreated)await onCreated(data);
 }
 
