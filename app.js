@@ -4,6 +4,8 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLI
 
 let products = [];
 let siteConfig = null;
+let siteLogoFile = null;
+let siteHeroFile = null;
 const money = n => new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0}).format(n);
 const icon = (name) => ({search:'⌕',menu:'☰',arrow:'›',fire:'🔥',truck:'✈',shield:'✓',chat:'◉',sparkle:'✦'})[name] || '';
 const statusLabel = s => ({disponible:'Disponible',apartada:'Apartada',vendida:'Vendida',proximamente:'Próximamente'})[s] || s || '';
@@ -40,13 +42,13 @@ function productCard(p){
 
 function renderStoreShell(){
  document.getElementById('app').innerHTML=`
-<header><a class="brand" href="#"><span class="mark">界</span><span>ANIME NO <b>SEKAI</b><small>FIGURAS & COLECCIONABLES</small></span></a><nav><a href="#catalogo">Figuras</a><a href="#ofertas">Ofertas</a><a href="#proximamente">Próximamente</a></nav><div class="headActions"><button aria-label="Buscar">${icon('search')}</button><button class="menu" id="mobileMenuButton" aria-label="Abrir menú" aria-expanded="false">${icon('menu')}</button></div><div class="mobileNav" id="mobileNav" aria-hidden="true"><a href="#catalogo">Figuras</a><a href="#ofertas">Ofertas</a><a href="#proximamente">Próximamente</a></div></header>
+<header><a class="brand" href="#"><span class="brandFallback"><span class="mark">界</span><span>ANIME NO <b>SEKAI</b><small>FIGURAS & COLECCIONABLES</small></span></span><img class="brandLogo" id="homeLogo" alt="Anime no Sekai" hidden></a><nav><a href="#catalogo">Figuras</a><a href="#ofertas">Ofertas</a><a href="#proximamente">Próximamente</a></nav><div class="headActions"><button aria-label="Buscar">${icon('search')}</button><button class="menu" id="mobileMenuButton" aria-label="Abrir menú" aria-expanded="false">${icon('menu')}</button></div><div class="mobileNav" id="mobileNav" aria-hidden="true"><a href="#catalogo">Figuras</a><a href="#ofertas">Ofertas</a><a href="#proximamente">Próximamente</a></div></header>
 <main><section class="hero"><div class="heroContent"><span class="eyebrow">${icon('sparkle')} <span id="homePortadaEtiqueta">DIRECTO DESDE JAPÓN</span></span><h1 id="homePortadaTitulo">Tu mundo de<br><em>figuras y coleccionables.</em></h1><p id="homePortadaDescripcion">Encuentra esa pieza que falta en tu colección. Figuras seleccionadas, disponibilidad real y atención directa por WhatsApp.</p><div class="heroBtns"><a href="#catalogo" class="primary">Explorar figuras ${icon('arrow')}</a><a href="#ofertas" class="secondary">${icon('fire')} Ver ofertas</a></div></div><div class="japan">日本<br><span>の世界</span></div></section>
 <section class="benefits"><div><span class="featureIcon">${icon('truck')}</span><span><b id="homeBeneficio1Titulo">Importadas de Japón</b><small id="homeBeneficio1Descripcion">Piezas seleccionadas</small></span></div><div><span class="featureIcon">${icon('shield')}</span><span><b id="homeBeneficio2Titulo">Compra con confianza</b><small id="homeBeneficio2Descripcion">Atención directa</small></span></div><div><span class="featureIcon">${icon('chat')}</span><span><b id="homeBeneficio3Titulo">Apártala por WhatsApp</b><small id="homeBeneficio3Descripcion">Rápido y sencillo</small></span></div></section>
 <section id="ofertas" class="section"><div class="sectionHead"><div><span class="kicker">🔥 PRECIOS ESPECIALES</span><h2 id="homeTituloOfertas">Ofertas del Sekai</h2></div><a href="#catalogo">Ver todas ${icon('arrow')}</a></div><div id="offersGrid" class="grid"><p class="catalogMessage">Cargando ofertas…</p></div></section>
 <section id="catalogo" class="section"><div class="sectionHead"><div><span class="kicker">COLECCIÓN</span><h2 id="homeTituloFiguras">Figuras destacadas</h2></div></div><div id="catalogChips" class="chips"></div><div id="catalogGrid" class="grid"><p class="catalogMessage">Cargando catálogo…</p></div></section>
 <section id="proximamente" class="arrival"><div><span class="kicker">PRÓXIMAMENTE 🇯🇵</span><h2 id="homeTituloProximamente">Próximamente</h2><p>Descubre próximas importaciones y pregunta por disponibilidad antes de que lleguen.</p></div><a class="primary" href="https://wa.me/529994739090" target="_blank" rel="noopener">Preguntar por WhatsApp</a></section></main>
-<footer><div class="brand"><span class="mark">界</span><span>ANIME NO <b>SEKAI</b></span></div><p>Tu mundo de figuras y coleccionables.</p><small>© 2026 Anime no Sekai</small></footer>`;
+<footer><div class="brand"><span class="brandFallback"><span class="mark">界</span><span>ANIME NO <b>SEKAI</b></span></span><img class="brandLogo footerLogo" id="footerLogo" alt="Anime no Sekai" hidden></div><p>Tu mundo de figuras y coleccionables.</p><small>© 2026 Anime no Sekai</small></footer>`;
 }
 
 async function loadSiteConfig(){
@@ -66,6 +68,17 @@ function applySiteConfig(c){
  set('homeBeneficio2Titulo',c.beneficio_2_titulo); set('homeBeneficio2Descripcion',c.beneficio_2_descripcion);
  set('homeBeneficio3Titulo',c.beneficio_3_titulo); set('homeBeneficio3Descripcion',c.beneficio_3_descripcion);
  set('homeTituloOfertas',c.titulo_ofertas); set('homeTituloFiguras',c.titulo_figuras); set('homeTituloProximamente',c.titulo_proximamente);
+ applySiteVisuals(c);
+}
+function applySiteVisuals(c){
+ const logo=c?.logo_url||'';
+ document.querySelectorAll('.brandLogo').forEach(img=>{img.src=logo;img.hidden=!logo});
+ document.querySelectorAll('.brandFallback').forEach(el=>el.hidden=!!logo);
+ const hero=document.querySelector('.hero');
+ if(hero){
+   if(c?.portada_url){hero.style.setProperty('--hero-image',`url('${String(c.portada_url).replace(/[\']/g,'')}')`);hero.classList.add('hasHeroImage')}
+   else {hero.style.removeProperty('--hero-image');hero.classList.remove('hasHeroImage')}
+ }
 }
 
 async function loadPublicCatalog(){
@@ -181,18 +194,57 @@ async function showSiteContentForm(){
  <section class="formSection"><div class="formSectionTitle"><span>01</span><div><h2>Portada</h2><p>Mensaje principal que recibe el visitante.</p></div></div><div class="formGrid"><label>Etiqueta<input name="portada_etiqueta" maxlength="100" required value="${attr(data.portada_etiqueta)}"></label><label class="full">Título<input name="portada_titulo" maxlength="200" required value="${attr(data.portada_titulo)}"></label><label class="full">Descripción<textarea name="portada_descripcion" maxlength="500" rows="4" required>${escapeHtml(data.portada_descripcion)}</textarea></label></div></section>
  <section class="formSection"><div class="formSectionTitle"><span>02</span><div><h2>Beneficios</h2><p>Los tres mensajes breves debajo de la portada.</p></div></div><div class="formGrid"><label>Beneficio 1<input name="beneficio_1_titulo" maxlength="100" required value="${attr(data.beneficio_1_titulo)}"></label><label>Descripción 1<input name="beneficio_1_descripcion" maxlength="150" required value="${attr(data.beneficio_1_descripcion)}"></label><label>Beneficio 2<input name="beneficio_2_titulo" maxlength="100" required value="${attr(data.beneficio_2_titulo)}"></label><label>Descripción 2<input name="beneficio_2_descripcion" maxlength="150" required value="${attr(data.beneficio_2_descripcion)}"></label><label>Beneficio 3<input name="beneficio_3_titulo" maxlength="100" required value="${attr(data.beneficio_3_titulo)}"></label><label>Descripción 3<input name="beneficio_3_descripcion" maxlength="150" required value="${attr(data.beneficio_3_descripcion)}"></label></div></section>
  <section class="formSection"><div class="formSectionTitle"><span>03</span><div><h2>Secciones</h2><p>Títulos principales del catálogo.</p></div></div><div class="formGrid"><label>Título de ofertas<input name="titulo_ofertas" maxlength="100" required value="${attr(data.titulo_ofertas)}"></label><label>Título de figuras<input name="titulo_figuras" maxlength="100" required value="${attr(data.titulo_figuras)}"></label><label>Título de próximamente<input name="titulo_proximamente" maxlength="100" required value="${attr(data.titulo_proximamente)}"></label></div></section>
+ <section class="formSection"><div class="formSectionTitle"><span>04</span><div><h2>Identidad visual</h2><p>Logo y fotografía de portada. El sitio aplica automáticamente el tratamiento negro y violeta.</p></div></div><div class="siteVisualGrid">
+ <div class="siteVisualField"><div class="siteVisualLabel"><b>Logo</b><small>PNG, JPG o WebP · recomendado con fondo transparente</small></div><div class="siteVisualPreview logoPreview" id="siteLogoPreview">${data.logo_url?`<img src="${attr(data.logo_url)}" alt="Logo actual">`:`<div class="visualFallback"><span class="mark">界</span><span>ANIME NO <b>SEKAI</b></span></div>`}</div><input id="siteLogoInput" type="file" accept="image/jpeg,image/png,image/webp" hidden><div class="siteVisualActions"><button id="chooseSiteLogo" class="secondary" type="button">${data.logo_url?'Cambiar logo':'Agregar logo'}</button>${data.logo_url?'<button id="removeSiteLogo" class="visualRemove" type="button">Quitar</button>':''}</div></div>
+ <div class="siteVisualField"><div class="siteVisualLabel"><b>Imagen de portada</b><small>PNG, JPG o WebP · preferentemente horizontal</small></div><div class="siteVisualPreview heroPreview" id="siteHeroPreview">${data.portada_url?`<img src="${attr(data.portada_url)}" alt="Portada actual">`:'<div class="heroFallbackPreview"><span>Fondo negro + halo violeta</span></div>'}</div><input id="siteHeroInput" type="file" accept="image/jpeg,image/png,image/webp" hidden><div class="siteVisualActions"><button id="chooseSiteHero" class="secondary" type="button">${data.portada_url?'Cambiar portada':'Agregar portada'}</button>${data.portada_url?'<button id="removeSiteHero" class="visualRemove" type="button">Quitar</button>':''}</div></div>
+ </div></section>
  <div class="formActions"><button id="saveSiteContent" class="primary" type="submit">Guardar contenido</button></div><p id="siteContentMessage" class="formMessage"></p></form>`;
  document.getElementById('logoutAdmin').onclick=async()=>{await supabaseClient.auth.signOut();closeAdmin()};
  document.getElementById('siteContentForm').onsubmit=saveSiteContent;
+ siteLogoFile=null;siteHeroFile=null;
+ const logoInput=document.getElementById('siteLogoInput'),heroInput=document.getElementById('siteHeroInput');
+ document.getElementById('chooseSiteLogo').onclick=()=>logoInput.click();
+ document.getElementById('chooseSiteHero').onclick=()=>heroInput.click();
+ logoInput.onchange=()=>previewSiteAsset('logo',logoInput.files?.[0]);
+ heroInput.onchange=()=>previewSiteAsset('hero',heroInput.files?.[0]);
+ document.getElementById('removeSiteLogo')?.addEventListener('click',()=>markSiteAssetRemoved('logo'));
+ document.getElementById('removeSiteHero')?.addEventListener('click',()=>markSiteAssetRemoved('hero'));
+}
+function previewSiteAsset(kind,file){
+ if(!file)return;
+ if(!/^image\/(jpeg|png|webp)$/.test(file.type)){alert('Selecciona una imagen JPG, PNG o WebP.');return}
+ const url=URL.createObjectURL(file),isLogo=kind==='logo';
+ if(isLogo)siteLogoFile={file,preview:url,remove:false};else siteHeroFile={file,preview:url,remove:false};
+ document.getElementById(isLogo?'siteLogoPreview':'siteHeroPreview').innerHTML=`<img src="${attr(url)}" alt="Vista previa">`;
+}
+function markSiteAssetRemoved(kind){
+ const isLogo=kind==='logo',current=isLogo?siteLogoFile:siteHeroFile;if(current?.preview)URL.revokeObjectURL(current.preview);
+ const marker={file:null,preview:null,remove:true};if(isLogo)siteLogoFile=marker;else siteHeroFile=marker;
+ document.getElementById(isLogo?'siteLogoPreview':'siteHeroPreview').innerHTML=isLogo?'<div class="visualFallback"><span class="mark">界</span><span>ANIME NO <b>SEKAI</b></span></div>':'<div class="heroFallbackPreview"><span>Fondo negro + halo violeta</span></div>';
+}
+async function compressSiteImage(file,kind){
+ const bitmap=await createImageBitmap(file),max=kind==='logo'?1000:2200,scale=Math.min(1,max/Math.max(bitmap.width,bitmap.height));
+ const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));
+ const ctx=canvas.getContext('2d',{alpha:kind==='logo'});if(kind!=='logo'){ctx.fillStyle='#090a0d';ctx.fillRect(0,0,canvas.width,canvas.height)}ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close?.();
+ return await new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('No fue posible optimizar la imagen.')),'image/webp',kind==='logo'?0.9:0.84));
+}
+function siteStoragePathFromPublicUrl(url){const marker='/storage/v1/object/public/sitio/';const i=(url||'').indexOf(marker);return i>=0?decodeURIComponent(url.slice(i+marker.length)):null}
+async function uploadSiteAsset(kind,file){
+ const blob=await compressSiteImage(file,kind),path=`${kind==='logo'?'logo':'portada'}-${crypto.randomUUID()}.webp`;
+ const {error}=await supabaseClient.storage.from('sitio').upload(path,blob,{contentType:'image/webp',upsert:false,cacheControl:'3600'});if(error)throw error;
+ const {data}=supabaseClient.storage.from('sitio').getPublicUrl(path);return {url:data.publicUrl,path};
 }
 async function saveSiteContent(e){
- e.preventDefault(); const f=new FormData(e.currentTarget),button=document.getElementById('saveSiteContent'),msg=document.getElementById('siteContentMessage');
+ e.preventDefault();const f=new FormData(e.currentTarget),button=document.getElementById('saveSiteContent'),msg=document.getElementById('siteContentMessage');
  const obj={portada_etiqueta:f.get('portada_etiqueta').trim(),portada_titulo:f.get('portada_titulo').trim(),portada_descripcion:f.get('portada_descripcion').trim(),beneficio_1_titulo:f.get('beneficio_1_titulo').trim(),beneficio_1_descripcion:f.get('beneficio_1_descripcion').trim(),beneficio_2_titulo:f.get('beneficio_2_titulo').trim(),beneficio_2_descripcion:f.get('beneficio_2_descripcion').trim(),beneficio_3_titulo:f.get('beneficio_3_titulo').trim(),beneficio_3_descripcion:f.get('beneficio_3_descripcion').trim(),titulo_ofertas:f.get('titulo_ofertas').trim(),titulo_figuras:f.get('titulo_figuras').trim(),titulo_proximamente:f.get('titulo_proximamente').trim(),fecha_actualizacion:new Date().toISOString()};
- button.disabled=true;msg.textContent='Guardando…';msg.className='formMessage';
- const {data,error}=await supabaseClient.from('configuracion_sitio').update(obj).eq('id',1).select().single();
- button.disabled=false;
- if(error){msg.textContent='No se pudo guardar: '+error.message;msg.className='formMessage error';return}
- siteConfig=data;applySiteConfig(data);msg.textContent='Contenido actualizado correctamente.';msg.className='formMessage success';
+ button.disabled=true;msg.textContent='Guardando…';msg.className='formMessage';const oldLogo=siteConfig?.logo_url||null,oldHero=siteConfig?.portada_url||null;let uploaded=[];
+ try{
+  if(siteLogoFile?.file){msg.textContent='Procesando logo…';const x=await uploadSiteAsset('logo',siteLogoFile.file);uploaded.push(x.path);obj.logo_url=x.url}else if(siteLogoFile?.remove)obj.logo_url=null;
+  if(siteHeroFile?.file){msg.textContent='Procesando portada…';const x=await uploadSiteAsset('hero',siteHeroFile.file);uploaded.push(x.path);obj.portada_url=x.url}else if(siteHeroFile?.remove)obj.portada_url=null;
+  const {data,error}=await supabaseClient.from('configuracion_sitio').update(obj).eq('id',1).select().single();if(error)throw error;
+  const obsolete=[];if(Object.prototype.hasOwnProperty.call(obj,'logo_url')&&oldLogo&&oldLogo!==data.logo_url){const x=siteStoragePathFromPublicUrl(oldLogo);if(x)obsolete.push(x)}if(Object.prototype.hasOwnProperty.call(obj,'portada_url')&&oldHero&&oldHero!==data.portada_url){const x=siteStoragePathFromPublicUrl(oldHero);if(x)obsolete.push(x)}if(obsolete.length)await supabaseClient.storage.from('sitio').remove(obsolete);
+  if(siteLogoFile?.preview)URL.revokeObjectURL(siteLogoFile.preview);if(siteHeroFile?.preview)URL.revokeObjectURL(siteHeroFile.preview);siteLogoFile=null;siteHeroFile=null;siteConfig=data;applySiteConfig(data);msg.textContent='Contenido e identidad visual actualizados correctamente.';msg.className='formMessage success';setTimeout(()=>renderAdminContentPanel(),700);
+ }catch(error){if(uploaded.length)await supabaseClient.storage.from('sitio').remove(uploaded);msg.textContent='No se pudo guardar: '+(error?.message||'Error inesperado.');msg.className='formMessage error'}finally{button.disabled=false}
 }
 
 let adminProductsCache=[];
