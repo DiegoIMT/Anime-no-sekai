@@ -6,6 +6,7 @@ let products = [];
 let siteConfig = null;
 let siteLogoFile = null;
 let siteHeroFile = null;
+let siteHeroMobileFile = null;
 let publicFranchiseFilter = 'Todas';
 let publicSearchQuery = ''; 
 const money = n => new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0}).format(n);
@@ -81,8 +82,8 @@ function applySiteVisuals(c){
  document.querySelectorAll('.brandText').forEach(el=>el.hidden=!!logo&&!showText);
  const hero=document.querySelector('.hero');
  if(hero){
-   if(c?.portada_url){hero.style.setProperty('--hero-image',`url('${String(c.portada_url).replace(/[\']/g,'')}')`);hero.style.setProperty('--hero-x',`${Number.isFinite(Number(c.portada_posicion_x))?Number(c.portada_posicion_x):50}%`);hero.style.setProperty('--hero-y',`${Number.isFinite(Number(c.portada_posicion_y))?Number(c.portada_posicion_y):50}%`);hero.classList.add('hasHeroImage')}
-   else {hero.style.removeProperty('--hero-image');hero.style.removeProperty('--hero-x');hero.style.removeProperty('--hero-y');hero.classList.remove('hasHeroImage')}
+   if(c?.portada_url){hero.style.setProperty('--hero-image',`url('${String(c.portada_url).replace(/[\']/g,'')}')`);hero.style.setProperty('--hero-x',`${Number.isFinite(Number(c.portada_posicion_x))?Number(c.portada_posicion_x):50}%`);hero.style.setProperty('--hero-y',`${Number.isFinite(Number(c.portada_posicion_y))?Number(c.portada_posicion_y):50}%`);if(c?.portada_movil_url){hero.style.setProperty('--hero-mobile-image',`url('${String(c.portada_movil_url).replace(/[\']/g,'')}')`)}else hero.style.removeProperty('--hero-mobile-image');hero.style.setProperty('--hero-mobile-x',`${Number.isFinite(Number(c.portada_movil_posicion_x))?Number(c.portada_movil_posicion_x):50}%`);hero.style.setProperty('--hero-mobile-y',`${Number.isFinite(Number(c.portada_movil_posicion_y))?Number(c.portada_movil_posicion_y):50}%`);hero.classList.add('hasHeroImage')}
+   else {hero.style.removeProperty('--hero-image');hero.style.removeProperty('--hero-mobile-image');hero.style.removeProperty('--hero-x');hero.style.removeProperty('--hero-y');hero.style.removeProperty('--hero-mobile-x');hero.style.removeProperty('--hero-mobile-y');hero.classList.remove('hasHeroImage')}
  }
 }
 
@@ -230,18 +231,22 @@ async function showSiteContentForm(){
  <div class="siteVisualField"><div class="siteVisualLabel"><b>Logo</b><small>PNG, JPG o WebP · recomendado con fondo transparente</small></div><div class="siteVisualPreview logoPreview" id="siteLogoPreview">${data.logo_url?`<img src="${attr(data.logo_url)}" alt="Logo actual">`:`<div class="visualFallback"><span class="mark">界</span><span>ANIME NO <b>SEKAI</b></span></div>`}</div><input id="siteLogoInput" type="file" accept="image/jpeg,image/png,image/webp" hidden><div class="siteVisualActions"><button id="chooseSiteLogo" class="secondary" type="button">${data.logo_url?'Cambiar logo':'Agregar logo'}</button>${data.logo_url?'<button id="removeSiteLogo" class="visualRemove" type="button">Quitar</button>':''}</div></div>
  <label class="siteLogoMode"><span><b>Mostrar nombre junto al logo</b><small>Actívalo para isotipos. Desactívalo si tu logo ya incluye el nombre de la tienda.</small></span><input id="mostrarTextoLogo" name="mostrar_texto_logo" type="checkbox" ${data.mostrar_texto_logo!==false?'checked':''}></label>
  <div class="siteVisualField heroVisualField"><div class="siteVisualLabel"><b>Imagen de portada</b><small>La vista previa usa el mismo recorte <code>cover</code> que la página pública.</small></div><div class="siteVisualPreview heroPreview realHeroPreview" id="siteHeroPreview" style="--preview-hero:${data.portada_url?`url(\'${attr(data.portada_url)}\')`:'none'};--preview-x:${Number(data.portada_posicion_x??50)}%;--preview-y:${Number(data.portada_posicion_y??50)}%">${data.portada_url?'<div class="heroPreviewShade"><span>Vista real del encuadre</span></div>':'<div class="heroFallbackPreview"><span>Fondo negro + halo violeta</span></div>'}</div><div class="heroPositionControls"><label><span>Posición horizontal <b id="heroXValue">${Number(data.portada_posicion_x??50)}%</b></span><input id="heroPositionX" name="portada_posicion_x" type="range" min="0" max="100" step="1" value="${Number(data.portada_posicion_x??50)}"></label><label><span>Posición vertical <b id="heroYValue">${Number(data.portada_posicion_y??50)}%</b></span><input id="heroPositionY" name="portada_posicion_y" type="range" min="0" max="100" step="1" value="${Number(data.portada_posicion_y??50)}"></label><button id="resetHeroPosition" class="visualRemove" type="button">Centrar imagen</button></div><input id="siteHeroInput" type="file" accept="image/jpeg,image/png,image/webp" hidden><div class="siteVisualActions"><button id="chooseSiteHero" class="secondary" type="button">${data.portada_url?'Cambiar portada':'Agregar portada'}</button>${data.portada_url?'<button id="removeSiteHero" class="visualRemove" type="button">Quitar</button>':''}</div></div>
+ <div class="siteVisualField heroVisualField mobileHeroField"><div class="siteVisualLabel"><b>Imagen de portada móvil <span class="optionalTag">opcional</span></b><small>Recomendada en formato vertical. Si no cargas una, se utilizará la portada de escritorio.</small></div><div class="siteVisualPreview heroPreview realHeroPreview mobileHeroPreview" id="siteHeroMobilePreview" style="--preview-hero:${data.portada_movil_url?`url(\'${attr(data.portada_movil_url)}\')`:data.portada_url?`url(\'${attr(data.portada_url)}\')`:'none'};--preview-x:${Number(data.portada_movil_posicion_x??50)}%;--preview-y:${Number(data.portada_movil_posicion_y??50)}%">${(data.portada_movil_url||data.portada_url)?'<div class="heroPreviewShade"><span>Vista previa móvil</span></div>':'<div class="heroFallbackPreview"><span>Sin portada</span></div>'}</div><div class="heroPositionControls"><label><span>Posición horizontal <b id="heroMobileXValue">${Number(data.portada_movil_posicion_x??50)}%</b></span><input id="heroMobilePositionX" name="portada_movil_posicion_x" type="range" min="0" max="100" step="1" value="${Number(data.portada_movil_posicion_x??50)}"></label><label><span>Posición vertical <b id="heroMobileYValue">${Number(data.portada_movil_posicion_y??50)}%</b></span><input id="heroMobilePositionY" name="portada_movil_posicion_y" type="range" min="0" max="100" step="1" value="${Number(data.portada_movil_posicion_y??50)}"></label><button id="resetHeroMobilePosition" class="visualRemove" type="button">Centrar imagen</button></div><input id="siteHeroMobileInput" type="file" accept="image/jpeg,image/png,image/webp" hidden><div class="siteVisualActions"><button id="chooseSiteHeroMobile" class="secondary" type="button">${data.portada_movil_url?'Cambiar portada móvil':'Agregar portada móvil'}</button>${data.portada_movil_url?'<button id="removeSiteHeroMobile" class="visualRemove" type="button">Quitar</button>':''}</div></div>
  </div></section>
  <div class="formActions"><button id="saveSiteContent" class="primary" type="submit">Guardar contenido</button></div><p id="siteContentMessage" class="formMessage"></p></form>`;
  document.getElementById('logoutAdmin').onclick=async()=>{await supabaseClient.auth.signOut();closeAdmin()};
  document.getElementById('siteContentForm').onsubmit=saveSiteContent;
- siteLogoFile=null;siteHeroFile=null;
- const logoInput=document.getElementById('siteLogoInput'),heroInput=document.getElementById('siteHeroInput');
+ siteLogoFile=null;siteHeroFile=null;siteHeroMobileFile=null;
+ const logoInput=document.getElementById('siteLogoInput'),heroInput=document.getElementById('siteHeroInput'),heroMobileInput=document.getElementById('siteHeroMobileInput');
  document.getElementById('chooseSiteLogo').onclick=()=>logoInput.click();
  document.getElementById('chooseSiteHero').onclick=()=>heroInput.click();
+ document.getElementById('chooseSiteHeroMobile').onclick=()=>heroMobileInput.click();
  logoInput.onchange=()=>previewSiteAsset('logo',logoInput.files?.[0]);
  heroInput.onchange=()=>previewSiteAsset('hero',heroInput.files?.[0]);
+ heroMobileInput.onchange=()=>previewSiteAsset('hero-mobile',heroMobileInput.files?.[0]);
  document.getElementById('removeSiteLogo')?.addEventListener('click',()=>markSiteAssetRemoved('logo'));
  document.getElementById('removeSiteHero')?.addEventListener('click',()=>markSiteAssetRemoved('hero'));
+ document.getElementById('removeSiteHeroMobile')?.addEventListener('click',()=>markSiteAssetRemoved('hero-mobile'));
  const mode=document.getElementById('mostrarTextoLogo');
  const syncLogoModePreview=()=>document.getElementById('siteLogoPreview')?.classList.toggle('logoOnlyPreview',!mode.checked);
  mode?.addEventListener('change',syncLogoModePreview);syncLogoModePreview();
@@ -249,18 +254,22 @@ async function showSiteContentForm(){
  const syncHeroPosition=()=>{const preview=document.getElementById('siteHeroPreview');if(!preview)return;preview.style.setProperty('--preview-x',`${posX.value}%`);preview.style.setProperty('--preview-y',`${posY.value}%`);document.getElementById('heroXValue').textContent=`${posX.value}%`;document.getElementById('heroYValue').textContent=`${posY.value}%`};
  posX?.addEventListener('input',syncHeroPosition);posY?.addEventListener('input',syncHeroPosition);
  document.getElementById('resetHeroPosition')?.addEventListener('click',()=>{posX.value=50;posY.value=50;syncHeroPosition()});syncHeroPosition();
+ const mobilePosX=document.getElementById('heroMobilePositionX'),mobilePosY=document.getElementById('heroMobilePositionY');
+ const syncHeroMobilePosition=()=>{const preview=document.getElementById('siteHeroMobilePreview');if(!preview)return;preview.style.setProperty('--preview-x',`${mobilePosX.value}%`);preview.style.setProperty('--preview-y',`${mobilePosY.value}%`);document.getElementById('heroMobileXValue').textContent=`${mobilePosX.value}%`;document.getElementById('heroMobileYValue').textContent=`${mobilePosY.value}%`};
+ mobilePosX?.addEventListener('input',syncHeroMobilePosition);mobilePosY?.addEventListener('input',syncHeroMobilePosition);document.getElementById('resetHeroMobilePosition')?.addEventListener('click',()=>{mobilePosX.value=50;mobilePosY.value=50;syncHeroMobilePosition()});syncHeroMobilePosition();
 }
 function previewSiteAsset(kind,file){
  if(!file)return;
  if(!/^image\/(jpeg|png|webp)$/.test(file.type)){alert('Selecciona una imagen JPG, PNG o WebP.');return}
- const url=URL.createObjectURL(file),isLogo=kind==='logo';
- if(isLogo)siteLogoFile={file,preview:url,remove:false};else siteHeroFile={file,preview:url,remove:false};
- if(isLogo){document.getElementById('siteLogoPreview').innerHTML=`<img src="${attr(url)}" alt="Vista previa">`}else{const preview=document.getElementById('siteHeroPreview');preview.style.setProperty('--preview-hero',`url('${url}')`);preview.innerHTML='<div class="heroPreviewShade"><span>Vista real del encuadre</span></div>';}
+ const url=URL.createObjectURL(file),isLogo=kind==='logo',isMobile=kind==='hero-mobile';
+ if(isLogo)siteLogoFile={file,preview:url,remove:false};else if(isMobile)siteHeroMobileFile={file,preview:url,remove:false};else siteHeroFile={file,preview:url,remove:false};
+ if(isLogo){document.getElementById('siteLogoPreview').innerHTML=`<img src="${attr(url)}" alt="Vista previa">`}else{const preview=document.getElementById(isMobile?'siteHeroMobilePreview':'siteHeroPreview');preview.style.setProperty('--preview-hero',`url('${url}')`);preview.innerHTML=`<div class="heroPreviewShade"><span>${isMobile?'Vista previa móvil':'Vista real del encuadre'}</span></div>`;}
 }
 function markSiteAssetRemoved(kind){
- const isLogo=kind==='logo',current=isLogo?siteLogoFile:siteHeroFile;if(current?.preview)URL.revokeObjectURL(current.preview);
- const marker={file:null,preview:null,remove:true};if(isLogo)siteLogoFile=marker;else siteHeroFile=marker;
- const preview=document.getElementById(isLogo?'siteLogoPreview':'siteHeroPreview');preview.innerHTML=isLogo?'<div class="visualFallback"><span class="mark">界</span><span>ANIME NO <b>SEKAI</b></span></div>':'<div class="heroFallbackPreview"><span>Fondo negro + halo violeta</span></div>';if(!isLogo)preview.style.setProperty('--preview-hero','none');
+ const isLogo=kind==='logo',isMobile=kind==='hero-mobile',current=isLogo?siteLogoFile:isMobile?siteHeroMobileFile:siteHeroFile;if(current?.preview)URL.revokeObjectURL(current.preview);
+ const marker={file:null,preview:null,remove:true};if(isLogo)siteLogoFile=marker;else if(isMobile)siteHeroMobileFile=marker;else siteHeroFile=marker;
+ const preview=document.getElementById(isLogo?'siteLogoPreview':isMobile?'siteHeroMobilePreview':'siteHeroPreview');
+ if(isLogo)preview.innerHTML='<div class="visualFallback"><span class="mark">界</span><span>ANIME NO <b>SEKAI</b></span></div>';else{const fallbackUrl=isMobile&&!siteHeroFile?.remove?(siteHeroFile?.preview||siteConfig?.portada_url):null;if(fallbackUrl){preview.style.setProperty('--preview-hero',`url('${fallbackUrl}')`);preview.innerHTML='<div class="heroPreviewShade"><span>Usando portada de escritorio</span></div>'}else{preview.innerHTML='<div class="heroFallbackPreview"><span>Sin portada</span></div>';preview.style.setProperty('--preview-hero','none')}}
 }
 async function compressSiteImage(file,kind){
  const bitmap=await createImageBitmap(file),max=kind==='logo'?1000:2200,scale=Math.min(1,max/Math.max(bitmap.width,bitmap.height));
@@ -270,20 +279,21 @@ async function compressSiteImage(file,kind){
 }
 function siteStoragePathFromPublicUrl(url){const marker='/storage/v1/object/public/sitio/';const i=(url||'').indexOf(marker);return i>=0?decodeURIComponent(url.slice(i+marker.length)):null}
 async function uploadSiteAsset(kind,file){
- const blob=await compressSiteImage(file,kind),path=`${kind==='logo'?'logo':'portada'}-${crypto.randomUUID()}.webp`;
+ const blob=await compressSiteImage(file,kind),path=`${kind==='logo'?'logo':kind==='hero-mobile'?'portada-movil':'portada'}-${crypto.randomUUID()}.webp`;
  const {error}=await supabaseClient.storage.from('sitio').upload(path,blob,{contentType:'image/webp',upsert:false,cacheControl:'3600'});if(error)throw error;
  const {data}=supabaseClient.storage.from('sitio').getPublicUrl(path);return {url:data.publicUrl,path};
 }
 async function saveSiteContent(e){
  e.preventDefault();const f=new FormData(e.currentTarget),button=document.getElementById('saveSiteContent'),msg=document.getElementById('siteContentMessage');
- const obj={portada_etiqueta:f.get('portada_etiqueta').trim(),portada_titulo:f.get('portada_titulo').trim(),portada_descripcion:f.get('portada_descripcion').trim(),beneficio_1_titulo:f.get('beneficio_1_titulo').trim(),beneficio_1_descripcion:f.get('beneficio_1_descripcion').trim(),beneficio_2_titulo:f.get('beneficio_2_titulo').trim(),beneficio_2_descripcion:f.get('beneficio_2_descripcion').trim(),beneficio_3_titulo:f.get('beneficio_3_titulo').trim(),beneficio_3_descripcion:f.get('beneficio_3_descripcion').trim(),titulo_ofertas:f.get('titulo_ofertas').trim(),titulo_figuras:f.get('titulo_figuras').trim(),titulo_proximamente:f.get('titulo_proximamente').trim(),mostrar_texto_logo:f.get('mostrar_texto_logo')==='on',portada_posicion_x:Number(f.get('portada_posicion_x')||50),portada_posicion_y:Number(f.get('portada_posicion_y')||50),fecha_actualizacion:new Date().toISOString()};
- button.disabled=true;msg.textContent='Guardando…';msg.className='formMessage';const oldLogo=siteConfig?.logo_url||null,oldHero=siteConfig?.portada_url||null;let uploaded=[];
+ const obj={portada_etiqueta:f.get('portada_etiqueta').trim(),portada_titulo:f.get('portada_titulo').trim(),portada_descripcion:f.get('portada_descripcion').trim(),beneficio_1_titulo:f.get('beneficio_1_titulo').trim(),beneficio_1_descripcion:f.get('beneficio_1_descripcion').trim(),beneficio_2_titulo:f.get('beneficio_2_titulo').trim(),beneficio_2_descripcion:f.get('beneficio_2_descripcion').trim(),beneficio_3_titulo:f.get('beneficio_3_titulo').trim(),beneficio_3_descripcion:f.get('beneficio_3_descripcion').trim(),titulo_ofertas:f.get('titulo_ofertas').trim(),titulo_figuras:f.get('titulo_figuras').trim(),titulo_proximamente:f.get('titulo_proximamente').trim(),mostrar_texto_logo:f.get('mostrar_texto_logo')==='on',portada_posicion_x:Number(f.get('portada_posicion_x')||50),portada_posicion_y:Number(f.get('portada_posicion_y')||50),portada_movil_posicion_x:Number(f.get('portada_movil_posicion_x')||50),portada_movil_posicion_y:Number(f.get('portada_movil_posicion_y')||50),fecha_actualizacion:new Date().toISOString()};
+ button.disabled=true;msg.textContent='Guardando…';msg.className='formMessage';const oldLogo=siteConfig?.logo_url||null,oldHero=siteConfig?.portada_url||null,oldHeroMobile=siteConfig?.portada_movil_url||null;let uploaded=[];
  try{
   if(siteLogoFile?.file){msg.textContent='Procesando logo…';const x=await uploadSiteAsset('logo',siteLogoFile.file);uploaded.push(x.path);obj.logo_url=x.url}else if(siteLogoFile?.remove)obj.logo_url=null;
   if(siteHeroFile?.file){msg.textContent='Procesando portada…';const x=await uploadSiteAsset('hero',siteHeroFile.file);uploaded.push(x.path);obj.portada_url=x.url}else if(siteHeroFile?.remove)obj.portada_url=null;
+  if(siteHeroMobileFile?.file){msg.textContent='Procesando portada móvil…';const x=await uploadSiteAsset('hero-mobile',siteHeroMobileFile.file);uploaded.push(x.path);obj.portada_movil_url=x.url}else if(siteHeroMobileFile?.remove)obj.portada_movil_url=null;
   const {data,error}=await supabaseClient.from('configuracion_sitio').update(obj).eq('id',1).select().single();if(error)throw error;
-  const obsolete=[];if(Object.prototype.hasOwnProperty.call(obj,'logo_url')&&oldLogo&&oldLogo!==data.logo_url){const x=siteStoragePathFromPublicUrl(oldLogo);if(x)obsolete.push(x)}if(Object.prototype.hasOwnProperty.call(obj,'portada_url')&&oldHero&&oldHero!==data.portada_url){const x=siteStoragePathFromPublicUrl(oldHero);if(x)obsolete.push(x)}if(obsolete.length)await supabaseClient.storage.from('sitio').remove(obsolete);
-  if(siteLogoFile?.preview)URL.revokeObjectURL(siteLogoFile.preview);if(siteHeroFile?.preview)URL.revokeObjectURL(siteHeroFile.preview);siteLogoFile=null;siteHeroFile=null;siteConfig=data;applySiteConfig(data);msg.textContent='Contenido e identidad visual actualizados correctamente.';msg.className='formMessage success';setTimeout(()=>renderAdminContentPanel(),700);
+  const obsolete=[];if(Object.prototype.hasOwnProperty.call(obj,'logo_url')&&oldLogo&&oldLogo!==data.logo_url){const x=siteStoragePathFromPublicUrl(oldLogo);if(x)obsolete.push(x)}if(Object.prototype.hasOwnProperty.call(obj,'portada_url')&&oldHero&&oldHero!==data.portada_url){const x=siteStoragePathFromPublicUrl(oldHero);if(x)obsolete.push(x)}if(Object.prototype.hasOwnProperty.call(obj,'portada_movil_url')&&oldHeroMobile&&oldHeroMobile!==data.portada_movil_url){const x=siteStoragePathFromPublicUrl(oldHeroMobile);if(x)obsolete.push(x)}if(obsolete.length)await supabaseClient.storage.from('sitio').remove(obsolete);
+  if(siteLogoFile?.preview)URL.revokeObjectURL(siteLogoFile.preview);if(siteHeroFile?.preview)URL.revokeObjectURL(siteHeroFile.preview);if(siteHeroMobileFile?.preview)URL.revokeObjectURL(siteHeroMobileFile.preview);siteLogoFile=null;siteHeroFile=null;siteHeroMobileFile=null;siteConfig=data;applySiteConfig(data);msg.textContent='Contenido e identidad visual actualizados correctamente.';msg.className='formMessage success';setTimeout(()=>renderAdminContentPanel(),700);
  }catch(error){if(uploaded.length)await supabaseClient.storage.from('sitio').remove(uploaded);msg.textContent='No se pudo guardar: '+(error?.message||'Error inesperado.');msg.className='formMessage error'}finally{button.disabled=false}
 }
 
