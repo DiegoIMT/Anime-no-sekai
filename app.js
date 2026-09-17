@@ -6,6 +6,8 @@ let products = [];
 let siteConfig = null;
 let siteLogoFile = null;
 let siteHeroFile = null;
+let publicFranchiseFilter = 'Todas';
+let publicSearchQuery = ''; 
 const money = n => new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0}).format(n);
 const icon = (name) => ({search:'⌕',menu:'☰',arrow:'›',fire:'🔥',truck:'✈',shield:'✓',chat:'◉',sparkle:'✦'})[name] || '';
 const statusLabel = s => ({disponible:'Disponible',apartada:'Apartada',vendida:'Vendida',proximamente:'Próximamente'})[s] || s || '';
@@ -42,7 +44,7 @@ function productCard(p){
 
 function renderStoreShell(){
  document.getElementById('app').innerHTML=`
-<header><a class="brand" href="#"><span class="brandIcon"><span class="mark brandMark">界</span><img class="brandLogo" id="homeLogo" alt="Logo Anime no Sekai" hidden></span><span class="brandText">ANIME NO <b>SEKAI</b><small>FIGURAS & COLECCIONABLES</small></span></a><nav><a href="#catalogo">Figuras</a><a href="#ofertas">Ofertas</a><a href="#proximamente">Próximamente</a></nav><div class="headActions"><button aria-label="Buscar">${icon('search')}</button><button class="menu" id="mobileMenuButton" aria-label="Abrir menú" aria-expanded="false">${icon('menu')}</button></div><div class="mobileNav" id="mobileNav" aria-hidden="true"><a href="#catalogo">Figuras</a><a href="#ofertas">Ofertas</a><a href="#proximamente">Próximamente</a></div></header>
+<header><a class="brand" href="#"><span class="brandIcon"><span class="mark brandMark">界</span><img class="brandLogo" id="homeLogo" alt="Logo Anime no Sekai" hidden></span><span class="brandText">ANIME NO <b>SEKAI</b><small>FIGURAS & COLECCIONABLES</small></span></a><nav><a href="#catalogo">Figuras</a><a href="#ofertas">Ofertas</a><a href="#proximamente">Próximamente</a></nav><div class="headActions"><button id="searchToggle" aria-label="Buscar" aria-expanded="false">${icon('search')}</button><button class="menu" id="mobileMenuButton" aria-label="Abrir menú" aria-expanded="false">${icon('menu')}</button></div><div class="headerSearch" id="headerSearch" aria-hidden="true"><span class="searchIcon">${icon('search')}</span><input id="publicSearchInput" type="search" autocomplete="off" placeholder="Buscar figura, personaje, anime, SKU o fabricante…" aria-label="Buscar en el catálogo"><button id="searchClose" type="button" aria-label="Cerrar búsqueda">×</button></div><div class="mobileNav" id="mobileNav" aria-hidden="true"><a href="#catalogo">Figuras</a><a href="#ofertas">Ofertas</a><a href="#proximamente">Próximamente</a></div></header>
 <main><section class="hero"><div class="heroContent"><span class="eyebrow">${icon('sparkle')} <span id="homePortadaEtiqueta">DIRECTO DESDE JAPÓN</span></span><h1 id="homePortadaTitulo">Tu mundo de<br><em>figuras y coleccionables.</em></h1><p id="homePortadaDescripcion">Encuentra esa pieza que falta en tu colección. Figuras seleccionadas, disponibilidad real y atención directa por WhatsApp.</p><div class="heroBtns"><a href="#catalogo" class="primary">Explorar figuras ${icon('arrow')}</a><a href="#ofertas" class="secondary">${icon('fire')} Ver ofertas</a></div></div><div class="japan">日本<br><span>の世界</span></div></section>
 <section class="benefits"><div><span class="featureIcon">${icon('truck')}</span><span><b id="homeBeneficio1Titulo">Importadas de Japón</b><small id="homeBeneficio1Descripcion">Piezas seleccionadas</small></span></div><div><span class="featureIcon">${icon('shield')}</span><span><b id="homeBeneficio2Titulo">Compra con confianza</b><small id="homeBeneficio2Descripcion">Atención directa</small></span></div><div><span class="featureIcon">${icon('chat')}</span><span><b id="homeBeneficio3Titulo">Apártala por WhatsApp</b><small id="homeBeneficio3Descripcion">Rápido y sencillo</small></span></div></section>
 <section id="ofertas" class="section"><div class="sectionHead"><div><span class="kicker">🔥 PRECIOS ESPECIALES</span><h2 id="homeTituloOfertas">Ofertas del Sekai</h2></div><a href="#catalogo">Ver todas ${icon('arrow')}</a></div><div id="offersGrid" class="grid"><p class="catalogMessage">Cargando ofertas…</p></div></section>
@@ -96,15 +98,25 @@ async function loadPublicCatalog(){
  const skuFromHash=location.hash.startsWith('#figura=')?decodeURIComponent(location.hash.slice(8)):null;
  if(skuFromHash) openDetail(skuFromHash,false);
 }
-function renderPublicProducts(filter='Todas'){
- const offers=products.filter(p=>p.sale!=null);
- document.getElementById('offersGrid').innerHTML=offers.length?offers.map(productCard).join(''):'<p class="catalogMessage">Por ahora no hay ofertas publicadas.</p>';
- const franchises=[...new Set(products.map(p=>p.series).filter(Boolean))];
+function normalizeSearch(value){return String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim()}
+function productMatchesSearch(p,query){
+ if(!query)return true;
+ const haystack=[p.name,p.sku,p.character,p.series,p.manufacturer].map(normalizeSearch).join(' ');
+ return query.split(/\s+/).every(term=>haystack.includes(term));
+}
+function renderPublicProducts(filter=publicFranchiseFilter){
+ publicFranchiseFilter=filter||'Todas';
+ const query=normalizeSearch(publicSearchQuery);
+ const searched=products.filter(p=>productMatchesSearch(p,query));
+ const offers=searched.filter(p=>p.sale!=null);
+ document.getElementById('offersGrid').innerHTML=offers.length?offers.map(productCard).join(''):`<p class="catalogMessage">${query?'No encontramos ofertas que coincidan con tu búsqueda.':'Por ahora no hay ofertas publicadas.'}</p>`;
+ const franchises=[...new Set(products.map(p=>p.series).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es',{sensitivity:'base'}));
+ if(publicFranchiseFilter!=='Todas'&&!franchises.includes(publicFranchiseFilter))publicFranchiseFilter='Todas';
  const chips=document.getElementById('catalogChips');
- chips.innerHTML=['Todas',...franchises].map(x=>`<button class="${x===filter?'active':''}" data-franchise="${attr(x)}">${escapeHtml(x)}</button>`).join('');
+ chips.innerHTML=['Todas',...franchises].map(x=>`<button class="${x===publicFranchiseFilter?'active':''}" data-franchise="${attr(x)}">${escapeHtml(x)}</button>`).join('');
  chips.querySelectorAll('[data-franchise]').forEach(b=>b.onclick=()=>renderPublicProducts(b.dataset.franchise));
- const list=filter==='Todas'?products:products.filter(p=>p.series===filter);
- document.getElementById('catalogGrid').innerHTML=list.length?list.map(productCard).join(''):'<p class="catalogMessage">No hay figuras publicadas en esta categoría.</p>';
+ const list=publicFranchiseFilter==='Todas'?searched:searched.filter(p=>p.series===publicFranchiseFilter);
+ document.getElementById('catalogGrid').innerHTML=list.length?list.map(productCard).join(''):`<p class="catalogMessage">${query?'No encontramos figuras que coincidan con tu búsqueda.':'No hay figuras publicadas en esta categoría.'}</p>`;
 }
 
 function openDetail(sku,push=true){
@@ -135,6 +147,22 @@ const mobileNav=document.getElementById('mobileNav');
 function closeMobileMenu(){if(!mobileMenuButton||!mobileNav)return;mobileNav.classList.remove('open');mobileMenuButton.setAttribute('aria-expanded','false');mobileMenuButton.setAttribute('aria-label','Abrir menú');mobileNav.setAttribute('aria-hidden','true')}
 mobileMenuButton?.addEventListener('click',()=>{const open=!mobileNav.classList.contains('open');mobileNav.classList.toggle('open',open);mobileMenuButton.setAttribute('aria-expanded',String(open));mobileMenuButton.setAttribute('aria-label',open?'Cerrar menú':'Abrir menú');mobileNav.setAttribute('aria-hidden',String(!open))});
 mobileNav?.querySelectorAll('a').forEach(a=>a.addEventListener('click',closeMobileMenu));
+const searchToggle=document.getElementById('searchToggle');
+const headerSearch=document.getElementById('headerSearch');
+const publicSearchInput=document.getElementById('publicSearchInput');
+const searchClose=document.getElementById('searchClose');
+function openPublicSearch(){
+ closeMobileMenu();headerSearch?.classList.add('open');headerSearch?.setAttribute('aria-hidden','false');searchToggle?.setAttribute('aria-expanded','true');setTimeout(()=>publicSearchInput?.focus(),0);
+}
+function closePublicSearch(clear=true){
+ headerSearch?.classList.remove('open');headerSearch?.setAttribute('aria-hidden','true');searchToggle?.setAttribute('aria-expanded','false');
+ if(clear){publicSearchQuery='';if(publicSearchInput)publicSearchInput.value='';renderPublicProducts();}
+}
+searchToggle?.addEventListener('click',()=>headerSearch?.classList.contains('open')?closePublicSearch(false):openPublicSearch());
+searchClose?.addEventListener('click',()=>closePublicSearch(true));
+publicSearchInput?.addEventListener('input',e=>{publicSearchQuery=e.target.value;renderPublicProducts();document.getElementById('catalogo')?.scrollIntoView({behavior:'smooth',block:'start'});});
+publicSearchInput?.addEventListener('keydown',e=>{if(e.key==='Escape')closePublicSearch(true)});
+
 loadSiteConfig();
 loadPublicCatalog();
 
@@ -143,7 +171,7 @@ loadPublicCatalog();
 // =========================================================
 function adminMarkup(){
  return `<section class="adminView" id="adminView">
-  <div class="adminTop"><a class="brand" href="#"><span class="mark">界</span><span>ANIME NO <b>SEKAI</b><small>ADMINISTRACIÓN</small></span></a><button id="adminExit" class="detailClose" type="button">×</button></div>
+  <div class="adminTop"><a class="brand adminBrand" href="#"><span class="brandIcon"><span class="mark brandMark">界</span><img class="brandLogo" id="adminLogo" alt="Logo Anime no Sekai" hidden></span><span class="brandText">ANIME NO <b>SEKAI</b><small>ADMINISTRACIÓN</small></span><span class="adminBadge">ADMIN</span></a><button id="adminExit" class="detailClose" type="button">×</button></div>
   <div class="adminShell"><div id="adminContent"><div class="adminLogin"><span class="kicker">ACCESO PRIVADO</span><h1>Panel administrativo</h1><p>Inicia sesión para administrar el catálogo de Anime no Sekai.</p><form id="loginForm"><label>Correo<input id="loginEmail" type="email" autocomplete="username" required></label><label>Contraseña<input id="loginPassword" type="password" autocomplete="current-password" required></label><button class="primary adminPrimary" type="submit">Iniciar sesión</button><p id="loginMessage" class="formMessage"></p></form></div></div></div>
  </section>`;
 }
@@ -151,6 +179,7 @@ async function openAdmin(){
  if(document.getElementById('adminView')) return;
  document.body.insertAdjacentHTML('beforeend',adminMarkup());
  document.body.classList.add('detail-open');
+ if(siteConfig) applySiteVisuals(siteConfig);
  document.getElementById('adminExit').addEventListener('click',closeAdmin);
  document.getElementById('loginForm').addEventListener('submit',loginAdmin);
  const {data:{session}}=await supabaseClient.auth.getSession();
