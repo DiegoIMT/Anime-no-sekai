@@ -265,20 +265,21 @@ function filterAdminProducts(q){q=q.toLowerCase().trim();renderAdminProducts(adm
 function renderAdminProducts(items){
  const box=document.getElementById('adminProducts');
  if(!items.length){box.innerHTML='<div class="adminEmpty"><b>Aún no hay figuras registradas.</b><span>Usa “Nueva figura” para crear el primer producto real.</span></div>';return}
- box.innerHTML=items.map(p=>`<article class="adminProduct"><div><span class="adminSku">${escapeHtml(p.sku)}</span><h3>${escapeHtml(p.nombre)}</h3><p>${escapeHtml(p.franquicia||'Sin franquicia')}</p></div><div class="adminProductPrice"><strong>${money(Number(p.precio_oferta??p.precio))}</strong>${p.precio_oferta!=null?`<small>${money(Number(p.precio))}</small>`:''}</div><span class="adminState state-${p.estado}">${escapeHtml(p.estado)}</span><div class="adminRowActions"><button type="button" data-edit="${p.id}">Editar</button><button type="button" class="danger" data-delete="${p.id}">Eliminar</button></div></article>`).join('');
+ box.innerHTML=items.map(p=>`<article class="adminProduct"><div><span class="adminSku">${escapeHtml(p.sku)}</span><h3>${escapeHtml(p.nombre)}</h3><p>${escapeHtml(p.franquicia||'Sin franquicia')}</p></div><div class="adminProductPrice"><strong>${money(Number(p.precio_oferta??p.precio))}</strong>${p.precio_oferta!=null?`<small>${money(Number(p.precio))}</small>`:''}</div><span class="adminState state-${p.estado}">${escapeHtml(p.estado)}</span><div class="adminRowActions"><button type="button" data-edit="${p.id}">Editar</button><button type="button" data-duplicate="${p.id}">Duplicar</button><button type="button" class="danger" data-delete="${p.id}">Eliminar</button></div></article>`).join('');
  box.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>openProductForm(adminProductsCache.find(p=>p.id===b.dataset.edit)));
+ box.querySelectorAll('[data-duplicate]').forEach(b=>b.onclick=()=>openProductForm(adminProductsCache.find(p=>p.id===b.dataset.duplicate),true));
  box.querySelectorAll('[data-delete]').forEach(b=>b.onclick=()=>deleteProduct(b.dataset.delete));
 }
 let productFormImages=[];
 let existingProductImages=[];
 
-function openProductForm(p=null){
- const editing=!!p;
+function openProductForm(p=null,duplicating=false){
+ const editing=!!p&&!duplicating;
  productFormImages=[];
  existingProductImages=[];
- document.getElementById('adminContent').innerHTML=`<div class="adminFormHead"><button id="backAdmin" class="backBtn" type="button">‹ Volver a productos</button><span class="kicker">${editing?'EDITAR':'NUEVA'} FIGURA</span><h1>${editing?'Editar producto':'Registrar figura'}</h1></div><form id="productForm" class="productForm">
+ document.getElementById('adminContent').innerHTML=`<div class="adminFormHead"><button id="backAdmin" class="backBtn" type="button">‹ Volver a productos</button><span class="kicker">${editing?'EDITAR':duplicating?'DUPLICAR':'NUEVA'} FIGURA</span><h1>${editing?'Editar producto':duplicating?'Duplicar producto':'Registrar figura'}</h1>${duplicating?'<p class="duplicateNotice">Se copiarán los datos del producto. El SKU será nuevo y las fotografías deberán agregarse a la copia.</p>':''}</div><form id="productForm" class="productForm">
  <section class="formSection"><div class="formSectionTitle"><span>01</span><div><h2>Información</h2><p>Datos principales de la figura.</p></div></div><div class="formGrid">
- <label>SKU<div class="readonlyField">${editing?escapeHtml(p.sku):'Se generará automáticamente'}</div><small class="fieldHint">${editing?'Identificador interno del producto.':'Supabase asignará el siguiente código ANS-XXXXX al guardar.'}</small></label>
+ <label>SKU<div class="readonlyField">${editing?escapeHtml(p.sku):'Se generará automáticamente'}</div><small class="fieldHint">${editing?'Identificador interno del producto.':duplicating?'La copia recibirá un SKU nuevo al guardarse.':'Supabase asignará el siguiente código ANS-XXXXX al guardar.'}</small></label>
  <label>Estado<select name="estado"><option value="disponible">Disponible</option><option value="apartada">Apartada</option><option value="vendida">Vendida</option><option value="proximamente">Próximamente</option></select></label>
  <label>Nombre<input name="nombre" maxlength="150" required value="${attr(p?.nombre||'')}"></label><label>Personaje<input name="personaje" maxlength="150" value="${attr(p?.personaje||'')}"></label>
  <div class="catalogField"><span>Franquicia</span><div class="catalogPicker"><select name="franquicia_id" id="franquiciaSelect"><option value="">Cargando franquicias…</option></select><button class="catalogAdd" id="addFranquicia" type="button">＋ Nueva</button></div><small class="fieldHint">Selecciona una franquicia existente o créala sin salir del producto.</small></div>
@@ -288,14 +289,14 @@ function openProductForm(p=null){
  <section class="formSection"><div class="formSectionTitle"><span>03</span><div><h2>Estado físico</h2><p>Condición de la pieza y su empaque.</p></div></div><div class="formGrid"><label>Condición figura<select name="condicion_figura"><option>Nueva</option><option>Usada - Excelente</option><option>Usada - Buena</option><option>Usada - Con detalles</option></select></label><label>Condición caja<select name="condicion_caja"><option value="">Seleccionar…</option><option>Excelente</option><option>Buena</option><option>Con detalles</option><option>Sin caja</option></select></label></div></section>
  <section class="formSection"><div class="formSectionTitle"><span>04</span><div><h2>Publicación</h2><p>Información que verá el cliente.</p></div></div><div class="formGrid"><label class="full">Entrega<input name="entrega" value="${attr(p?.entrega||'A convenir')}"></label><label class="full">Descripción<textarea name="descripcion" rows="5" placeholder="Describe la figura, edición, detalles relevantes, contenido incluido…">${escapeHtml(p?.descripcion||'')}</textarea></label></div></section>
  <section class="formSection"><div class="formSectionTitle"><span>05</span><div><h2>Fotografías</h2><p>Agrega varias imágenes y elige la principal.</p></div></div><div class="photoUploader"><input id="productPhotos" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden><button id="selectPhotos" class="uploadButton" type="button"><span>＋</span><b>Agregar fotografías</b><small>JPG, PNG o WebP · se optimizan antes de subir</small></button><div id="photoPreview" class="photoPreview"></div></div></section>
- <div class="formChecks"><label><input name="destacada" type="checkbox" ${p?.destacada?'checked':''}> Figura destacada</label><label><input name="activo" type="checkbox" ${p?.activo===false?'':'checked'}> Visible en catálogo</label></div><div class="formActions"><button id="saveProductButton" class="primary" type="submit">${editing?'Guardar cambios':'Crear figura'}</button></div><p id="productMessage" class="formMessage"></p></form>`;
+ <div class="formChecks"><label><input name="destacada" type="checkbox" ${p?.destacada?'checked':''}> Figura destacada</label><label><input name="activo" type="checkbox" ${p?.activo===false?'':'checked'}> Visible en catálogo</label></div><div class="formActions"><button id="saveProductButton" class="primary" type="submit">${editing?'Guardar cambios':duplicating?'Crear copia':'Crear figura'}</button></div><p id="productMessage" class="formMessage"></p></form>`;
  document.querySelector('[name="estado"]').value=p?.estado||'disponible';
  document.querySelector('[name="condicion_figura"]').value=p?.condicion_figura||'Nueva';
  if(p?.condicion_caja && [...document.querySelector('[name="condicion_caja"]').options].some(o=>o.value===p.condicion_caja)) document.querySelector('[name="condicion_caja"]').value=p.condicion_caja;
  document.getElementById('backAdmin').onclick=()=>{cleanupNewImagePreviews();renderAdminPanel();loadAdminProducts()};
  document.getElementById('selectPhotos').onclick=()=>document.getElementById('productPhotos').click();
  document.getElementById('productPhotos').onchange=handlePhotoSelection;
- document.getElementById('productForm').onsubmit=e=>saveProduct(e,p?.id,p?.sku);
+ document.getElementById('productForm').onsubmit=e=>saveProduct(e,editing?p?.id:null,editing?p?.sku:null);
  document.getElementById('addFranquicia').onclick=()=>openCatalogModal('franquicias','franquiciaSelect','Nueva franquicia');
  document.getElementById('addFabricante').onclick=()=>openCatalogModal('fabricantes','fabricanteSelect','Nuevo fabricante');
  loadProductCatalogs(p);
