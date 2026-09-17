@@ -101,23 +101,116 @@ function renderAdminProducts(items){
  box.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>openProductForm(adminProductsCache.find(p=>p.id===b.dataset.edit)));
  box.querySelectorAll('[data-delete]').forEach(b=>b.onclick=()=>deleteProduct(b.dataset.delete));
 }
+let productFormImages=[];
+let existingProductImages=[];
+
 function openProductForm(p=null){
  const editing=!!p;
+ productFormImages=[];
+ existingProductImages=[];
  document.getElementById('adminContent').innerHTML=`<div class="adminFormHead"><button id="backAdmin" class="backBtn" type="button">‹ Volver a productos</button><span class="kicker">${editing?'EDITAR':'NUEVA'} FIGURA</span><h1>${editing?'Editar producto':'Registrar figura'}</h1></div><form id="productForm" class="productForm">
- <div class="formGrid"><label>SKU<input name="sku" maxlength="20" required value="${attr(p?.sku||'')}"></label><label>Nombre<input name="nombre" maxlength="150" required value="${attr(p?.nombre||'')}"></label><label>Personaje<input name="personaje" value="${attr(p?.personaje||'')}"></label><label>Franquicia<input name="franquicia" value="${attr(p?.franquicia||'')}"></label><label>Fabricante<input name="fabricante" value="${attr(p?.fabricante||'')}"></label><label>Estado<select name="estado"><option value="disponible">Disponible</option><option value="apartada">Apartada</option><option value="vendida">Vendida</option><option value="proximamente">Próximamente</option></select></label><label>Precio normal<input name="precio" type="number" min="0" step="0.01" required value="${attr(p?.precio??'')}"></label><label>Precio oferta <small>(opcional)</small><input name="precio_oferta" type="number" min="0" step="0.01" value="${attr(p?.precio_oferta??'')}"></label><label>Stock<input name="stock" type="number" min="0" step="1" required value="${attr(p?.stock??1)}"></label><label>Condición figura<input name="condicion_figura" value="${attr(p?.condicion_figura||'Nueva')}"></label><label>Condición caja<input name="condicion_caja" value="${attr(p?.condicion_caja||'')}"></label><label>Procedencia<input name="procedencia" value="${attr(p?.procedencia||'Japón')}"></label><label class="full">Entrega<input name="entrega" value="${attr(p?.entrega||'A convenir')}"></label><label class="full">Descripción<textarea name="descripcion" rows="5">${escapeHtml(p?.descripcion||'')}</textarea></label></div>
- <div class="formChecks"><label><input name="destacada" type="checkbox" ${p?.destacada?'checked':''}> Figura destacada</label><label><input name="activo" type="checkbox" ${p?.activo===false?'':'checked'}> Visible en catálogo</label></div><div class="formActions"><button class="primary" type="submit">${editing?'Guardar cambios':'Crear figura'}</button></div><p id="productMessage" class="formMessage"></p></form>`;
+ <section class="formSection"><div class="formSectionTitle"><span>01</span><div><h2>Información</h2><p>Datos principales de la figura.</p></div></div><div class="formGrid">
+ <label>SKU<div class="readonlyField">${editing?escapeHtml(p.sku):'Se generará automáticamente'}</div><small class="fieldHint">${editing?'Identificador interno del producto.':'Supabase asignará el siguiente código ANS-XXXXX al guardar.'}</small></label>
+ <label>Estado<select name="estado"><option value="disponible">Disponible</option><option value="apartada">Apartada</option><option value="vendida">Vendida</option><option value="proximamente">Próximamente</option></select></label>
+ <label>Nombre<input name="nombre" maxlength="150" required value="${attr(p?.nombre||'')}"></label><label>Personaje<input name="personaje" maxlength="150" value="${attr(p?.personaje||'')}"></label>
+ <label>Franquicia<input name="franquicia" maxlength="150" value="${attr(p?.franquicia||'')}"></label><label>Fabricante<input name="fabricante" maxlength="150" value="${attr(p?.fabricante||'')}"></label>
+ </div></section>
+ <section class="formSection"><div class="formSectionTitle"><span>02</span><div><h2>Precio e inventario</h2><p>Precio de venta y disponibilidad.</p></div></div><div class="formGrid"><label>Precio normal <span class="required">*</span><div class="moneyInput"><span>$</span><input name="precio" type="number" min="0" step="0.01" required value="${attr(p?.precio??'')}"></div></label><label>Precio oferta <small>(opcional)</small><div class="moneyInput"><span>$</span><input name="precio_oferta" type="number" min="0" step="0.01" value="${attr(p?.precio_oferta??'')}"></div></label><label>Stock<input name="stock" type="number" min="0" step="1" required value="${attr(p?.stock??1)}"></label><label>Procedencia<input name="procedencia" value="${attr(p?.procedencia||'Japón')}"></label></div></section>
+ <section class="formSection"><div class="formSectionTitle"><span>03</span><div><h2>Estado físico</h2><p>Condición de la pieza y su empaque.</p></div></div><div class="formGrid"><label>Condición figura<select name="condicion_figura"><option>Nueva</option><option>Usada - Excelente</option><option>Usada - Buena</option><option>Usada - Con detalles</option></select></label><label>Condición caja<select name="condicion_caja"><option value="">Seleccionar…</option><option>Excelente</option><option>Buena</option><option>Con detalles</option><option>Sin caja</option></select></label></div></section>
+ <section class="formSection"><div class="formSectionTitle"><span>04</span><div><h2>Publicación</h2><p>Información que verá el cliente.</p></div></div><div class="formGrid"><label class="full">Entrega<input name="entrega" value="${attr(p?.entrega||'A convenir')}"></label><label class="full">Descripción<textarea name="descripcion" rows="5" placeholder="Describe la figura, edición, detalles relevantes, contenido incluido…">${escapeHtml(p?.descripcion||'')}</textarea></label></div></section>
+ <section class="formSection"><div class="formSectionTitle"><span>05</span><div><h2>Fotografías</h2><p>Agrega varias imágenes y elige la principal.</p></div></div><div class="photoUploader"><input id="productPhotos" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden><button id="selectPhotos" class="uploadButton" type="button"><span>＋</span><b>Agregar fotografías</b><small>JPG, PNG o WebP · se optimizan antes de subir</small></button><div id="photoPreview" class="photoPreview"></div></div></section>
+ <div class="formChecks"><label><input name="destacada" type="checkbox" ${p?.destacada?'checked':''}> Figura destacada</label><label><input name="activo" type="checkbox" ${p?.activo===false?'':'checked'}> Visible en catálogo</label></div><div class="formActions"><button id="saveProductButton" class="primary" type="submit">${editing?'Guardar cambios':'Crear figura'}</button></div><p id="productMessage" class="formMessage"></p></form>`;
  document.querySelector('[name="estado"]').value=p?.estado||'disponible';
- document.getElementById('backAdmin').onclick=()=>{renderAdminPanel();loadAdminProducts()};
- document.getElementById('productForm').onsubmit=e=>saveProduct(e,p?.id);
+ document.querySelector('[name="condicion_figura"]').value=p?.condicion_figura||'Nueva';
+ if(p?.condicion_caja && [...document.querySelector('[name="condicion_caja"]').options].some(o=>o.value===p.condicion_caja)) document.querySelector('[name="condicion_caja"]').value=p.condicion_caja;
+ document.getElementById('backAdmin').onclick=()=>{cleanupNewImagePreviews();renderAdminPanel();loadAdminProducts()};
+ document.getElementById('selectPhotos').onclick=()=>document.getElementById('productPhotos').click();
+ document.getElementById('productPhotos').onchange=handlePhotoSelection;
+ document.getElementById('productForm').onsubmit=e=>saveProduct(e,p?.id,p?.sku);
+ if(editing) loadExistingProductImages(p.id);
 }
-async function saveProduct(e,id){
- e.preventDefault();const f=new FormData(e.currentTarget),msg=document.getElementById('productMessage');
- const obj={sku:f.get('sku').trim(),nombre:f.get('nombre').trim(),personaje:emptyNull(f.get('personaje')),franquicia:emptyNull(f.get('franquicia')),fabricante:emptyNull(f.get('fabricante')),descripcion:emptyNull(f.get('descripcion')),precio:Number(f.get('precio')),precio_oferta:f.get('precio_oferta')===''?null:Number(f.get('precio_oferta')),estado:f.get('estado'),stock:Number(f.get('stock')),condicion_figura:emptyNull(f.get('condicion_figura')),condicion_caja:emptyNull(f.get('condicion_caja')),procedencia:emptyNull(f.get('procedencia')),entrega:emptyNull(f.get('entrega')),destacada:f.get('destacada')==='on',activo:f.get('activo')==='on'};
- if(obj.precio_oferta!==null&&obj.precio_oferta>=obj.precio){msg.textContent='El precio de oferta debe ser menor que el precio normal.';msg.className='formMessage error';return}
- msg.textContent='Guardando…'; const q=id?supabaseClient.from('productos').update(obj).eq('id',id):supabaseClient.from('productos').insert(obj); const {error}=await q;
- if(error){msg.textContent=error.code==='23505'?'Ya existe un producto con ese SKU.':error.message;msg.className='formMessage error';return}
- renderAdminPanel();await loadAdminProducts();
+
+async function loadExistingProductImages(productId){
+ const {data,error}=await supabaseClient.from('producto_imagenes').select('*').eq('producto_id',productId).order('orden',{ascending:true});
+ if(error){showProductMessage('No fue posible cargar las fotografías existentes: '+error.message,true);return}
+ existingProductImages=(data||[]).map(x=>({...x,removed:false})); renderPhotoPreview();
 }
+
+function handlePhotoSelection(e){
+ const files=[...e.target.files];
+ const allowed=['image/jpeg','image/png','image/webp'];
+ for(const file of files){
+   if(!allowed.includes(file.type)) continue;
+   if(productFormImages.length+existingProductImages.filter(x=>!x.removed).length>=8) break;
+   productFormImages.push({id:crypto.randomUUID(),file,preview:URL.createObjectURL(file),principal:false});
+ }
+ if(!hasPrincipalPhoto()) setFirstPhotoPrincipal();
+ e.target.value=''; renderPhotoPreview();
+}
+function hasPrincipalPhoto(){return existingProductImages.some(x=>!x.removed&&x.principal)||productFormImages.some(x=>x.principal)}
+function setFirstPhotoPrincipal(){
+ const old=existingProductImages.find(x=>!x.removed); if(old){old.principal=true;return}
+ const fresh=productFormImages[0]; if(fresh) fresh.principal=true;
+}
+function renderPhotoPreview(){
+ const box=document.getElementById('photoPreview'); if(!box)return;
+ const old=existingProductImages.filter(x=>!x.removed).map(x=>({kind:'old',id:x.id,src:x.url,principal:x.principal}));
+ const fresh=productFormImages.map(x=>({kind:'new',id:x.id,src:x.preview,principal:x.principal}));
+ const all=[...old,...fresh];
+ if(!all.length){box.innerHTML='<p class="photoEmpty">Todavía no has agregado fotografías.</p>';return}
+ box.innerHTML=all.map((x,i)=>`<article class="photoItem ${x.principal?'principal':''}"><img src="${attr(x.src)}" alt="Fotografía ${i+1}"><button type="button" class="photoMain" data-main-kind="${x.kind}" data-main-id="${x.id}">${x.principal?'★ Principal':'☆ Hacer principal'}</button><button type="button" class="photoRemove" data-remove-kind="${x.kind}" data-remove-id="${x.id}" aria-label="Quitar fotografía">×</button></article>`).join('');
+ box.querySelectorAll('[data-main-id]').forEach(b=>b.onclick=()=>setPrincipalPhoto(b.dataset.mainKind,b.dataset.mainId));
+ box.querySelectorAll('[data-remove-id]').forEach(b=>b.onclick=()=>removePhoto(b.dataset.removeKind,b.dataset.removeId));
+}
+function setPrincipalPhoto(kind,id){
+ existingProductImages.forEach(x=>x.principal=false); productFormImages.forEach(x=>x.principal=false);
+ const list=kind==='old'?existingProductImages:productFormImages; const item=list.find(x=>x.id===id); if(item)item.principal=true; renderPhotoPreview();
+}
+function removePhoto(kind,id){
+ if(kind==='old'){const x=existingProductImages.find(x=>x.id===id);if(x)x.removed=true}
+ else {const i=productFormImages.findIndex(x=>x.id===id);if(i>=0){URL.revokeObjectURL(productFormImages[i].preview);productFormImages.splice(i,1)}}
+ if(!hasPrincipalPhoto())setFirstPhotoPrincipal(); renderPhotoPreview();
+}
+function cleanupNewImagePreviews(){productFormImages.forEach(x=>URL.revokeObjectURL(x.preview));productFormImages=[]}
+
+async function compressImage(file){
+ const bitmap=await createImageBitmap(file); const max=1600; const scale=Math.min(1,max/Math.max(bitmap.width,bitmap.height));
+ const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));
+ canvas.getContext('2d',{alpha:false}).drawImage(bitmap,0,0,canvas.width,canvas.height); bitmap.close?.();
+ return await new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('No fue posible optimizar la imagen.')),'image/webp',0.82));
+}
+function storagePathFromPublicUrl(url){
+ const marker='/storage/v1/object/public/productos/'; const i=url.indexOf(marker); return i>=0?decodeURIComponent(url.slice(i+marker.length)):null;
+}
+async function syncProductImages(product){
+ const removed=existingProductImages.filter(x=>x.removed);
+ for(const img of removed){const path=storagePathFromPublicUrl(img.url);if(path)await supabaseClient.storage.from('productos').remove([path]);await supabaseClient.from('producto_imagenes').delete().eq('id',img.id)}
+ const kept=existingProductImages.filter(x=>!x.removed);
+ for(let i=0;i<kept.length;i++){await supabaseClient.from('producto_imagenes').update({orden:i,principal:kept[i].principal}).eq('id',kept[i].id)}
+ let order=kept.length;
+ for(const img of productFormImages){
+   const blob=await compressImage(img.file); const path=`${product.sku}/${String(order+1).padStart(2,'0')}-${crypto.randomUUID()}.webp`;
+   const {error:uploadError}=await supabaseClient.storage.from('productos').upload(path,blob,{contentType:'image/webp',upsert:false,cacheControl:'3600'}); if(uploadError)throw uploadError;
+   const {data:publicData}=supabaseClient.storage.from('productos').getPublicUrl(path);
+   const {error:dbError}=await supabaseClient.from('producto_imagenes').insert({producto_id:product.id,url:publicData.publicUrl,orden:order,principal:img.principal});
+   if(dbError){await supabaseClient.storage.from('productos').remove([path]);throw dbError} order++;
+ }
+}
+
+async function saveProduct(e,id,currentSku){
+ e.preventDefault();const f=new FormData(e.currentTarget),msg=document.getElementById('productMessage'),button=document.getElementById('saveProductButton');
+ const obj={nombre:f.get('nombre').trim(),personaje:emptyNull(f.get('personaje')),franquicia:emptyNull(f.get('franquicia')),fabricante:emptyNull(f.get('fabricante')),descripcion:emptyNull(f.get('descripcion')),precio:Number(f.get('precio')),precio_oferta:f.get('precio_oferta')===''?null:Number(f.get('precio_oferta')),estado:f.get('estado'),stock:Number(f.get('stock')),condicion_figura:emptyNull(f.get('condicion_figura')),condicion_caja:emptyNull(f.get('condicion_caja')),procedencia:emptyNull(f.get('procedencia')),entrega:emptyNull(f.get('entrega')),destacada:f.get('destacada')==='on',activo:f.get('activo')==='on'};
+ if(obj.precio_oferta!==null&&obj.precio_oferta>=obj.precio){showProductMessage('El precio de oferta debe ser menor que el precio normal.',true);return}
+ button.disabled=true;msg.textContent=id?'Guardando cambios…':'Creando figura…';msg.className='formMessage';
+ try{
+   let product;
+   if(id){const {data,error}=await supabaseClient.from('productos').update(obj).eq('id',id).select().single();if(error)throw error;product=data||{id,sku:currentSku}}
+   else {const {data,error}=await supabaseClient.from('productos').insert(obj).select().single();if(error)throw error;product=data}
+   msg.textContent=productFormImages.length||existingProductImages.some(x=>x.removed)?'Procesando fotografías…':'Guardado correctamente…';
+   await syncProductImages(product); cleanupNewImagePreviews(); renderAdminPanel();await loadAdminProducts();
+ }catch(error){showProductMessage('No se pudo guardar: '+(error?.message||'Error inesperado.'),true);button.disabled=false}
+}
+function showProductMessage(text,error=false){const m=document.getElementById('productMessage');if(!m)return;m.textContent=text;m.className='formMessage'+(error?' error':'')}
 async function deleteProduct(id){
  const p=adminProductsCache.find(x=>x.id===id); if(!confirm(`¿Eliminar ${p?.nombre||'este producto'}? Esta acción no se puede deshacer.`))return;
  const {error}=await supabaseClient.from('productos').delete().eq('id',id); if(error){alert('No se pudo eliminar: '+error.message);return} await loadAdminProducts();
