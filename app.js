@@ -3,6 +3,7 @@ const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_5L3IfGy74SfEDB0YNnH9Fw_n3HjwND7
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
 let products = [];
+let siteConfig = null;
 const money = n => new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0}).format(n);
 const icon = (name) => ({search:'⌕',menu:'☰',arrow:'›',fire:'🔥',truck:'✈',shield:'✓',chat:'◉',sparkle:'✦'})[name] || '';
 const statusLabel = s => ({disponible:'Disponible',apartada:'Apartada',vendida:'Vendida',proximamente:'Próximamente'})[s] || s || '';
@@ -40,12 +41,31 @@ function productCard(p){
 function renderStoreShell(){
  document.getElementById('app').innerHTML=`
 <header><a class="brand" href="#"><span class="mark">界</span><span>ANIME NO <b>SEKAI</b><small>FIGURAS & COLECCIONABLES</small></span></a><nav><a href="#catalogo">Figuras</a><a href="#ofertas">Ofertas</a><a href="#proximamente">Próximamente</a></nav><div class="headActions"><button aria-label="Buscar">${icon('search')}</button><button class="menu" id="mobileMenuButton" aria-label="Abrir menú" aria-expanded="false">${icon('menu')}</button></div><div class="mobileNav" id="mobileNav" aria-hidden="true"><a href="#catalogo">Figuras</a><a href="#ofertas">Ofertas</a><a href="#proximamente">Próximamente</a></div></header>
-<main><section class="hero"><div class="heroContent"><span class="eyebrow">${icon('sparkle')} DIRECTO DESDE JAPÓN</span><h1>Tu mundo de<br><em>figuras y coleccionables.</em></h1><p>Encuentra esa pieza que falta en tu colección. Figuras seleccionadas, disponibilidad real y atención directa por WhatsApp.</p><div class="heroBtns"><a href="#catalogo" class="primary">Explorar figuras ${icon('arrow')}</a><a href="#ofertas" class="secondary">${icon('fire')} Ver ofertas</a></div></div><div class="japan">日本<br><span>の世界</span></div></section>
-<section class="benefits"><div><span class="featureIcon">${icon('truck')}</span><span><b>Importadas de Japón</b><small>Piezas seleccionadas</small></span></div><div><span class="featureIcon">${icon('shield')}</span><span><b>Compra con confianza</b><small>Atención directa</small></span></div><div><span class="featureIcon">${icon('chat')}</span><span><b>Apártala por WhatsApp</b><small>Rápido y sencillo</small></span></div></section>
-<section id="ofertas" class="section"><div class="sectionHead"><div><span class="kicker">🔥 PRECIOS ESPECIALES</span><h2>Ofertas del Sekai</h2></div><a href="#catalogo">Ver todas ${icon('arrow')}</a></div><div id="offersGrid" class="grid"><p class="catalogMessage">Cargando ofertas…</p></div></section>
-<section id="catalogo" class="section"><div class="sectionHead"><div><span class="kicker">COLECCIÓN</span><h2>Figuras destacadas</h2></div></div><div id="catalogChips" class="chips"></div><div id="catalogGrid" class="grid"><p class="catalogMessage">Cargando catálogo…</p></div></section>
-<section id="proximamente" class="arrival"><div><span class="kicker">PRÓXIMAMENTE 🇯🇵</span><h2>Nuevas piezas vienen en camino.</h2><p>Descubre próximas importaciones y pregunta por disponibilidad antes de que lleguen.</p></div><a class="primary" href="https://wa.me/529994739090" target="_blank" rel="noopener">Preguntar por WhatsApp</a></section></main>
+<main><section class="hero"><div class="heroContent"><span class="eyebrow">${icon('sparkle')} <span id="homePortadaEtiqueta">DIRECTO DESDE JAPÓN</span></span><h1 id="homePortadaTitulo">Tu mundo de<br><em>figuras y coleccionables.</em></h1><p id="homePortadaDescripcion">Encuentra esa pieza que falta en tu colección. Figuras seleccionadas, disponibilidad real y atención directa por WhatsApp.</p><div class="heroBtns"><a href="#catalogo" class="primary">Explorar figuras ${icon('arrow')}</a><a href="#ofertas" class="secondary">${icon('fire')} Ver ofertas</a></div></div><div class="japan">日本<br><span>の世界</span></div></section>
+<section class="benefits"><div><span class="featureIcon">${icon('truck')}</span><span><b id="homeBeneficio1Titulo">Importadas de Japón</b><small id="homeBeneficio1Descripcion">Piezas seleccionadas</small></span></div><div><span class="featureIcon">${icon('shield')}</span><span><b id="homeBeneficio2Titulo">Compra con confianza</b><small id="homeBeneficio2Descripcion">Atención directa</small></span></div><div><span class="featureIcon">${icon('chat')}</span><span><b id="homeBeneficio3Titulo">Apártala por WhatsApp</b><small id="homeBeneficio3Descripcion">Rápido y sencillo</small></span></div></section>
+<section id="ofertas" class="section"><div class="sectionHead"><div><span class="kicker">🔥 PRECIOS ESPECIALES</span><h2 id="homeTituloOfertas">Ofertas del Sekai</h2></div><a href="#catalogo">Ver todas ${icon('arrow')}</a></div><div id="offersGrid" class="grid"><p class="catalogMessage">Cargando ofertas…</p></div></section>
+<section id="catalogo" class="section"><div class="sectionHead"><div><span class="kicker">COLECCIÓN</span><h2 id="homeTituloFiguras">Figuras destacadas</h2></div></div><div id="catalogChips" class="chips"></div><div id="catalogGrid" class="grid"><p class="catalogMessage">Cargando catálogo…</p></div></section>
+<section id="proximamente" class="arrival"><div><span class="kicker">PRÓXIMAMENTE 🇯🇵</span><h2 id="homeTituloProximamente">Próximamente</h2><p>Descubre próximas importaciones y pregunta por disponibilidad antes de que lleguen.</p></div><a class="primary" href="https://wa.me/529994739090" target="_blank" rel="noopener">Preguntar por WhatsApp</a></section></main>
 <footer><div class="brand"><span class="mark">界</span><span>ANIME NO <b>SEKAI</b></span></div><p>Tu mundo de figuras y coleccionables.</p><small>© 2026 Anime no Sekai</small></footer>`;
+}
+
+async function loadSiteConfig(){
+ const {data,error}=await supabaseClient.from('configuracion_sitio').select('*').eq('id',1).single();
+ if(error){console.error('No fue posible cargar la configuración del sitio:',error);return}
+ siteConfig=data;
+ applySiteConfig(data);
+}
+function applySiteConfig(c){
+ if(!c)return;
+ const set=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value||''};
+ set('homePortadaEtiqueta',c.portada_etiqueta);
+ const title=document.getElementById('homePortadaTitulo');
+ if(title) title.textContent=c.portada_titulo||'';
+ set('homePortadaDescripcion',c.portada_descripcion);
+ set('homeBeneficio1Titulo',c.beneficio_1_titulo); set('homeBeneficio1Descripcion',c.beneficio_1_descripcion);
+ set('homeBeneficio2Titulo',c.beneficio_2_titulo); set('homeBeneficio2Descripcion',c.beneficio_2_descripcion);
+ set('homeBeneficio3Titulo',c.beneficio_3_titulo); set('homeBeneficio3Descripcion',c.beneficio_3_descripcion);
+ set('homeTituloOfertas',c.titulo_ofertas); set('homeTituloFiguras',c.titulo_figuras); set('homeTituloProximamente',c.titulo_proximamente);
 }
 
 async function loadPublicCatalog(){
@@ -99,6 +119,7 @@ const mobileNav=document.getElementById('mobileNav');
 function closeMobileMenu(){if(!mobileMenuButton||!mobileNav)return;mobileNav.classList.remove('open');mobileMenuButton.setAttribute('aria-expanded','false');mobileMenuButton.setAttribute('aria-label','Abrir menú');mobileNav.setAttribute('aria-hidden','true')}
 mobileMenuButton?.addEventListener('click',()=>{const open=!mobileNav.classList.contains('open');mobileNav.classList.toggle('open',open);mobileMenuButton.setAttribute('aria-expanded',String(open));mobileMenuButton.setAttribute('aria-label',open?'Cerrar menú':'Abrir menú');mobileNav.setAttribute('aria-hidden',String(!open))});
 mobileNav?.querySelectorAll('a').forEach(a=>a.addEventListener('click',closeMobileMenu));
+loadSiteConfig();
 loadPublicCatalog();
 
 // =========================================================
@@ -130,14 +151,50 @@ async function loginAdmin(e){
 async function verifyAdminAndRender(){
  const {data,isError,error}=await (async()=>{const r=await supabaseClient.rpc('es_administrador');return {data:r.data,isError:!!r.error,error:r.error}})();
  if(isError||data!==true){await supabaseClient.auth.signOut(); const m=document.getElementById('loginMessage');if(m){m.textContent='Esta cuenta no tiene permisos de administrador.';m.className='formMessage error'}return}
- renderAdminPanel(); await loadAdminProducts();
+ renderAdminPanel();
 }
 function renderAdminPanel(){
- document.getElementById('adminContent').innerHTML=`<div class="adminHeader"><div><span class="kicker">ANIME NO SEKAI</span><h1>Productos</h1><p>Administra las figuras publicadas en tu catálogo.</p></div><div class="adminHeaderActions"><button id="newProduct" class="primary" type="button">+ Nueva figura</button><button id="logoutAdmin" class="secondary" type="button">Cerrar sesión</button></div></div><div class="adminToolbar"><input id="adminSearch" type="search" placeholder="Buscar por nombre, SKU o franquicia…"></div><div id="adminProducts" class="adminProducts"><p class="adminLoading">Cargando productos…</p></div>`;
+ document.getElementById('adminContent').innerHTML=`<div class="adminNav"><button class="active" id="adminProductsTab" type="button">Productos</button><button id="adminContentTab" type="button">Contenido del sitio</button></div><div id="adminPanelBody"></div>`;
+ document.getElementById('adminProductsTab').onclick=()=>showAdminProductsSection();
+ document.getElementById('adminContentTab').onclick=()=>showSiteContentForm();
+ showAdminProductsSection();
+}
+function setAdminTab(activeId){
+ document.querySelectorAll('.adminNav button').forEach(b=>b.classList.toggle('active',b.id===activeId));
+}
+function showAdminProductsSection(){
+ setAdminTab('adminProductsTab');
+ document.getElementById('adminPanelBody').innerHTML=`<div class="adminHeader"><div><span class="kicker">ANIME NO SEKAI</span><h1>Productos</h1><p>Administra las figuras publicadas en tu catálogo.</p></div><div class="adminHeaderActions"><button id="newProduct" class="primary" type="button">+ Nueva figura</button><button id="logoutAdmin" class="secondary" type="button">Cerrar sesión</button></div></div><div class="adminToolbar"><input id="adminSearch" type="search" placeholder="Buscar por nombre, SKU o franquicia…"></div><div id="adminProducts" class="adminProducts"><p class="adminLoading">Cargando productos…</p></div>`;
  document.getElementById('logoutAdmin').onclick=async()=>{await supabaseClient.auth.signOut();closeAdmin()};
  document.getElementById('newProduct').onclick=()=>openProductForm();
  document.getElementById('adminSearch').addEventListener('input',e=>filterAdminProducts(e.target.value));
+ loadAdminProducts();
 }
+async function showSiteContentForm(){
+ setAdminTab('adminContentTab');
+ const body=document.getElementById('adminPanelBody');
+ body.innerHTML='<p class="adminLoading">Cargando contenido del sitio…</p>';
+ const {data,error}=await supabaseClient.from('configuracion_sitio').select('*').eq('id',1).single();
+ if(error){body.innerHTML=`<p class="formMessage error">No fue posible cargar la configuración: ${escapeHtml(error.message)}</p>`;return}
+ body.innerHTML=`<div class="adminHeader"><div><span class="kicker">ANIME NO SEKAI</span><h1>Contenido del sitio</h1><p>Edita únicamente los textos comerciales principales del catálogo.</p></div><div class="adminHeaderActions"><button id="logoutAdmin" class="secondary" type="button">Cerrar sesión</button></div></div>
+ <form id="siteContentForm" class="productForm siteContentForm">
+ <section class="formSection"><div class="formSectionTitle"><span>01</span><div><h2>Portada</h2><p>Mensaje principal que recibe el visitante.</p></div></div><div class="formGrid"><label>Etiqueta<input name="portada_etiqueta" maxlength="100" required value="${attr(data.portada_etiqueta)}"></label><label class="full">Título<input name="portada_titulo" maxlength="200" required value="${attr(data.portada_titulo)}"></label><label class="full">Descripción<textarea name="portada_descripcion" maxlength="500" rows="4" required>${escapeHtml(data.portada_descripcion)}</textarea></label></div></section>
+ <section class="formSection"><div class="formSectionTitle"><span>02</span><div><h2>Beneficios</h2><p>Los tres mensajes breves debajo de la portada.</p></div></div><div class="formGrid"><label>Beneficio 1<input name="beneficio_1_titulo" maxlength="100" required value="${attr(data.beneficio_1_titulo)}"></label><label>Descripción 1<input name="beneficio_1_descripcion" maxlength="150" required value="${attr(data.beneficio_1_descripcion)}"></label><label>Beneficio 2<input name="beneficio_2_titulo" maxlength="100" required value="${attr(data.beneficio_2_titulo)}"></label><label>Descripción 2<input name="beneficio_2_descripcion" maxlength="150" required value="${attr(data.beneficio_2_descripcion)}"></label><label>Beneficio 3<input name="beneficio_3_titulo" maxlength="100" required value="${attr(data.beneficio_3_titulo)}"></label><label>Descripción 3<input name="beneficio_3_descripcion" maxlength="150" required value="${attr(data.beneficio_3_descripcion)}"></label></div></section>
+ <section class="formSection"><div class="formSectionTitle"><span>03</span><div><h2>Secciones</h2><p>Títulos principales del catálogo.</p></div></div><div class="formGrid"><label>Título de ofertas<input name="titulo_ofertas" maxlength="100" required value="${attr(data.titulo_ofertas)}"></label><label>Título de figuras<input name="titulo_figuras" maxlength="100" required value="${attr(data.titulo_figuras)}"></label><label>Título de próximamente<input name="titulo_proximamente" maxlength="100" required value="${attr(data.titulo_proximamente)}"></label></div></section>
+ <div class="formActions"><button id="saveSiteContent" class="primary" type="submit">Guardar contenido</button></div><p id="siteContentMessage" class="formMessage"></p></form>`;
+ document.getElementById('logoutAdmin').onclick=async()=>{await supabaseClient.auth.signOut();closeAdmin()};
+ document.getElementById('siteContentForm').onsubmit=saveSiteContent;
+}
+async function saveSiteContent(e){
+ e.preventDefault(); const f=new FormData(e.currentTarget),button=document.getElementById('saveSiteContent'),msg=document.getElementById('siteContentMessage');
+ const obj={portada_etiqueta:f.get('portada_etiqueta').trim(),portada_titulo:f.get('portada_titulo').trim(),portada_descripcion:f.get('portada_descripcion').trim(),beneficio_1_titulo:f.get('beneficio_1_titulo').trim(),beneficio_1_descripcion:f.get('beneficio_1_descripcion').trim(),beneficio_2_titulo:f.get('beneficio_2_titulo').trim(),beneficio_2_descripcion:f.get('beneficio_2_descripcion').trim(),beneficio_3_titulo:f.get('beneficio_3_titulo').trim(),beneficio_3_descripcion:f.get('beneficio_3_descripcion').trim(),titulo_ofertas:f.get('titulo_ofertas').trim(),titulo_figuras:f.get('titulo_figuras').trim(),titulo_proximamente:f.get('titulo_proximamente').trim(),fecha_actualizacion:new Date().toISOString()};
+ button.disabled=true;msg.textContent='Guardando…';msg.className='formMessage';
+ const {data,error}=await supabaseClient.from('configuracion_sitio').update(obj).eq('id',1).select().single();
+ button.disabled=false;
+ if(error){msg.textContent='No se pudo guardar: '+error.message;msg.className='formMessage error';return}
+ siteConfig=data;applySiteConfig(data);msg.textContent='Contenido actualizado correctamente.';msg.className='formMessage success';
+}
+
 let adminProductsCache=[];
 async function loadAdminProducts(){
  const box=document.getElementById('adminProducts');
