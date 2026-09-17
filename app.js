@@ -2,52 +2,93 @@ const SUPABASE_URL = 'https://uobqjdvaovqbqthnmvpm.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_5L3IfGy74SfEDB0YNnH9Fw_n3HjwND7';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
-const products = [
-  {id:'gojo-satoru',name:'Gojo Satoru',series:'Jujutsu Kaisen',character:'Gojo Satoru',manufacturer:'Banpresto',condition:'Nueva / caja original',origin:'Japón',description:'Figura de colección seleccionada para Anime no Sekai. Fotografías e información de demostración mientras conectamos el catálogo real.',price:1000,sale:700,status:'Disponible',img:'https://images.unsplash.com/photo-1608889825205-eebdb9fc5806?auto=format&fit=crop&w=900&q=80'},
-  {id:'luffy',name:'Monkey D. Luffy',series:'One Piece',character:'Monkey D. Luffy',manufacturer:'Bandai Spirits',condition:'Nueva / caja original',origin:'Japón',description:'Figura de colección de One Piece. Esta ficha sirve como demostración de la vista de detalle antes de cargar tus productos reales.',price:1450,status:'Disponible',img:'https://images.unsplash.com/photo-1612036782180-6f0b6cd846fe?auto=format&fit=crop&w=900&q=80'},
-  {id:'tanjiro',name:'Tanjiro Kamado',series:'Demon Slayer',character:'Tanjiro Kamado',manufacturer:'SEGA',condition:'Nueva / caja original',origin:'Japón',description:'Figura de colección de Demon Slayer importada desde Japón. Datos de demostración para validar el diseño del catálogo.',price:1200,sale:990,status:'Disponible',img:'https://images.unsplash.com/photo-1560972550-aba3456b5564?auto=format&fit=crop&w=900&q=80'},
-  {id:'goku',name:'Goku',series:'Dragon Ball',character:'Son Goku',manufacturer:'Banpresto',condition:'Nueva / caja original',origin:'Japón',description:'Figura de colección de Dragon Ball. Actualmente aparece como apartada para mostrar cómo cambia la acción comercial según disponibilidad.',price:1650,status:'Apartada',img:'https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=900&q=80'}
-];
+let products = [];
 const money = n => new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0}).format(n);
 const icon = (name) => ({search:'⌕',menu:'☰',arrow:'›',fire:'🔥',truck:'✈',shield:'✓',chat:'◉',sparkle:'✦'})[name] || '';
-function productCard(p){
- const pct=p.sale?Math.round((1-p.sale/p.price)*100):null;
- const action = p.status==='Apartada' ? {text:'Consultar disponibilidad', cls:'disabled', msg:`Hola, vi la figura ${p.name} de ${p.series} como apartada en Anime no Sekai. ¿Podrías avisarme si vuelve a estar disponible?`} : p.status==='Próximamente' ? {text:'Avísame cuando llegue', cls:'notify', msg:`Hola, me interesa la figura ${p.name} de ${p.series}. ¿Podrías avisarme cuando llegue a Anime no Sekai?`} : p.status==='Vendida' ? {text:'¿Puedes conseguirme una?', cls:'sold', msg:`Hola, vi la figura ${p.name} de ${p.series} en Anime no Sekai. ¿Podrías conseguirme una?`} : {text:'Apartar por WhatsApp', cls:'', msg:`Hola, me interesa la figura ${p.name} de ${p.series} que vi en Anime no Sekai. ¿Sigue disponible?`};
- const wa=`https://wa.me/529994739090?text=${encodeURIComponent(action.msg)}`;
- return `<article class="card"><div class="photo"><img src="${p.img}" alt="${p.name}">${pct?`<span class="discount">-${pct}%</span>`:''}<span class="status ${p.status==='Apartada'?'hold':''}">${p.status}</span></div><div class="cardBody"><p class="series">${p.series}</p><h3>${p.name}</h3><div class="prices">${p.sale?`<span class="old">${money(p.price)}</span>`:''}<strong>${money(p.sale||p.price)}</strong></div><button class="details" data-product="${p.id}" type="button">Ver detalles <span>${icon('arrow')}</span></button><a class="whatsapp ${action.cls}" href="${wa}" target="_blank" rel="noopener">${icon('chat')} ${action.text}</a></div></article>`;
+const statusLabel = s => ({disponible:'Disponible',apartada:'Apartada',vendida:'Vendida',proximamente:'Próximamente'})[s] || s || '';
+
+function mapProduct(row){
+  const images=(row.producto_imagenes||[]).slice().sort((a,b)=>(a.orden??0)-(b.orden??0));
+  const principal=images.find(x=>x.principal)||images[0];
+  return {
+    id:row.id, sku:row.sku, name:row.nombre, series:row.franquicia||'Sin franquicia', character:row.personaje||'No especificado',
+    manufacturer:row.fabricante||'No especificado', description:row.descripcion||'Consulta disponibilidad y detalles directamente por WhatsApp.',
+    price:Number(row.precio), sale:row.precio_oferta==null?null:Number(row.precio_oferta), status:row.estado,
+    stock:row.stock, figureCondition:row.condicion_figura||'No especificada', boxCondition:row.condicion_caja||'No especificada',
+    origin:row.procedencia||'No especificada', delivery:row.entrega||'A convenir', featured:!!row.destacada,
+    images, img:principal?.url||null
+  };
 }
-document.getElementById('app').innerHTML=`
+
+function productAction(p){
+  const url=`${location.origin}${location.pathname}#figura=${encodeURIComponent(p.sku)}`;
+  const base=`${p.name} (${p.sku})`;
+  if(p.status==='apartada') return {text:'Consultar disponibilidad',cls:'disabled',msg:`Hola, vi ${base} como apartada en Anime no Sekai. ¿Podrías avisarme si vuelve a estar disponible? ${url}`};
+  if(p.status==='proximamente') return {text:'Avísame cuando llegue',cls:'notify',msg:`Hola, me interesa ${base}. ¿Podrías avisarme cuando llegue a Anime no Sekai? ${url}`};
+  if(p.status==='vendida') return {text:'¿Puedes conseguirme una?',cls:'sold',msg:`Hola, vi ${base} en Anime no Sekai. ¿Podrías conseguirme una? ${url}`};
+  return {text:'Apartar por WhatsApp',cls:'',msg:`Hola, me interesa ${base} que vi en Anime no Sekai. ¿Sigue disponible? ${url}`};
+}
+function photoMarkup(p){
+  return p.img ? `<img src="${attr(p.img)}" alt="${attr(p.name)}" loading="lazy">` : `<div class="photoPlaceholder"><span>界</span><small>Fotografía próximamente</small></div>`;
+}
+function productCard(p){
+  const pct=p.sale?Math.round((1-p.sale/p.price)*100):null, action=productAction(p);
+  const wa=`https://wa.me/529994739090?text=${encodeURIComponent(action.msg)}`;
+  return `<article class="card"><div class="photo">${photoMarkup(p)}${pct?`<span class="discount">-${pct}%</span>`:''}<span class="status ${p.status==='apartada'?'hold':''}">${statusLabel(p.status)}</span></div><div class="cardBody"><p class="series">${escapeHtml(p.series)}</p><h3>${escapeHtml(p.name)}</h3><div class="prices">${p.sale?`<span class="old">${money(p.price)}</span>`:''}<strong>${money(p.sale||p.price)}</strong></div><button class="details" data-product="${attr(p.sku)}" type="button">Ver detalles <span>${icon('arrow')}</span></button><a class="whatsapp ${action.cls}" href="${attr(wa)}" target="_blank" rel="noopener">${icon('chat')} ${action.text}</a></div></article>`;
+}
+
+function renderStoreShell(){
+ document.getElementById('app').innerHTML=`
 <header><a class="brand" href="#"><span class="mark">界</span><span>ANIME NO <b>SEKAI</b><small>FIGURAS & COLECCIONABLES</small></span></a><nav><a href="#catalogo">Figuras</a><a href="#ofertas">Ofertas</a><a href="#proximamente">Próximamente</a></nav><div class="headActions"><button aria-label="Buscar">${icon('search')}</button><button class="menu" aria-label="Menú">${icon('menu')}</button></div></header>
 <main><section class="hero"><div class="heroContent"><span class="eyebrow">${icon('sparkle')} DIRECTO DESDE JAPÓN</span><h1>Tu mundo de<br><em>figuras y coleccionables.</em></h1><p>Encuentra esa pieza que falta en tu colección. Figuras seleccionadas, disponibilidad real y atención directa por WhatsApp.</p><div class="heroBtns"><a href="#catalogo" class="primary">Explorar figuras ${icon('arrow')}</a><a href="#ofertas" class="secondary">${icon('fire')} Ver ofertas</a></div></div><div class="japan">日本<br><span>の世界</span></div></section>
 <section class="benefits"><div><span class="featureIcon">${icon('truck')}</span><span><b>Importadas de Japón</b><small>Piezas seleccionadas</small></span></div><div><span class="featureIcon">${icon('shield')}</span><span><b>Compra con confianza</b><small>Atención directa</small></span></div><div><span class="featureIcon">${icon('chat')}</span><span><b>Apártala por WhatsApp</b><small>Rápido y sencillo</small></span></div></section>
-<section id="ofertas" class="section"><div class="sectionHead"><div><span class="kicker">🔥 PRECIOS ESPECIALES</span><h2>Ofertas del Sekai</h2></div><a href="#catalogo">Ver todas ${icon('arrow')}</a></div><div class="grid">${products.filter(x=>x.sale).map(productCard).join('')}</div></section>
-<section id="catalogo" class="section"><div class="sectionHead"><div><span class="kicker">COLECCIÓN</span><h2>Figuras destacadas</h2></div></div><div class="chips"><button class="active">Todas</button><button>One Piece</button><button>Dragon Ball</button><button>Jujutsu Kaisen</button><button>Demon Slayer</button></div><div class="grid">${products.map(productCard).join('')}</div></section>
+<section id="ofertas" class="section"><div class="sectionHead"><div><span class="kicker">🔥 PRECIOS ESPECIALES</span><h2>Ofertas del Sekai</h2></div><a href="#catalogo">Ver todas ${icon('arrow')}</a></div><div id="offersGrid" class="grid"><p class="catalogMessage">Cargando ofertas…</p></div></section>
+<section id="catalogo" class="section"><div class="sectionHead"><div><span class="kicker">COLECCIÓN</span><h2>Figuras destacadas</h2></div></div><div id="catalogChips" class="chips"></div><div id="catalogGrid" class="grid"><p class="catalogMessage">Cargando catálogo…</p></div></section>
 <section id="proximamente" class="arrival"><div><span class="kicker">PRÓXIMAMENTE 🇯🇵</span><h2>Nuevas piezas vienen en camino.</h2><p>Descubre próximas importaciones y pregunta por disponibilidad antes de que lleguen.</p></div><a class="primary" href="https://wa.me/529994739090" target="_blank" rel="noopener">Preguntar por WhatsApp</a></section></main>
 <footer><div class="brand"><span class="mark">界</span><span>ANIME NO <b>SEKAI</b></span></div><p>Tu mundo de figuras y coleccionables.</p><small>© 2026 Anime no Sekai</small></footer>`;
-
-
-function productAction(p){
-  return p.status==='Apartada' ? {text:'Consultar disponibilidad', cls:'disabled', msg:`Hola, vi la figura ${p.name} de ${p.series} como apartada en Anime no Sekai. ¿Podrías avisarme si vuelve a estar disponible?`} : p.status==='Próximamente' ? {text:'Avísame cuando llegue', cls:'notify', msg:`Hola, me interesa la figura ${p.name} de ${p.series}. ¿Podrías avisarme cuando llegue a Anime no Sekai?`} : p.status==='Vendida' ? {text:'¿Puedes conseguirme una?', cls:'sold', msg:`Hola, vi la figura ${p.name} de ${p.series} en Anime no Sekai. ¿Podrías conseguirme una?`} : {text:'Apartar por WhatsApp', cls:'', msg:`Hola, me interesa la figura ${p.name} de ${p.series} que vi en Anime no Sekai. ¿Sigue disponible?`};
 }
-function openDetail(id){
-  const p=products.find(x=>x.id===id); if(!p)return;
-  const pct=p.sale?Math.round((1-p.sale/p.price)*100):null;
-  const action=productAction(p);
-  const wa=`https://wa.me/529994739090?text=${encodeURIComponent(action.msg)}`;
-  const gallery=[p.img,p.img,p.img,p.img];
-  const detail=document.createElement('section');
-  detail.className='detailView'; detail.id='detailView';
-  detail.innerHTML=`<div class="detailTop"><button class="backBtn" type="button">‹ Volver al catálogo</button><button class="detailClose" type="button" aria-label="Cerrar">×</button></div><div class="detailShell"><div class="detailGallery"><div class="detailMainPhoto"><img id="detailMainImage" src="${p.img}" alt="${p.name}"></div><div class="detailThumbs">${gallery.map((img,i)=>`<button class="detailThumb ${i===0?'active':''}" type="button" data-img="${img}"><img src="${img}" alt="Vista ${i+1} de ${p.name}"></button>`).join('')}</div></div><div class="detailInfo"><p class="series">${p.series}</p><h1>${p.name}</h1><div class="detailBadges">${pct?`<span class="detailBadge sale">-${pct}%</span>`:''}<span class="detailBadge ${p.status==='Apartada'?'hold':''}">${p.status}</span></div><div class="detailPrice">${p.sale?`<span class="old">Antes ${money(p.price)}</span>`:''}<strong>${money(p.sale||p.price)}</strong></div><p>${p.description}</p><div class="detailMeta"><div><small>Personaje</small><b>${p.character}</b></div><div><small>Franquicia</small><b>${p.series}</b></div><div><small>Fabricante</small><b>${p.manufacturer}</b></div><div><small>Condición</small><b>${p.condition}</b></div><div><small>Procedencia</small><b>${p.origin}</b></div><div><small>Entrega</small><b>A convenir</b></div></div><div class="detailActions"><a class="whatsapp ${action.cls}" href="${wa}" target="_blank" rel="noopener">${icon('chat')} ${action.text}</a><p class="detailNote">La compra y entrega se acuerdan directamente por WhatsApp.</p></div></div></div>`;
-  document.body.appendChild(detail); document.body.classList.add('detail-open');
-  detail.querySelectorAll('.backBtn,.detailClose').forEach(b=>b.addEventListener('click',closeDetail));
-  detail.querySelectorAll('.detailThumb').forEach(t=>t.addEventListener('click',()=>{detail.querySelector('#detailMainImage').src=t.dataset.img;detail.querySelectorAll('.detailThumb').forEach(x=>x.classList.remove('active'));t.classList.add('active')}));
-  history.pushState({detail:id},'',`#figura=${id}`);
+
+async function loadPublicCatalog(){
+ const {data,error}=await supabaseClient.from('productos').select('*, producto_imagenes(*)').eq('activo',true).order('destacada',{ascending:false}).order('fecha_creacion',{ascending:false});
+ if(error){
+   document.getElementById('catalogGrid').innerHTML='<p class="catalogMessage error">No fue posible cargar el catálogo en este momento.</p>';
+   document.getElementById('offersGrid').innerHTML='<p class="catalogMessage error">No fue posible cargar las ofertas.</p>';
+   console.error(error); return;
+ }
+ products=(data||[]).map(mapProduct);
+ renderPublicProducts();
+ const skuFromHash=location.hash.startsWith('#figura=')?decodeURIComponent(location.hash.slice(8)):null;
+ if(skuFromHash) openDetail(skuFromHash,false);
 }
-function closeDetail(){const d=document.getElementById('detailView');if(d)d.remove();document.body.classList.remove('detail-open');if(location.hash.startsWith('#figura='))history.replaceState({},'',location.pathname+location.search+'#catalogo')}
+function renderPublicProducts(filter='Todas'){
+ const offers=products.filter(p=>p.sale!=null);
+ document.getElementById('offersGrid').innerHTML=offers.length?offers.map(productCard).join(''):'<p class="catalogMessage">Por ahora no hay ofertas publicadas.</p>';
+ const franchises=[...new Set(products.map(p=>p.series).filter(Boolean))];
+ const chips=document.getElementById('catalogChips');
+ chips.innerHTML=['Todas',...franchises].map(x=>`<button class="${x===filter?'active':''}" data-franchise="${attr(x)}">${escapeHtml(x)}</button>`).join('');
+ chips.querySelectorAll('[data-franchise]').forEach(b=>b.onclick=()=>renderPublicProducts(b.dataset.franchise));
+ const list=filter==='Todas'?products:products.filter(p=>p.series===filter);
+ document.getElementById('catalogGrid').innerHTML=list.length?list.map(productCard).join(''):'<p class="catalogMessage">No hay figuras publicadas en esta categoría.</p>';
+}
+
+function openDetail(sku,push=true){
+ const p=products.find(x=>x.sku===sku); if(!p)return;
+ document.getElementById('detailView')?.remove();
+ const pct=p.sale?Math.round((1-p.sale/p.price)*100):null, action=productAction(p), wa=`https://wa.me/529994739090?text=${encodeURIComponent(action.msg)}`;
+ const gallery=p.images.length?p.images.map(x=>x.url):(p.img?[p.img]:[]); const main=gallery[0]||'';
+ const detail=document.createElement('section'); detail.className='detailView'; detail.id='detailView';
+ detail.innerHTML=`<div class="detailTop"><button class="backBtn" type="button">‹ Volver al catálogo</button><button class="detailClose" type="button" aria-label="Cerrar">×</button></div><div class="detailShell"><div class="detailGallery"><div class="detailMainPhoto">${main?`<img id="detailMainImage" src="${attr(main)}" alt="${attr(p.name)}">`:`<div class="photoPlaceholder large"><span>界</span><small>Fotografía próximamente</small></div>`}</div>${gallery.length?`<div class="detailThumbs">${gallery.map((img,i)=>`<button class="detailThumb ${i===0?'active':''}" type="button" data-img="${attr(img)}"><img src="${attr(img)}" alt="Vista ${i+1} de ${attr(p.name)}"></button>`).join('')}</div>`:''}</div><div class="detailInfo"><p class="series">${escapeHtml(p.series)}</p><h1>${escapeHtml(p.name)}</h1><p class="detailSku">${escapeHtml(p.sku)}</p><div class="detailBadges">${pct?`<span class="detailBadge sale">-${pct}%</span>`:''}<span class="detailBadge ${p.status==='apartada'?'hold':''}">${statusLabel(p.status)}</span></div><div class="detailPrice">${p.sale?`<span class="old">Antes ${money(p.price)}</span>`:''}<strong>${money(p.sale||p.price)}</strong></div><p>${escapeHtml(p.description)}</p><div class="detailMeta"><div><small>Personaje</small><b>${escapeHtml(p.character)}</b></div><div><small>Franquicia</small><b>${escapeHtml(p.series)}</b></div><div><small>Fabricante</small><b>${escapeHtml(p.manufacturer)}</b></div><div><small>Condición figura</small><b>${escapeHtml(p.figureCondition)}</b></div><div><small>Condición caja</small><b>${escapeHtml(p.boxCondition)}</b></div><div><small>Procedencia</small><b>${escapeHtml(p.origin)}</b></div><div><small>Stock</small><b>${p.stock}</b></div><div><small>Entrega</small><b>${escapeHtml(p.delivery)}</b></div></div><div class="detailActions"><a class="whatsapp ${action.cls}" href="${attr(wa)}" target="_blank" rel="noopener">${icon('chat')} ${action.text}</a><p class="detailNote">La compra y entrega se acuerdan directamente por WhatsApp.</p></div></div></div>`;
+ document.body.appendChild(detail);document.body.classList.add('detail-open');
+ detail.querySelectorAll('.backBtn,.detailClose').forEach(b=>b.addEventListener('click',closeDetail));
+ detail.querySelectorAll('.detailThumb').forEach(t=>t.addEventListener('click',()=>{const m=detail.querySelector('#detailMainImage');if(m)m.src=t.dataset.img;detail.querySelectorAll('.detailThumb').forEach(x=>x.classList.remove('active'));t.classList.add('active')}));
+ if(push) history.pushState({detail:sku},'',`#figura=${encodeURIComponent(sku)}`);
+}
+function closeDetail(){document.getElementById('detailView')?.remove();document.body.classList.remove('detail-open');if(location.hash.startsWith('#figura='))history.replaceState({},'',location.pathname+location.search+'#catalogo')}
 document.addEventListener('click',e=>{const btn=e.target.closest('.details[data-product]');if(btn)openDetail(btn.dataset.product)});
-window.addEventListener('popstate',()=>{if(!location.hash.startsWith('#figura=')){const d=document.getElementById('detailView');if(d){d.remove();document.body.classList.remove('detail-open')}}});
-if(location.hash.startsWith('#figura=')){setTimeout(()=>openDetail(location.hash.split('=')[1]),0)}
+window.addEventListener('popstate',()=>{if(!location.hash.startsWith('#figura=')){document.getElementById('detailView')?.remove();document.body.classList.remove('detail-open')}});
 
+renderStoreShell();
+loadPublicCatalog();
 
 // =========================================================
 // V4 — Panel administrativo conectado a Supabase
@@ -213,6 +254,10 @@ async function saveProduct(e,id,currentSku){
 function showProductMessage(text,error=false){const m=document.getElementById('productMessage');if(!m)return;m.textContent=text;m.className='formMessage'+(error?' error':'')}
 async function deleteProduct(id){
  const p=adminProductsCache.find(x=>x.id===id); if(!confirm(`¿Eliminar ${p?.nombre||'este producto'}? Esta acción no se puede deshacer.`))return;
+ const {data:imgs,error:imgReadError}=await supabaseClient.from('producto_imagenes').select('url').eq('producto_id',id);
+ if(imgReadError){alert('No se pudieron consultar las fotografías: '+imgReadError.message);return}
+ const paths=(imgs||[]).map(x=>storagePathFromPublicUrl(x.url)).filter(Boolean);
+ if(paths.length){const {error:storageError}=await supabaseClient.storage.from('productos').remove(paths);if(storageError){alert('No se pudieron eliminar las fotografías de Storage: '+storageError.message);return}}
  const {error}=await supabaseClient.from('productos').delete().eq('id',id); if(error){alert('No se pudo eliminar: '+error.message);return} await loadAdminProducts();
 }
 function emptyNull(v){v=(v??'').toString().trim();return v===''?null:v}
