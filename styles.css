@@ -88,3 +88,17 @@ footer .brandIcon{width:46px;height:46px;flex-basis:46px}
 footer .brandIcon .brandLogo{max-width:100%;max-height:100%}
 @media(max-width:760px){.brandIcon{width:48px;height:48px;flex-basis:48px}}
 @media(max-width:560px){.brandIcon{width:42px;height:42px;flex-basis:42px}.brandText{font-size:14px}.brandText small{font-size:7px}}
+
+
+/* V7.2.3 — modo de identidad: isotipo + texto / logo horizontal completo */
+.brandText[hidden]{display:none!important}
+.brand.logoOnly{gap:0;min-width:0}
+.brand.logoOnly .brandIcon{width:auto;height:58px;flex:0 1 auto;overflow:visible}
+.brand.logoOnly .brandLogo{width:auto;height:auto;max-width:320px;max-height:58px;object-fit:contain;object-position:left center}
+footer .brand.logoOnly .brandIcon{width:auto;height:48px;flex-basis:auto}
+footer .brand.logoOnly .brandLogo{max-width:250px;max-height:48px}
+.siteLogoMode{grid-column:1/-1;display:flex!important;align-items:center;justify-content:space-between;gap:18px;padding:14px 16px;border:1px solid #30333b;border-radius:10px;background:#0b0c10;cursor:pointer}
+.siteLogoMode span{display:grid;gap:4px}.siteLogoMode b{font-size:12px;color:#e7e7eb}.siteLogoMode small{font-size:10px;color:#777b84;line-height:1.45}.siteLogoMode input{width:18px;height:18px;accent-color:#8B5CF6;flex:0 0 auto}
+.logoPreview.logoOnlyPreview>img{max-width:96%;max-height:120px}
+@media(max-width:760px){.brand.logoOnly .brandIcon{height:50px}.brand.logoOnly .brandLogo{max-width:260px;max-height:50px}}
+@media(max-width:560px){.brand.logoOnly .brandIcon{height:44px}.brand.logoOnly .brandLogo{max-width:215px;max-height:44px}.siteLogoMode{align-items:flex-start}}
