@@ -81,8 +81,8 @@ function applySiteVisuals(c){
  document.querySelectorAll('.brandText').forEach(el=>el.hidden=!!logo&&!showText);
  const hero=document.querySelector('.hero');
  if(hero){
-   if(c?.portada_url){hero.style.setProperty('--hero-image',`url('${String(c.portada_url).replace(/[\']/g,'')}')`);hero.classList.add('hasHeroImage')}
-   else {hero.style.removeProperty('--hero-image');hero.classList.remove('hasHeroImage')}
+   if(c?.portada_url){hero.style.setProperty('--hero-image',`url('${String(c.portada_url).replace(/[\']/g,'')}')`);hero.style.setProperty('--hero-x',`${Number.isFinite(Number(c.portada_posicion_x))?Number(c.portada_posicion_x):50}%`);hero.style.setProperty('--hero-y',`${Number.isFinite(Number(c.portada_posicion_y))?Number(c.portada_posicion_y):50}%`);hero.classList.add('hasHeroImage')}
+   else {hero.style.removeProperty('--hero-image');hero.style.removeProperty('--hero-x');hero.style.removeProperty('--hero-y');hero.classList.remove('hasHeroImage')}
  }
 }
 
@@ -229,7 +229,7 @@ async function showSiteContentForm(){
  <section class="formSection"><div class="formSectionTitle"><span>04</span><div><h2>Identidad visual</h2><p>Logo y fotografía de portada. El sitio aplica automáticamente el tratamiento negro y violeta.</p></div></div><div class="siteVisualGrid">
  <div class="siteVisualField"><div class="siteVisualLabel"><b>Logo</b><small>PNG, JPG o WebP · recomendado con fondo transparente</small></div><div class="siteVisualPreview logoPreview" id="siteLogoPreview">${data.logo_url?`<img src="${attr(data.logo_url)}" alt="Logo actual">`:`<div class="visualFallback"><span class="mark">界</span><span>ANIME NO <b>SEKAI</b></span></div>`}</div><input id="siteLogoInput" type="file" accept="image/jpeg,image/png,image/webp" hidden><div class="siteVisualActions"><button id="chooseSiteLogo" class="secondary" type="button">${data.logo_url?'Cambiar logo':'Agregar logo'}</button>${data.logo_url?'<button id="removeSiteLogo" class="visualRemove" type="button">Quitar</button>':''}</div></div>
  <label class="siteLogoMode"><span><b>Mostrar nombre junto al logo</b><small>Actívalo para isotipos. Desactívalo si tu logo ya incluye el nombre de la tienda.</small></span><input id="mostrarTextoLogo" name="mostrar_texto_logo" type="checkbox" ${data.mostrar_texto_logo!==false?'checked':''}></label>
- <div class="siteVisualField"><div class="siteVisualLabel"><b>Imagen de portada</b><small>PNG, JPG o WebP · preferentemente horizontal</small></div><div class="siteVisualPreview heroPreview" id="siteHeroPreview">${data.portada_url?`<img src="${attr(data.portada_url)}" alt="Portada actual">`:'<div class="heroFallbackPreview"><span>Fondo negro + halo violeta</span></div>'}</div><input id="siteHeroInput" type="file" accept="image/jpeg,image/png,image/webp" hidden><div class="siteVisualActions"><button id="chooseSiteHero" class="secondary" type="button">${data.portada_url?'Cambiar portada':'Agregar portada'}</button>${data.portada_url?'<button id="removeSiteHero" class="visualRemove" type="button">Quitar</button>':''}</div></div>
+ <div class="siteVisualField heroVisualField"><div class="siteVisualLabel"><b>Imagen de portada</b><small>La vista previa usa el mismo recorte <code>cover</code> que la página pública.</small></div><div class="siteVisualPreview heroPreview realHeroPreview" id="siteHeroPreview" style="--preview-hero:${data.portada_url?`url(\'${attr(data.portada_url)}\')`:'none'};--preview-x:${Number(data.portada_posicion_x??50)}%;--preview-y:${Number(data.portada_posicion_y??50)}%">${data.portada_url?'<div class="heroPreviewShade"><span>Vista real del encuadre</span></div>':'<div class="heroFallbackPreview"><span>Fondo negro + halo violeta</span></div>'}</div><div class="heroPositionControls"><label><span>Posición horizontal <b id="heroXValue">${Number(data.portada_posicion_x??50)}%</b></span><input id="heroPositionX" name="portada_posicion_x" type="range" min="0" max="100" step="1" value="${Number(data.portada_posicion_x??50)}"></label><label><span>Posición vertical <b id="heroYValue">${Number(data.portada_posicion_y??50)}%</b></span><input id="heroPositionY" name="portada_posicion_y" type="range" min="0" max="100" step="1" value="${Number(data.portada_posicion_y??50)}"></label><button id="resetHeroPosition" class="visualRemove" type="button">Centrar imagen</button></div><input id="siteHeroInput" type="file" accept="image/jpeg,image/png,image/webp" hidden><div class="siteVisualActions"><button id="chooseSiteHero" class="secondary" type="button">${data.portada_url?'Cambiar portada':'Agregar portada'}</button>${data.portada_url?'<button id="removeSiteHero" class="visualRemove" type="button">Quitar</button>':''}</div></div>
  </div></section>
  <div class="formActions"><button id="saveSiteContent" class="primary" type="submit">Guardar contenido</button></div><p id="siteContentMessage" class="formMessage"></p></form>`;
  document.getElementById('logoutAdmin').onclick=async()=>{await supabaseClient.auth.signOut();closeAdmin()};
@@ -245,18 +245,22 @@ async function showSiteContentForm(){
  const mode=document.getElementById('mostrarTextoLogo');
  const syncLogoModePreview=()=>document.getElementById('siteLogoPreview')?.classList.toggle('logoOnlyPreview',!mode.checked);
  mode?.addEventListener('change',syncLogoModePreview);syncLogoModePreview();
+ const posX=document.getElementById('heroPositionX'),posY=document.getElementById('heroPositionY');
+ const syncHeroPosition=()=>{const preview=document.getElementById('siteHeroPreview');if(!preview)return;preview.style.setProperty('--preview-x',`${posX.value}%`);preview.style.setProperty('--preview-y',`${posY.value}%`);document.getElementById('heroXValue').textContent=`${posX.value}%`;document.getElementById('heroYValue').textContent=`${posY.value}%`};
+ posX?.addEventListener('input',syncHeroPosition);posY?.addEventListener('input',syncHeroPosition);
+ document.getElementById('resetHeroPosition')?.addEventListener('click',()=>{posX.value=50;posY.value=50;syncHeroPosition()});syncHeroPosition();
 }
 function previewSiteAsset(kind,file){
  if(!file)return;
  if(!/^image\/(jpeg|png|webp)$/.test(file.type)){alert('Selecciona una imagen JPG, PNG o WebP.');return}
  const url=URL.createObjectURL(file),isLogo=kind==='logo';
  if(isLogo)siteLogoFile={file,preview:url,remove:false};else siteHeroFile={file,preview:url,remove:false};
- document.getElementById(isLogo?'siteLogoPreview':'siteHeroPreview').innerHTML=`<img src="${attr(url)}" alt="Vista previa">`;
+ if(isLogo){document.getElementById('siteLogoPreview').innerHTML=`<img src="${attr(url)}" alt="Vista previa">`}else{const preview=document.getElementById('siteHeroPreview');preview.style.setProperty('--preview-hero',`url('${url}')`);preview.innerHTML='<div class="heroPreviewShade"><span>Vista real del encuadre</span></div>';}
 }
 function markSiteAssetRemoved(kind){
  const isLogo=kind==='logo',current=isLogo?siteLogoFile:siteHeroFile;if(current?.preview)URL.revokeObjectURL(current.preview);
  const marker={file:null,preview:null,remove:true};if(isLogo)siteLogoFile=marker;else siteHeroFile=marker;
- document.getElementById(isLogo?'siteLogoPreview':'siteHeroPreview').innerHTML=isLogo?'<div class="visualFallback"><span class="mark">界</span><span>ANIME NO <b>SEKAI</b></span></div>':'<div class="heroFallbackPreview"><span>Fondo negro + halo violeta</span></div>';
+ const preview=document.getElementById(isLogo?'siteLogoPreview':'siteHeroPreview');preview.innerHTML=isLogo?'<div class="visualFallback"><span class="mark">界</span><span>ANIME NO <b>SEKAI</b></span></div>':'<div class="heroFallbackPreview"><span>Fondo negro + halo violeta</span></div>';if(!isLogo)preview.style.setProperty('--preview-hero','none');
 }
 async function compressSiteImage(file,kind){
  const bitmap=await createImageBitmap(file),max=kind==='logo'?1000:2200,scale=Math.min(1,max/Math.max(bitmap.width,bitmap.height));
@@ -272,7 +276,7 @@ async function uploadSiteAsset(kind,file){
 }
 async function saveSiteContent(e){
  e.preventDefault();const f=new FormData(e.currentTarget),button=document.getElementById('saveSiteContent'),msg=document.getElementById('siteContentMessage');
- const obj={portada_etiqueta:f.get('portada_etiqueta').trim(),portada_titulo:f.get('portada_titulo').trim(),portada_descripcion:f.get('portada_descripcion').trim(),beneficio_1_titulo:f.get('beneficio_1_titulo').trim(),beneficio_1_descripcion:f.get('beneficio_1_descripcion').trim(),beneficio_2_titulo:f.get('beneficio_2_titulo').trim(),beneficio_2_descripcion:f.get('beneficio_2_descripcion').trim(),beneficio_3_titulo:f.get('beneficio_3_titulo').trim(),beneficio_3_descripcion:f.get('beneficio_3_descripcion').trim(),titulo_ofertas:f.get('titulo_ofertas').trim(),titulo_figuras:f.get('titulo_figuras').trim(),titulo_proximamente:f.get('titulo_proximamente').trim(),mostrar_texto_logo:f.get('mostrar_texto_logo')==='on',fecha_actualizacion:new Date().toISOString()};
+ const obj={portada_etiqueta:f.get('portada_etiqueta').trim(),portada_titulo:f.get('portada_titulo').trim(),portada_descripcion:f.get('portada_descripcion').trim(),beneficio_1_titulo:f.get('beneficio_1_titulo').trim(),beneficio_1_descripcion:f.get('beneficio_1_descripcion').trim(),beneficio_2_titulo:f.get('beneficio_2_titulo').trim(),beneficio_2_descripcion:f.get('beneficio_2_descripcion').trim(),beneficio_3_titulo:f.get('beneficio_3_titulo').trim(),beneficio_3_descripcion:f.get('beneficio_3_descripcion').trim(),titulo_ofertas:f.get('titulo_ofertas').trim(),titulo_figuras:f.get('titulo_figuras').trim(),titulo_proximamente:f.get('titulo_proximamente').trim(),mostrar_texto_logo:f.get('mostrar_texto_logo')==='on',portada_posicion_x:Number(f.get('portada_posicion_x')||50),portada_posicion_y:Number(f.get('portada_posicion_y')||50),fecha_actualizacion:new Date().toISOString()};
  button.disabled=true;msg.textContent='Guardando…';msg.className='formMessage';const oldLogo=siteConfig?.logo_url||null,oldHero=siteConfig?.portada_url||null;let uploaded=[];
  try{
   if(siteLogoFile?.file){msg.textContent='Procesando logo…';const x=await uploadSiteAsset('logo',siteLogoFile.file);uploaded.push(x.path);obj.logo_url=x.url}else if(siteLogoFile?.remove)obj.logo_url=null;
