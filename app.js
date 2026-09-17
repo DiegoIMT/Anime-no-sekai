@@ -281,7 +281,8 @@ function openProductForm(p=null){
  <label>SKU<div class="readonlyField">${editing?escapeHtml(p.sku):'Se generará automáticamente'}</div><small class="fieldHint">${editing?'Identificador interno del producto.':'Supabase asignará el siguiente código ANS-XXXXX al guardar.'}</small></label>
  <label>Estado<select name="estado"><option value="disponible">Disponible</option><option value="apartada">Apartada</option><option value="vendida">Vendida</option><option value="proximamente">Próximamente</option></select></label>
  <label>Nombre<input name="nombre" maxlength="150" required value="${attr(p?.nombre||'')}"></label><label>Personaje<input name="personaje" maxlength="150" value="${attr(p?.personaje||'')}"></label>
- <label>Franquicia<input name="franquicia" maxlength="150" value="${attr(p?.franquicia||'')}"></label><label>Fabricante<input name="fabricante" maxlength="150" value="${attr(p?.fabricante||'')}"></label>
+ <div class="catalogField"><span>Franquicia</span><div class="catalogPicker"><select name="franquicia_id" id="franquiciaSelect"><option value="">Cargando franquicias…</option></select><button class="catalogAdd" id="addFranquicia" type="button">＋ Nueva</button></div><small class="fieldHint">Selecciona una franquicia existente o créala sin salir del producto.</small></div>
+ <div class="catalogField"><span>Fabricante</span><div class="catalogPicker"><select name="fabricante_id" id="fabricanteSelect"><option value="">Cargando fabricantes…</option></select><button class="catalogAdd" id="addFabricante" type="button">＋ Nuevo</button></div><small class="fieldHint">Los fabricantes se reutilizan en las siguientes figuras.</small></div>
  </div></section>
  <section class="formSection"><div class="formSectionTitle"><span>02</span><div><h2>Precio e inventario</h2><p>Precio de venta y disponibilidad.</p></div></div><div class="formGrid"><label>Precio normal <span class="required">*</span><div class="moneyInput"><span>$</span><input name="precio" type="number" min="0" step="0.01" required value="${attr(p?.precio??'')}"></div></label><label>Precio oferta <small>(opcional)</small><div class="moneyInput"><span>$</span><input name="precio_oferta" type="number" min="0" step="0.01" value="${attr(p?.precio_oferta??'')}"></div></label><label>Stock<input name="stock" type="number" min="0" step="1" required value="${attr(p?.stock??1)}"></label><label>Procedencia<input name="procedencia" value="${attr(p?.procedencia||'Japón')}"></label></div></section>
  <section class="formSection"><div class="formSectionTitle"><span>03</span><div><h2>Estado físico</h2><p>Condición de la pieza y su empaque.</p></div></div><div class="formGrid"><label>Condición figura<select name="condicion_figura"><option>Nueva</option><option>Usada - Excelente</option><option>Usada - Buena</option><option>Usada - Con detalles</option></select></label><label>Condición caja<select name="condicion_caja"><option value="">Seleccionar…</option><option>Excelente</option><option>Buena</option><option>Con detalles</option><option>Sin caja</option></select></label></div></section>
@@ -295,8 +296,49 @@ function openProductForm(p=null){
  document.getElementById('selectPhotos').onclick=()=>document.getElementById('productPhotos').click();
  document.getElementById('productPhotos').onchange=handlePhotoSelection;
  document.getElementById('productForm').onsubmit=e=>saveProduct(e,p?.id,p?.sku);
+ document.getElementById('addFranquicia').onclick=()=>openCatalogModal('franquicias','franquiciaSelect','Nueva franquicia');
+ document.getElementById('addFabricante').onclick=()=>openCatalogModal('fabricantes','fabricanteSelect','Nuevo fabricante');
+ loadProductCatalogs(p);
  if(editing) loadExistingProductImages(p.id);
 }
+
+async function loadProductCatalogs(product=null){
+ const [fr,fa]=await Promise.all([
+   supabaseClient.from('franquicias').select('id,nombre').order('nombre',{ascending:true}),
+   supabaseClient.from('fabricantes').select('id,nombre').order('nombre',{ascending:true})
+ ]);
+ if(fr.error){showProductMessage('No fue posible cargar las franquicias: '+fr.error.message,true);return}
+ if(fa.error){showProductMessage('No fue posible cargar los fabricantes: '+fa.error.message,true);return}
+ fillCatalogSelect('franquiciaSelect',fr.data||[],product?.franquicia_id,product?.franquicia,'Sin franquicia');
+ fillCatalogSelect('fabricanteSelect',fa.data||[],product?.fabricante_id,product?.fabricante,'Sin fabricante');
+}
+function fillCatalogSelect(id,items,selectedId,legacyName,emptyLabel){
+ const select=document.getElementById(id);if(!select)return;
+ select.innerHTML=`<option value="">${escapeHtml(emptyLabel)}</option>`+items.map(x=>`<option value="${attr(x.id)}" data-name="${attr(x.nombre)}">${escapeHtml(x.nombre)}</option>`).join('');
+ let value=selectedId||'';
+ if(!value&&legacyName){const match=items.find(x=>x.nombre.trim().toLowerCase()===legacyName.trim().toLowerCase());if(match)value=match.id}
+ select.value=value;
+}
+function openCatalogModal(table,selectId,title){
+ document.getElementById('catalogModalBackdrop')?.remove();
+ const wrap=document.createElement('div');wrap.id='catalogModalBackdrop';wrap.className='catalogModalBackdrop';
+ wrap.innerHTML=`<div class="catalogModal" role="dialog" aria-modal="true" aria-labelledby="catalogModalTitle"><div class="catalogModalHead"><h3 id="catalogModalTitle">${escapeHtml(title)}</h3><button class="catalogModalClose" type="button" aria-label="Cerrar">×</button></div><form id="catalogModalForm"><label>Nombre <span class="required">*</span><input id="catalogModalName" maxlength="150" autocomplete="off" required placeholder="Escribe el nombre…"></label><p id="catalogModalMessage" class="catalogModalMessage"></p><div class="catalogModalActions"><button class="secondary" id="cancelCatalogModal" type="button">Cancelar</button><button class="primary" id="saveCatalogModal" type="submit">Crear</button></div></form></div>`;
+ document.body.appendChild(wrap);
+ const close=()=>wrap.remove();
+ wrap.querySelector('.catalogModalClose').onclick=close;document.getElementById('cancelCatalogModal').onclick=close;
+ wrap.onclick=e=>{if(e.target===wrap)close()};
+ document.getElementById('catalogModalForm').onsubmit=e=>createCatalogItem(e,table,selectId,wrap);
+ setTimeout(()=>document.getElementById('catalogModalName')?.focus(),0);
+}
+async function createCatalogItem(e,table,selectId,modal){
+ e.preventDefault();const input=document.getElementById('catalogModalName'),msg=document.getElementById('catalogModalMessage'),button=document.getElementById('saveCatalogModal');
+ const nombre=input.value.trim();if(!nombre)return;button.disabled=true;msg.textContent='Creando…';msg.className='catalogModalMessage';
+ const {data,error}=await supabaseClient.from(table).insert({nombre}).select('id,nombre').single();
+ if(error){msg.textContent=error.code==='23505'?'Ese nombre ya existe en el catálogo.':'No se pudo crear: '+error.message;msg.className='catalogModalMessage error';button.disabled=false;return}
+ const select=document.getElementById(selectId);if(select){const option=document.createElement('option');option.value=data.id;option.dataset.name=data.nombre;option.textContent=data.nombre;select.appendChild(option);select.value=data.id}
+ modal.remove();
+}
+
 
 async function loadExistingProductImages(productId){
  const {data,error}=await supabaseClient.from('producto_imagenes').select('*').eq('producto_id',productId).order('orden',{ascending:true});
@@ -367,7 +409,11 @@ async function syncProductImages(product){
 
 async function saveProduct(e,id,currentSku){
  e.preventDefault();const f=new FormData(e.currentTarget),msg=document.getElementById('productMessage'),button=document.getElementById('saveProductButton');
- const obj={nombre:f.get('nombre').trim(),personaje:emptyNull(f.get('personaje')),franquicia:emptyNull(f.get('franquicia')),fabricante:emptyNull(f.get('fabricante')),descripcion:emptyNull(f.get('descripcion')),precio:Number(f.get('precio')),precio_oferta:f.get('precio_oferta')===''?null:Number(f.get('precio_oferta')),estado:f.get('estado'),stock:Number(f.get('stock')),condicion_figura:emptyNull(f.get('condicion_figura')),condicion_caja:emptyNull(f.get('condicion_caja')),procedencia:emptyNull(f.get('procedencia')),entrega:emptyNull(f.get('entrega')),destacada:f.get('destacada')==='on',activo:f.get('activo')==='on'};
+ const franquiciaSelect=document.getElementById('franquiciaSelect'),fabricanteSelect=document.getElementById('fabricanteSelect');
+ const franquiciaId=emptyNull(f.get('franquicia_id')),fabricanteId=emptyNull(f.get('fabricante_id'));
+ const franquiciaNombre=franquiciaId?emptyNull(franquiciaSelect?.selectedOptions?.[0]?.dataset?.name):null;
+ const fabricanteNombre=fabricanteId?emptyNull(fabricanteSelect?.selectedOptions?.[0]?.dataset?.name):null;
+ const obj={nombre:f.get('nombre').trim(),personaje:emptyNull(f.get('personaje')),franquicia_id:franquiciaId,franquicia:franquiciaNombre,fabricante_id:fabricanteId,fabricante:fabricanteNombre,descripcion:emptyNull(f.get('descripcion')),precio:Number(f.get('precio')),precio_oferta:f.get('precio_oferta')===''?null:Number(f.get('precio_oferta')),estado:f.get('estado'),stock:Number(f.get('stock')),condicion_figura:emptyNull(f.get('condicion_figura')),condicion_caja:emptyNull(f.get('condicion_caja')),procedencia:emptyNull(f.get('procedencia')),entrega:emptyNull(f.get('entrega')),destacada:f.get('destacada')==='on',activo:f.get('activo')==='on'};
  if(obj.precio_oferta!==null&&obj.precio_oferta>=obj.precio){showProductMessage('El precio de oferta debe ser menor que el precio normal.',true);return}
  button.disabled=true;msg.textContent=id?'Guardando cambios…':'Creando figura…';msg.className='formMessage';
  try{
