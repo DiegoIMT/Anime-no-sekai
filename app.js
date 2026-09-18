@@ -11,7 +11,9 @@ let siteHeroMobileFile = null;
 let publicFranchiseFilter = 'Todas';
 let publicSearchQuery = '';
 let publicQuickFilter = 'todas';
-let publicCatalogFilters = {franquicia:'', personaje:'', fabricante:'', orden:'recientes'}; 
+let publicCatalogFilters = {busqueda:'', franquicia:'', personaje:'', fabricante:'', orden:'recientes'};
+let publicCatalogPage = 1;
+const PUBLIC_CATALOG_PAGE_SIZE = 24; 
 const money = n => new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0}).format(n);
 const icon = (name) => ({search:'⌕',menu:'☰',arrow:'›',fire:'🔥',truck:'✈',shield:'✓',chat:'◉',sparkle:'✦'})[name] || '';
 const statusLabel = s => ({disponible:'Disponible',apartada:'Apartada',vendida:'Vendida',proximamente:'Próximamente'})[s] || s || '';
@@ -75,12 +77,12 @@ function productCard(p){
 
 function renderStoreShell(){
  document.getElementById('app').innerHTML=`
-<header><a class="brand" href="#"><span class="brandIcon"><span class="mark brandMark">界</span><img class="brandLogo" id="homeLogo" alt="Logo Anime no Sekai" hidden></span><span class="brandText">ANIME NO <b>SEKAI</b><small>FIGURAS & COLECCIONABLES</small></span></a><nav><a href="#catalogo">Figuras</a><a href="#ofertas">Ofertas</a><a href="#mas-coleccion">Más para tu colección</a><a href="#proximamente">Próximamente</a></nav><div class="headActions"><button id="searchToggle" aria-label="Buscar" aria-expanded="false">${icon('search')}</button><button class="menu" id="mobileMenuButton" aria-label="Abrir menú" aria-expanded="false">${icon('menu')}</button></div><div class="headerSearch" id="headerSearch" aria-hidden="true"><span class="searchIcon">${icon('search')}</span><input id="publicSearchInput" type="search" autocomplete="off" placeholder="Buscar figura, personaje, anime, SKU o fabricante…" aria-label="Buscar en el catálogo"><button id="searchClose" type="button" aria-label="Cerrar búsqueda">×</button></div><div class="mobileNav" id="mobileNav" aria-hidden="true"><a href="#catalogo">Figuras</a><a href="#ofertas">Ofertas</a><a href="#mas-coleccion">Más para tu colección</a><a href="#proximamente">Próximamente</a></div></header>
+<header><a class="brand" href="#"><span class="brandIcon"><span class="mark brandMark">界</span><img class="brandLogo" id="homeLogo" alt="Logo Anime no Sekai" hidden></span><span class="brandText">ANIME NO <b>SEKAI</b><small>FIGURAS & COLECCIONABLES</small></span></a><nav><a href="#catalogo">Figuras</a><a href="#ofertas">Ofertas</a><a href="#mas-coleccion">Más para tu colección</a><a href="#proximamente">Próximamente</a></nav><div class="headActions"><button id="searchToggle" class="headerSearchTrigger" aria-label="Buscar" aria-expanded="false"><span class="headerSearchTriggerIcon">${icon('search')}</span><span class="headerSearchTriggerText">Buscar</span></button><button class="menu" id="mobileMenuButton" aria-label="Abrir menú" aria-expanded="false">${icon('menu')}</button></div><div class="headerSearch" id="headerSearch" aria-hidden="true"><span class="searchIcon">${icon('search')}</span><input id="publicSearchInput" type="search" autocomplete="off" placeholder="Buscar figura, personaje, anime, SKU o fabricante…" aria-label="Buscar en el catálogo"><button id="searchClose" type="button" aria-label="Cerrar búsqueda">×</button></div><div class="mobileNav" id="mobileNav" aria-hidden="true"><a href="#catalogo">Figuras</a><a href="#ofertas">Ofertas</a><a href="#mas-coleccion">Más para tu colección</a><a href="#proximamente">Próximamente</a></div></header>
 <main><section class="hero"><div class="heroContent"><span class="eyebrow">${icon('sparkle')} <span id="homePortadaEtiqueta">DIRECTO DESDE JAPÓN</span></span><h1 id="homePortadaTitulo">Tu mundo de<br><em>figuras y coleccionables.</em></h1><p id="homePortadaDescripcion">Encuentra esa pieza que falta en tu colección. Figuras seleccionadas, disponibilidad real y atención directa por WhatsApp.</p><div class="heroBtns"><a href="#catalogo" class="primary">Explorar figuras ${icon('arrow')}</a><a href="#ofertas" class="secondary">${icon('fire')} Ver ofertas</a></div></div><div class="japan">日本<br><span>の世界</span></div></section>
 <section class="benefits"><div><span class="featureIcon">${icon('truck')}</span><span><b id="homeBeneficio1Titulo">Importadas de Japón</b><small id="homeBeneficio1Descripcion">Piezas seleccionadas</small></span></div><div><span class="featureIcon">${icon('shield')}</span><span><b id="homeBeneficio2Titulo">Compra con confianza</b><small id="homeBeneficio2Descripcion">Atención directa</small></span></div><div><span class="featureIcon">${icon('chat')}</span><span><b id="homeBeneficio3Titulo">Apártala por WhatsApp</b><small id="homeBeneficio3Descripcion">Rápido y sencillo</small></span></div></section>
-<section id="ofertas" class="section"><div class="sectionHead"><div><span class="kicker">🔥 PRECIOS ESPECIALES</span><h2 id="homeTituloOfertas">Ofertas del Sekai</h2></div><a id="viewAllOffers" href="#catalogo">Ver todas ${icon('arrow')}</a></div><div id="offersGrid" class="grid"><p class="catalogMessage">Cargando ofertas…</p></div></section>
-<section id="destacados" class="section"><div class="sectionHead"><div><span class="kicker">COLECCIÓN DESTACADA</span><h2 id="homeTituloFiguras">Figuras destacadas</h2></div><a href="#catalogo">Ver catálogo ${icon('arrow')}</a></div><div id="featuredGrid" class="grid"><p class="catalogMessage">Cargando figuras destacadas…</p></div></section>
-<section id="catalogo" class="section catalogSection"><div class="sectionHead catalogHeading"><div><span class="kicker">CATÁLOGO</span><h2>Explora nuestras figuras</h2><p class="catalogIntro">Encuentra personajes de tus animes favoritos y descubre nuevas piezas para tu colección.</p></div><span id="catalogCount" class="catalogCount"></span></div><div id="catalogQuickFilters" class="chips quickFilters"><button class="active" data-quick="todas">Todas</button><button data-quick="ofertas">🔥 Ofertas</button><button data-quick="proximamente">Próximamente</button></div><div class="catalogToolbar"><label><span>Franquicia</span><input id="filterFranchise" list="franchiseOptions" type="search" autocomplete="off" placeholder="Todas las franquicias"><datalist id="franchiseOptions"></datalist></label><label><span>Personaje</span><input id="filterCharacter" list="characterOptions" type="search" autocomplete="off" placeholder="Todos los personajes"><datalist id="characterOptions"></datalist></label><label><span>Fabricante</span><input id="filterManufacturer" list="manufacturerOptions" type="search" autocomplete="off" placeholder="Todos los fabricantes"><datalist id="manufacturerOptions"></datalist></label><label class="sortField"><span>Ordenar por</span><select id="catalogSort"><option value="recientes">Más recientes</option><option value="precio-asc">Precio: menor a mayor</option><option value="precio-desc">Precio: mayor a menor</option><option value="nombre">Nombre A–Z</option></select></label><button id="clearCatalogFilters" class="clearCatalogFilters" type="button">Limpiar filtros</button></div><div id="catalogChips" class="chips legacyChips" hidden></div><div id="catalogGrid" class="grid"><p class="catalogMessage">Cargando catálogo…</p></div></section>
+<section id="ofertas" class="section"><div class="sectionHead"><div><span class="kicker">🔥 PRECIOS ESPECIALES</span><h2 id="homeTituloOfertas">Ofertas del Sekai</h2></div><button id="viewAllOffers" class="sectionLinkButton" type="button">Ver todas ${icon('arrow')}</button></div><div id="offersGrid" class="grid"><p class="catalogMessage">Cargando ofertas…</p></div></section>
+<section id="destacados" class="section"><div class="sectionHead"><div><span class="kicker">COLECCIÓN DESTACADA</span><h2 id="homeTituloFiguras">Figuras destacadas</h2></div><button id="viewAllFeatured" class="sectionLinkButton" type="button">Ver todas ${icon('arrow')}</button></div><div id="featuredGrid" class="grid"><p class="catalogMessage">Cargando figuras destacadas…</p></div></section>
+<section id="catalogo" class="section catalogSection"><div class="sectionHead catalogHeading"><div><span class="kicker">CATÁLOGO</span><h2>Explora nuestras figuras</h2><p class="catalogIntro">Encuentra personajes de tus animes favoritos y descubre nuevas piezas para tu colección.</p></div><span id="catalogCount" class="catalogCount"></span></div><div id="catalogQuickFilters" class="chips quickFilters"><button class="active" data-quick="todas">Todas</button><button data-quick="ofertas">🔥 Ofertas</button><button data-quick="proximamente">Próximamente</button></div><div class="catalogToolbar"><label class="catalogSearchField"><span>Buscar</span><input id="catalogSearch" type="search" autocomplete="off" placeholder="Nombre, SKU, personaje, anime…"></label><label><span>Franquicia</span><input id="filterFranchise" list="franchiseOptions" type="search" autocomplete="off" placeholder="Todas las franquicias"><datalist id="franchiseOptions"></datalist></label><label><span>Personaje</span><input id="filterCharacter" list="characterOptions" type="search" autocomplete="off" placeholder="Todos los personajes"><datalist id="characterOptions"></datalist></label><label><span>Fabricante</span><input id="filterManufacturer" list="manufacturerOptions" type="search" autocomplete="off" placeholder="Todos los fabricantes"><datalist id="manufacturerOptions"></datalist></label><label class="sortField"><span>Ordenar por</span><select id="catalogSort"><option value="recientes">Más recientes</option><option value="precio-asc">Precio: menor a mayor</option><option value="precio-desc">Precio: mayor a menor</option><option value="nombre">Nombre A–Z</option></select></label><button id="clearCatalogFilters" class="clearCatalogFilters" type="button">Limpiar filtros</button></div><div id="catalogChips" class="chips legacyChips" hidden></div><div id="catalogGrid" class="grid"><p class="catalogMessage">Cargando catálogo…</p></div><nav id="catalogPagination" class="catalogPagination" aria-label="Paginación del catálogo"></nav></section>
 <section id="mas-coleccion" class="section additionalSection"><div class="sectionHead"><div><span class="kicker">MÁS PARA TU COLECCIÓN</span><h2>Detalles que complementan tu colección</h2><p class="catalogIntro">Amigurumis, peluches, llaveros, tazas y otros productos seleccionados.</p></div><button id="viewAllAdditional" class="sectionLinkButton" type="button">Ver todos ${icon('arrow')}</button></div><div id="additionalGrid" class="grid"><p class="catalogMessage">Cargando productos…</p></div></section>
 <section id="proximamente" class="arrival"><div><span class="kicker">PRÓXIMAMENTE 🇯🇵</span><h2 id="homeTituloProximamente">Próximamente</h2><p>Descubre próximas importaciones y pregunta por disponibilidad antes de que lleguen.</p></div><a id="generalWhatsapp" class="primary" href="#" target="_blank" rel="noopener">Preguntar por WhatsApp</a></section></main>
 <footer><div class="brand"><span class="brandIcon"><span class="mark brandMark">界</span><img class="brandLogo footerLogo" id="footerLogo" alt="Logo Anime no Sekai" hidden></span><span class="brandText">ANIME NO <b>SEKAI</b></span></div><p>Tu mundo de figuras y coleccionables.</p><small>© 2026 Anime no Sekai</small></footer>`;
@@ -195,10 +197,11 @@ function renderPublicProducts(){
  if(featuredSection)featuredSection.hidden=!featured.length;
  const offersGrid=document.getElementById('offersGrid');
  const featuredGrid=document.getElementById('featuredGrid');
- if(offersGrid&&offers.length)offersGrid.innerHTML=offers.map(productCard).join('');
- if(featuredGrid&&featured.length)featuredGrid.innerHTML=featured.map(productCard).join('');
+ if(offersGrid&&offers.length)offersGrid.innerHTML=offers.slice(0,4).map(productCard).join('');
+ if(featuredGrid&&featured.length)featuredGrid.innerHTML=featured.slice(0,4).map(productCard).join('');
  populatePublicFilterOptions();
  let list=searched.filter(p=>{
+   if(publicCatalogFilters.busqueda&&!productMatchesSearch(p,normalizeSearch(publicCatalogFilters.busqueda)))return false;
    if(publicQuickFilter==='ofertas'&&p.sale==null)return false;
    if(publicQuickFilter==='proximamente'&&p.status!=='proximamente')return false;
    if(publicCatalogFilters.franquicia&&!normalizeSearch(p.series).includes(normalizeSearch(publicCatalogFilters.franquicia)))return false;
@@ -210,25 +213,49 @@ function renderPublicProducts(){
  else if(publicCatalogFilters.orden==='precio-desc')list.sort((a,b)=>effectivePrice(b)-effectivePrice(a));
  else if(publicCatalogFilters.orden==='nombre')list.sort((a,b)=>a.name.localeCompare(b.name,'es',{sensitivity:'base'}));
  document.querySelectorAll('#catalogQuickFilters [data-quick]').forEach(b=>b.classList.toggle('active',b.dataset.quick===publicQuickFilter));
- const count=document.getElementById('catalogCount');if(count)count.textContent=`${list.length} ${list.length===1?'figura':'figuras'}`;
+ const total=list.length; const totalPages=Math.max(1,Math.ceil(total/PUBLIC_CATALOG_PAGE_SIZE)); if(publicCatalogPage>totalPages)publicCatalogPage=totalPages;
+ const start=(publicCatalogPage-1)*PUBLIC_CATALOG_PAGE_SIZE; const pageItems=list.slice(start,start+PUBLIC_CATALOG_PAGE_SIZE);
+ const count=document.getElementById('catalogCount');if(count)count.textContent=`${total} ${total===1?'figura':'figuras'}`;
  const grid=document.getElementById('catalogGrid');
  if(!products.length)grid.innerHTML='<div class="catalogEmpty"><b>Estamos preparando nuevas figuras ✨</b><span>Muy pronto encontrarás nuevas piezas para tu colección.</span></div>';
  else if(!list.length)grid.innerHTML='<div class="catalogEmpty"><b>No encontramos figuras con esos filtros.</b><span>Prueba con otra franquicia o limpia los filtros.</span><button type="button" data-clear-public-filters>Limpiar filtros</button></div>';
- else grid.innerHTML=list.map(productCard).join('');
+ else grid.innerHTML=pageItems.map(productCard).join('');
+ renderCatalogPagination(totalPages);
+}
+function renderCatalogPagination(totalPages){
+ const nav=document.getElementById('catalogPagination'); if(!nav)return; if(totalPages<=1){nav.innerHTML='';return}
+ const current=publicCatalogPage, pages=[];
+ const add=n=>{if(n>=1&&n<=totalPages&&!pages.includes(n))pages.push(n)}; add(1); for(let n=current-2;n<=current+2;n++)add(n); add(totalPages); pages.sort((a,b)=>a-b);
+ let last=0, html=`<button type="button" data-page="${current-1}" ${current===1?'disabled':''}>‹ Anterior</button>`;
+ for(const n of pages){if(last&&n-last>1)html+='<span>…</span>'; html+=`<button type="button" data-page="${n}" class="${n===current?'active':''}" ${n===current?'aria-current="page"':''}>${n}</button>`;last=n}
+ html+=`<button type="button" data-page="${current+1}" ${current===totalPages?'disabled':''}>Siguiente ›</button>`; nav.innerHTML=html;
 }
 function initPublicCatalogFilters(){
- const bind=(id,key)=>document.getElementById(id)?.addEventListener('input',e=>{publicCatalogFilters[key]=e.target.value;if(key==='franquicia'){publicCatalogFilters.personaje='';const c=document.getElementById('filterCharacter');if(c)c.value=''}renderPublicProducts()});
- bind('filterFranchise','franquicia');bind('filterCharacter','personaje');bind('filterManufacturer','fabricante');
- document.getElementById('catalogSort')?.addEventListener('change',e=>{publicCatalogFilters.orden=e.target.value;renderPublicProducts()});
- document.querySelectorAll('#catalogQuickFilters [data-quick]').forEach(b=>b.addEventListener('click',()=>{publicQuickFilter=b.dataset.quick;renderPublicProducts()}));
+ const bind=(id,key)=>document.getElementById(id)?.addEventListener('input',e=>{publicCatalogPage=1;publicCatalogFilters[key]=e.target.value;if(key==='franquicia'){publicCatalogFilters.personaje='';const c=document.getElementById('filterCharacter');if(c)c.value=''}renderPublicProducts()});
+ bind('catalogSearch','busqueda');bind('filterFranchise','franquicia');bind('filterCharacter','personaje');bind('filterManufacturer','fabricante');
+ document.getElementById('catalogSort')?.addEventListener('change',e=>{publicCatalogPage=1;publicCatalogFilters.orden=e.target.value;renderPublicProducts()});
+ document.querySelectorAll('#catalogQuickFilters [data-quick]').forEach(b=>b.addEventListener('click',()=>{publicCatalogPage=1;publicQuickFilter=b.dataset.quick;renderPublicProducts()}));
  document.getElementById('clearCatalogFilters')?.addEventListener('click',clearPublicCatalogFilters);
- document.getElementById('viewAllOffers')?.addEventListener('click',()=>{publicQuickFilter='ofertas';renderPublicProducts()});
+ document.getElementById('viewAllOffers')?.addEventListener('click',()=>openFigureCollection('ofertas'));
+ document.getElementById('viewAllFeatured')?.addEventListener('click',()=>openFigureCollection('destacadas'));
+ document.getElementById('catalogPagination')?.addEventListener('click',e=>{const b=e.target.closest('[data-page]');if(!b||b.disabled)return;publicCatalogPage=Number(b.dataset.page);renderPublicProducts();document.getElementById('catalogo')?.scrollIntoView({behavior:'smooth',block:'start'})});
 }
 function clearPublicCatalogFilters(){
- publicQuickFilter='todas';publicCatalogFilters={franquicia:'',personaje:'',fabricante:'',orden:'recientes'};
- [['filterFranchise',''],['filterCharacter',''],['filterManufacturer',''],['catalogSort','recientes']].forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.value=v});renderPublicProducts();
+ publicQuickFilter='todas';publicCatalogPage=1;publicCatalogFilters={busqueda:'',franquicia:'',personaje:'',fabricante:'',orden:'recientes'};
+ [['catalogSearch',''],['filterFranchise',''],['filterCharacter',''],['filterManufacturer',''],['catalogSort','recientes']].forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.value=v});renderPublicProducts();
 }
 
+function openFigureCollection(kind){
+ document.getElementById('figureCollectionView')?.remove();
+ const isOffers=kind==='ofertas', source=products.filter(p=>isOffers?p.sale!=null:p.featured);
+ const title=isOffers?'Todas las ofertas':'Figuras destacadas', kicker=isOffers?'🔥 PRECIOS ESPECIALES':'COLECCIÓN DESTACADA';
+ const view=document.createElement('section');view.className='detailView figureCollectionView';view.id='figureCollectionView';
+ view.innerHTML=`<div class="detailTop"><button class="backBtn" type="button">‹ Volver a la tienda</button><button class="detailClose" type="button" aria-label="Cerrar">×</button></div><div class="additionalCatalogShell"><span class="kicker">${kicker}</span><h1>${title}</h1><p>${isOffers?'Explora todas las figuras que actualmente tienen precio especial.':'Explora todas las figuras seleccionadas como destacadas.'}</p><div class="additionalCatalogTools single"><input class="figureCollectionSearch" type="search" placeholder="Buscar nombre, SKU, personaje, anime o fabricante…"></div><div class="figureCollectionCount catalogCount"></div><div class="figureCollectionGrid grid"></div></div>`;
+ document.body.appendChild(view);document.body.classList.add('detail-open');
+ const render=()=>{const q=normalizeSearch(view.querySelector('.figureCollectionSearch').value);const list=source.filter(p=>!q||productMatchesSearch(p,q));view.querySelector('.figureCollectionCount').textContent=`${list.length} ${list.length===1?'figura':'figuras'}`;view.querySelector('.figureCollectionGrid').innerHTML=list.length?list.map(productCard).join(''):'<div class="catalogEmpty"><b>No encontramos figuras.</b><span>Prueba con otra búsqueda.</span></div>'};
+ view.querySelector('.figureCollectionSearch').addEventListener('input',render);render();
+ const close=()=>{view.remove();document.body.classList.remove('detail-open')};view.querySelectorAll('.backBtn,.detailClose').forEach(b=>b.addEventListener('click',close));
+}
 function openDetail(sku,push=true){
  const p=products.find(x=>x.sku===sku); if(!p)return;
  document.getElementById('detailView')?.remove();
@@ -280,7 +307,7 @@ function closePublicSearch(clear=true){
 }
 searchToggle?.addEventListener('click',()=>headerSearch?.classList.contains('open')?closePublicSearch(false):openPublicSearch());
 searchClose?.addEventListener('click',()=>closePublicSearch(true));
-publicSearchInput?.addEventListener('input',e=>{publicSearchQuery=e.target.value;renderPublicProducts();document.getElementById('catalogo')?.scrollIntoView({behavior:'smooth',block:'start'});});
+publicSearchInput?.addEventListener('input',e=>{publicSearchQuery=e.target.value;publicCatalogPage=1;const cs=document.getElementById('catalogSearch');if(cs)cs.value=e.target.value;publicCatalogFilters.busqueda=e.target.value;renderPublicProducts();document.getElementById('catalogo')?.scrollIntoView({behavior:'smooth',block:'start'});});
 publicSearchInput?.addEventListener('keydown',e=>{if(e.key==='Escape')closePublicSearch(true)});
 
 loadSiteConfig();
