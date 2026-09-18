@@ -14,6 +14,7 @@ let publicCatalogFilters = {franquicia:'', personaje:'', fabricante:'', orden:'r
 const money = n => new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0}).format(n);
 const icon = (name) => ({search:'⌕',menu:'☰',arrow:'›',fire:'🔥',truck:'✈',shield:'✓',chat:'◉',sparkle:'✦'})[name] || '';
 const statusLabel = s => ({disponible:'Disponible',apartada:'Apartada',vendida:'Vendida',proximamente:'Próximamente'})[s] || s || '';
+const currentSiteUrl = (hash='') => `${window.location.origin}/${hash}`;
 
 function mapProduct(row){
   const images=(row.producto_imagenes||[]).slice().sort((a,b)=>(a.orden??0)-(b.orden??0));
@@ -29,7 +30,7 @@ function mapProduct(row){
 }
 
 function productAction(p){
-  const url=`${location.origin}${location.pathname}#figura=${encodeURIComponent(p.sku)}`;
+  const url=currentSiteUrl(`#figura=${encodeURIComponent(p.sku)}`);
   const base=`${p.name} (${p.sku})`;
   if(p.status==='apartada') return {text:'Consultar disponibilidad',cls:'disabled',msg:`Hola, vi ${base} como apartada en Anime no Sekai. ¿Podrías avisarme si vuelve a estar disponible? ${url}`};
   if(p.status==='proximamente') return {text:'Avísame cuando llegue',cls:'notify',msg:`Hola, me interesa ${base}. ¿Podrías avisarme cuando llegue a Anime no Sekai? ${url}`};
@@ -53,7 +54,7 @@ function renderStoreShell(){
 <section id="ofertas" class="section"><div class="sectionHead"><div><span class="kicker">🔥 PRECIOS ESPECIALES</span><h2 id="homeTituloOfertas">Ofertas del Sekai</h2></div><a id="viewAllOffers" href="#catalogo">Ver todas ${icon('arrow')}</a></div><div id="offersGrid" class="grid"><p class="catalogMessage">Cargando ofertas…</p></div></section>
 <section id="destacados" class="section"><div class="sectionHead"><div><span class="kicker">COLECCIÓN DESTACADA</span><h2 id="homeTituloFiguras">Figuras destacadas</h2></div><a href="#catalogo">Ver catálogo ${icon('arrow')}</a></div><div id="featuredGrid" class="grid"><p class="catalogMessage">Cargando figuras destacadas…</p></div></section>
 <section id="catalogo" class="section catalogSection"><div class="sectionHead catalogHeading"><div><span class="kicker">CATÁLOGO</span><h2>Explora nuestras figuras</h2><p class="catalogIntro">Encuentra personajes de tus animes favoritos y descubre nuevas piezas para tu colección.</p></div><span id="catalogCount" class="catalogCount"></span></div><div id="catalogQuickFilters" class="chips quickFilters"><button class="active" data-quick="todas">Todas</button><button data-quick="ofertas">🔥 Ofertas</button><button data-quick="proximamente">Próximamente</button></div><div class="catalogToolbar"><label><span>Franquicia</span><input id="filterFranchise" list="franchiseOptions" type="search" autocomplete="off" placeholder="Todas las franquicias"><datalist id="franchiseOptions"></datalist></label><label><span>Personaje</span><input id="filterCharacter" list="characterOptions" type="search" autocomplete="off" placeholder="Todos los personajes"><datalist id="characterOptions"></datalist></label><label><span>Fabricante</span><input id="filterManufacturer" list="manufacturerOptions" type="search" autocomplete="off" placeholder="Todos los fabricantes"><datalist id="manufacturerOptions"></datalist></label><label class="sortField"><span>Ordenar por</span><select id="catalogSort"><option value="recientes">Más recientes</option><option value="precio-asc">Precio: menor a mayor</option><option value="precio-desc">Precio: mayor a menor</option><option value="nombre">Nombre A–Z</option></select></label><button id="clearCatalogFilters" class="clearCatalogFilters" type="button">Limpiar filtros</button></div><div id="catalogChips" class="chips legacyChips" hidden></div><div id="catalogGrid" class="grid"><p class="catalogMessage">Cargando catálogo…</p></div></section>
-<section id="proximamente" class="arrival"><div><span class="kicker">PRÓXIMAMENTE 🇯🇵</span><h2 id="homeTituloProximamente">Próximamente</h2><p>Descubre próximas importaciones y pregunta por disponibilidad antes de que lleguen.</p></div><a class="primary" href="https://wa.me/529994739090" target="_blank" rel="noopener">Preguntar por WhatsApp</a></section></main>
+<section id="proximamente" class="arrival"><div><span class="kicker">PRÓXIMAMENTE 🇯🇵</span><h2 id="homeTituloProximamente">Próximamente</h2><p>Descubre próximas importaciones y pregunta por disponibilidad antes de que lleguen.</p></div><a id="generalWhatsapp" class="primary" href="#" target="_blank" rel="noopener">Preguntar por WhatsApp</a></section></main>
 <footer><div class="brand"><span class="brandIcon"><span class="mark brandMark">界</span><img class="brandLogo footerLogo" id="footerLogo" alt="Logo Anime no Sekai" hidden></span><span class="brandText">ANIME NO <b>SEKAI</b></span></div><p>Tu mundo de figuras y coleccionables.</p><small>© 2026 Anime no Sekai</small></footer>`;
 }
 
@@ -196,6 +197,8 @@ document.addEventListener('keydown',e=>{const card=e.target.closest?.('.publicPr
 window.addEventListener('popstate',()=>{if(!location.hash.startsWith('#figura=')){document.getElementById('detailView')?.remove();document.body.classList.remove('detail-open')}});
 
 renderStoreShell();
+const generalWhatsapp=document.getElementById('generalWhatsapp');
+if(generalWhatsapp){const msg=`Hola, me gustaría consultar las próximas figuras de Anime no Sekai. ${currentSiteUrl('#proximamente')}`;generalWhatsapp.href=`https://wa.me/529994739090?text=${encodeURIComponent(msg)}`;}
 const mobileMenuButton=document.getElementById('mobileMenuButton');
 const mobileNav=document.getElementById('mobileNav');
 function closeMobileMenu(){if(!mobileMenuButton||!mobileNav)return;mobileNav.classList.remove('open');mobileMenuButton.setAttribute('aria-expanded','false');mobileMenuButton.setAttribute('aria-label','Abrir menú');mobileNav.setAttribute('aria-hidden','true')}
