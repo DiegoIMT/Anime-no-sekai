@@ -265,13 +265,23 @@ function renderAdminPanel(){
 function setAdminTab(activeId){
  document.querySelectorAll('.adminNav button').forEach(b=>b.classList.toggle('active',b.id===activeId));
 }
-function showAdminProductsSection(){
+function showAdminProductsSection(section='figuras'){
  setAdminTab('adminProductsTab');
- document.getElementById('adminPanelBody').innerHTML=`<div class="adminHeader"><div><span class="kicker">ANIME NO SEKAI</span><h1>Productos</h1><p>Administra las figuras publicadas en tu catálogo.</p></div><div class="adminHeaderActions"><button id="newProduct" class="primary" type="button">+ Nueva figura</button><button id="logoutAdmin" class="secondary" type="button">Cerrar sesión</button></div></div><div class="adminToolbar"><input id="adminSearch" type="search" placeholder="Buscar por nombre, SKU o franquicia…"></div><div id="adminProducts" class="adminProducts"><p class="adminLoading">Cargando productos…</p></div>`;
+ document.getElementById('adminPanelBody').innerHTML=`<div class="adminHeader"><div><span class="kicker">ANIME NO SEKAI</span><h1>Productos</h1><p>Las figuras son el catálogo principal. Administra por separado los artículos de “Más para tu colección”.</p></div><div class="adminHeaderActions"><button id="logoutAdmin" class="secondary" type="button">Cerrar sesión</button></div></div><div class="adminProductKinds"><button type="button" data-admin-kind="figuras" class="${section==='figuras'?'active':''}">Figuras</button><button type="button" data-admin-kind="adicionales" class="${section==='adicionales'?'active':''}">Más para tu colección</button></div><div id="adminProductKindBody"></div>`;
  document.getElementById('logoutAdmin').onclick=async()=>{await supabaseClient.auth.signOut();closeAdmin()};
- document.getElementById('newProduct').onclick=()=>openProductForm();
- document.getElementById('adminSearch').addEventListener('input',e=>filterAdminProducts(e.target.value));
- loadAdminProducts();
+ document.querySelectorAll('[data-admin-kind]').forEach(b=>b.onclick=()=>showAdminProductsSection(b.dataset.adminKind));
+ const body=document.getElementById('adminProductKindBody');
+ if(section==='adicionales'){
+   body.innerHTML=`<div class="adminSubHeader"><div><h2>Más para tu colección</h2><p>Amigurumis, peluches, llaveros, tazas y otros complementos.</p></div><button id="newAdditionalProduct" class="primary" type="button">+ Nuevo producto</button></div><div class="adminToolbar"><input id="adminAdditionalSearch" type="search" placeholder="Buscar por nombre, SKU o tipo…"></div><div id="adminAdditionalProducts" class="adminProducts"><p class="adminLoading">Cargando productos…</p></div>`;
+   document.getElementById('newAdditionalProduct').onclick=()=>openAdditionalProductForm();
+   document.getElementById('adminAdditionalSearch').addEventListener('input',e=>filterAdminAdditionalProducts(e.target.value));
+   loadAdminAdditionalProducts();
+ }else{
+   body.innerHTML=`<div class="adminSubHeader"><div><h2>Figuras</h2><p>Catálogo principal de figuras coleccionables.</p></div><button id="newProduct" class="primary" type="button">+ Nueva figura</button></div><div class="adminToolbar"><input id="adminSearch" type="search" placeholder="Buscar por nombre, SKU o franquicia…"></div><div id="adminProducts" class="adminProducts"><p class="adminLoading">Cargando figuras…</p></div>`;
+   document.getElementById('newProduct').onclick=()=>openProductForm();
+   document.getElementById('adminSearch').addEventListener('input',e=>filterAdminProducts(e.target.value));
+   loadAdminProducts();
+ }
 }
 async function showSiteContentForm(){
  setAdminTab('adminContentTab');
@@ -563,6 +573,80 @@ async function deleteProduct(id){
  if(paths.length){const {error:storageError}=await supabaseClient.storage.from('productos').remove(paths);if(storageError){alert('No se pudieron eliminar las fotografías de Storage: '+storageError.message);return}}
  const {error}=await supabaseClient.from('productos').delete().eq('id',id); if(error){alert('No se pudo eliminar: '+error.message);return} await loadAdminProducts();
 }
+
+// =========================================================
+// V7.6.0 — Administración de “Más para tu colección”
+// =========================================================
+let adminAdditionalProductsCache=[];
+async function loadAdminAdditionalProducts(){
+ const box=document.getElementById('adminAdditionalProducts');if(!box)return;
+ const {data,error}=await supabaseClient.from('productos_adicionales').select('*, tipos_producto(nombre), franquicias(nombre), personajes(nombre)').order('fecha_creacion',{ascending:false});
+ if(error){box.innerHTML=`<p class="formMessage error">No fue posible cargar los productos adicionales: ${escapeHtml(error.message)}</p>`;return}
+ adminAdditionalProductsCache=data||[];renderAdminAdditionalProducts(adminAdditionalProductsCache);
+}
+function filterAdminAdditionalProducts(q){q=(q||'').toLowerCase().trim();renderAdminAdditionalProducts(adminAdditionalProductsCache.filter(p=>[p.nombre,p.sku,p.tipos_producto?.nombre,p.franquicias?.nombre,p.personajes?.nombre].some(v=>(v||'').toLowerCase().includes(q))))}
+function renderAdminAdditionalProducts(items){
+ const box=document.getElementById('adminAdditionalProducts');if(!box)return;
+ if(!items.length){box.innerHTML='<div class="adminEmpty"><b>Aún no hay productos adicionales.</b><span>Usa “Nuevo producto” para registrar el primero de “Más para tu colección”.</span></div>';return}
+ box.innerHTML=items.map(p=>`<article class="adminProduct"><div><span class="adminSku">${escapeHtml(p.sku)}</span><h3>${escapeHtml(p.nombre)}</h3><p>${escapeHtml(p.tipos_producto?.nombre||'Sin tipo')} · ${escapeHtml(p.franquicias?.nombre||'Sin franquicia')}</p></div><div class="adminProductPrice"><strong>${money(Number(p.precio_oferta??p.precio))}</strong>${p.precio_oferta!=null?`<small>${money(Number(p.precio))}</small>`:''}</div><span class="adminState state-${p.estado}">${escapeHtml(p.estado.replace('_',' '))}</span><div class="adminRowActions"><button type="button" data-additional-edit="${p.id}">Editar</button><button type="button" data-additional-duplicate="${p.id}">Duplicar</button><button type="button" class="danger" data-additional-delete="${p.id}">Eliminar</button></div></article>`).join('');
+ box.querySelectorAll('[data-additional-edit]').forEach(b=>b.onclick=()=>openAdditionalProductForm(adminAdditionalProductsCache.find(p=>p.id===b.dataset.additionalEdit)));
+ box.querySelectorAll('[data-additional-duplicate]').forEach(b=>b.onclick=()=>openAdditionalProductForm(adminAdditionalProductsCache.find(p=>p.id===b.dataset.additionalDuplicate),true));
+ box.querySelectorAll('[data-additional-delete]').forEach(b=>b.onclick=()=>deleteAdditionalProduct(b.dataset.additionalDelete));
+}
+function openAdditionalProductForm(p=null,duplicating=false){
+ const editing=!!p&&!duplicating;productFormImages=[];existingProductImages=[];
+ document.getElementById('adminContent').innerHTML=`<div class="adminFormHead"><button id="backAdmin" class="backBtn" type="button">‹ Volver a Más para tu colección</button><span class="kicker">${editing?'EDITAR':duplicating?'DUPLICAR':'NUEVO'} PRODUCTO</span><h1>${editing?'Editar producto':duplicating?'Duplicar producto':'Registrar producto'}</h1>${duplicating?'<p class="duplicateNotice">Se copiarán los datos. El SKU será nuevo y las fotografías deberán agregarse nuevamente.</p>':''}</div><form id="additionalProductForm" class="productForm">
+ <section class="formSection"><div class="formSectionTitle"><span>01</span><div><h2>Información</h2><p>Datos principales del producto adicional.</p></div></div><div class="formGrid">
+ <label>SKU<div class="readonlyField">${editing?escapeHtml(p.sku):'Se generará automáticamente'}</div><small class="fieldHint">${editing?'Identificador interno del producto.':'Supabase asignará el siguiente código ANX-XXXXX al guardar.'}</small></label>
+ <div class="catalogField"><span>Tipo de producto <span class="required">*</span></span><div class="catalogPicker"><div class="searchableSelect" id="tipoProductoCombo"><input class="searchableSelectInput" id="tipoProductoSearch" type="text" autocomplete="off" placeholder="Buscar tipo…"><button class="searchableSelectArrow" type="button" tabindex="-1">⌄</button><div class="searchableSelectMenu"></div><select name="tipo_producto_id" id="tipoProductoSelect" class="catalogNativeSelect" required><option value="">Cargando tipos…</option></select></div><button class="catalogAdd" id="addTipoProducto" type="button">＋ Nuevo</button></div><small class="fieldHint">Amigurumi, peluche, llavero, taza u otro tipo administrable.</small></div>
+ <label class="full">Nombre<input name="nombre" maxlength="150" required value="${attr(p?.nombre||'')}"></label>
+ <div class="catalogField"><span>Franquicia</span><div class="catalogPicker"><div class="searchableSelect" id="additionalFranquiciaCombo"><input class="searchableSelectInput" id="additionalFranquiciaSearch" type="text" autocomplete="off" placeholder="Buscar franquicia…"><button class="searchableSelectArrow" type="button" tabindex="-1">⌄</button><div class="searchableSelectMenu"></div><select name="franquicia_id" id="additionalFranquiciaSelect" class="catalogNativeSelect"><option value="">Cargando franquicias…</option></select></div><button class="catalogAdd" id="addAdditionalFranquicia" type="button">＋ Nueva</button></div><small class="fieldHint">Opcional.</small></div>
+ <div class="catalogField"><span>Personaje</span><div class="catalogPicker"><div class="searchableSelect" id="additionalPersonajeCombo"><input class="searchableSelectInput" id="additionalPersonajeSearch" type="text" autocomplete="off" placeholder="Selecciona primero una franquicia…" disabled><button class="searchableSelectArrow" type="button" tabindex="-1">⌄</button><div class="searchableSelectMenu"></div><select name="personaje_id" id="additionalPersonajeSelect" class="catalogNativeSelect" disabled><option value="">Selecciona primero una franquicia…</option></select></div><button class="catalogAdd" id="addAdditionalPersonaje" type="button" disabled>＋ Nuevo</button></div><small class="fieldHint">Opcional y dependiente de la franquicia.</small></div>
+ <label class="full">Descripción<textarea name="descripcion" maxlength="2000" rows="5">${escapeHtml(p?.descripcion||'')}</textarea></label></div></section>
+ <section class="formSection"><div class="formSectionTitle"><span>02</span><div><h2>Precio y disponibilidad</h2><p>Precio, existencia y estado comercial.</p></div></div><div class="formGrid"><label>Precio <span class="required">*</span><div class="moneyInput"><span>$</span><input name="precio" type="number" min="0" step="0.01" required value="${attr(p?.precio??'')}"></div></label><label>Precio de oferta<div class="moneyInput"><span>$</span><input name="precio_oferta" type="number" min="0" step="0.01" value="${attr(p?.precio_oferta??'')}"></div></label><label>Estado<select name="estado"><option value="disponible">Disponible</option><option value="apartada">Apartada</option><option value="vendida">Vendida</option><option value="proximamente">Próximamente</option><option value="sobre_pedido">Sobre pedido</option></select></label><label>Stock<input name="stock" type="number" min="0" step="1" required value="${attr(p?.stock??1)}"></label></div></section>
+ <section class="formSection"><div class="formSectionTitle"><span>03</span><div><h2>Elaboración</h2><p>Opciones útiles especialmente para productos artesanales.</p></div></div><div class="formGrid"><label class="full">Tiempo de elaboración<input name="tiempo_elaboracion" maxlength="100" placeholder="Ej. 3 a 5 días" value="${attr(p?.tiempo_elaboracion||'')}"><small class="fieldHint">Déjalo vacío cuando no aplique.</small></label></div><div class="inlineChecks"><label><input name="hecho_mano" type="checkbox" ${p?.hecho_mano?'checked':''}> Hecho a mano</label><label><input name="sobre_pedido" type="checkbox" ${p?.sobre_pedido?'checked':''}> Acepta pedidos</label></div></section>
+ <section class="formSection"><div class="formSectionTitle"><span>04</span><div><h2>Fotografías</h2><p>Agrega varias imágenes y elige la principal.</p></div></div><div class="photoUploader"><input id="additionalProductPhotos" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden><button id="selectAdditionalPhotos" class="uploadButton" type="button"><span>＋</span><b>Agregar fotografías</b><small>JPG, PNG o WebP · se optimizan antes de subir</small></button><div id="photoPreview" class="photoPreview"></div></div></section>
+ <div class="formChecks"><label><input name="destacado" type="checkbox" ${p?.destacado?'checked':''}> Producto destacado</label><label><input name="activo" type="checkbox" ${p?.activo===false?'':'checked'}> Visible cuando se publique la sección</label></div><div class="formActions"><button id="saveAdditionalProductButton" class="primary" type="submit">${editing?'Guardar cambios':duplicating?'Crear copia':'Crear producto'}</button></div><p id="productMessage" class="formMessage"></p></form>`;
+ document.querySelector('[name="estado"]').value=p?.estado||'disponible';
+ document.getElementById('backAdmin').onclick=()=>{cleanupNewImagePreviews();renderAdminPanel();showAdminProductsSection('adicionales')};
+ document.getElementById('selectAdditionalPhotos').onclick=()=>document.getElementById('additionalProductPhotos').click();document.getElementById('additionalProductPhotos').onchange=handlePhotoSelection;
+ document.getElementById('additionalProductForm').onsubmit=e=>saveAdditionalProduct(e,editing?p?.id:null,editing?p?.sku:null);
+ document.getElementById('addTipoProducto').onclick=()=>openCatalogModal('tipos_producto','tipoProductoSelect','Nuevo tipo de producto');
+ document.getElementById('addAdditionalFranquicia').onclick=()=>openCatalogModal('franquicias','additionalFranquiciaSelect','Nueva franquicia',null,async()=>loadAdditionalCharacters(null));
+ document.getElementById('addAdditionalPersonaje').onclick=()=>{const id=document.getElementById('additionalFranquiciaSelect')?.value;if(id)openCatalogModal('personajes','additionalPersonajeSelect','Nuevo personaje',{franquicia_id:id})};
+ document.getElementById('additionalFranquiciaSelect').onchange=()=>loadAdditionalCharacters(null);
+ initCatalogCombobox('tipoProductoSelect','tipoProductoSearch');initCatalogCombobox('additionalFranquiciaSelect','additionalFranquiciaSearch');initCatalogCombobox('additionalPersonajeSelect','additionalPersonajeSearch');
+ loadAdditionalProductCatalogs(p);if(editing)loadExistingAdditionalProductImages(p.id);
+}
+async function loadAdditionalProductCatalogs(product=null){
+ const [tp,fr]=await Promise.all([supabaseClient.from('tipos_producto').select('id,nombre').eq('activo',true).order('nombre'),supabaseClient.from('franquicias').select('id,nombre').order('nombre')]);
+ if(tp.error){showProductMessage('No fue posible cargar los tipos: '+tp.error.message,true);return}if(fr.error){showProductMessage('No fue posible cargar las franquicias: '+fr.error.message,true);return}
+ fillCatalogSelect('tipoProductoSelect',tp.data||[],product?.tipo_producto_id,null,'Selecciona un tipo');fillCatalogSelect('additionalFranquiciaSelect',fr.data||[],product?.franquicia_id,product?.franquicias?.nombre,'Sin franquicia');await loadAdditionalCharacters(product);
+}
+async function loadAdditionalCharacters(product=null){
+ const franchiseId=document.getElementById('additionalFranquiciaSelect')?.value||'',select=document.getElementById('additionalPersonajeSelect'),add=document.getElementById('addAdditionalPersonaje');if(!select||!add)return;
+ if(!franchiseId){select.innerHTML='<option value="">Selecciona primero una franquicia…</option>';select.disabled=true;add.disabled=true;syncCatalogCombobox('additionalPersonajeSelect');return}
+ select.disabled=true;add.disabled=true;select.innerHTML='<option value="">Cargando personajes…</option>';
+ const {data,error}=await supabaseClient.from('personajes').select('id,nombre').eq('franquicia_id',franchiseId).order('nombre');if(error){showProductMessage('No fue posible cargar los personajes: '+error.message,true);return}
+ fillCatalogSelect('additionalPersonajeSelect',data||[],product?.personaje_id,product?.personajes?.nombre,'Sin personaje');select.disabled=false;add.disabled=false;syncCatalogCombobox('additionalPersonajeSelect');
+}
+async function loadExistingAdditionalProductImages(productId){
+ const {data,error}=await supabaseClient.from('producto_adicional_imagenes').select('*').eq('producto_id',productId).order('orden');if(error){showProductMessage('No fue posible cargar las fotografías existentes: '+error.message,true);return}existingProductImages=(data||[]).map(x=>({...x,removed:false}));renderPhotoPreview();
+}
+async function syncAdditionalProductImages(product){
+ const removed=existingProductImages.filter(x=>x.removed);for(const img of removed){const path=storagePathFromPublicUrl(img.url);if(path)await supabaseClient.storage.from('productos').remove([path]);await supabaseClient.from('producto_adicional_imagenes').delete().eq('id',img.id)}
+ const kept=existingProductImages.filter(x=>!x.removed);for(let i=0;i<kept.length;i++)await supabaseClient.from('producto_adicional_imagenes').update({orden:i,principal:kept[i].principal}).eq('id',kept[i].id);
+ let order=kept.length;for(const img of productFormImages){const blob=await compressImage(img.file),path=`adicionales/${product.sku}/${String(order+1).padStart(2,'0')}-${crypto.randomUUID()}.webp`;const {error:uploadError}=await supabaseClient.storage.from('productos').upload(path,blob,{contentType:'image/webp',upsert:false,cacheControl:'3600'});if(uploadError)throw uploadError;const {data:publicData}=supabaseClient.storage.from('productos').getPublicUrl(path);const {error:dbError}=await supabaseClient.from('producto_adicional_imagenes').insert({producto_id:product.id,url:publicData.publicUrl,orden:order,principal:img.principal});if(dbError){await supabaseClient.storage.from('productos').remove([path]);throw dbError}order++}
+}
+async function saveAdditionalProduct(e,id,currentSku){
+ e.preventDefault();const f=new FormData(e.currentTarget),msg=document.getElementById('productMessage'),button=document.getElementById('saveAdditionalProductButton');const obj={tipo_producto_id:emptyNull(f.get('tipo_producto_id')),nombre:f.get('nombre').trim(),franquicia_id:emptyNull(f.get('franquicia_id')),personaje_id:emptyNull(f.get('personaje_id')),descripcion:emptyNull(f.get('descripcion')),precio:Number(f.get('precio')),precio_oferta:f.get('precio_oferta')===''?null:Number(f.get('precio_oferta')),estado:f.get('estado'),stock:Number(f.get('stock')),hecho_mano:f.get('hecho_mano')==='on',sobre_pedido:f.get('sobre_pedido')==='on',tiempo_elaboracion:emptyNull(f.get('tiempo_elaboracion')),destacado:f.get('destacado')==='on',activo:f.get('activo')==='on'};
+ if(!obj.tipo_producto_id){showProductMessage('Selecciona un tipo de producto.',true);return}if(obj.precio_oferta!==null&&obj.precio_oferta>=obj.precio){showProductMessage('El precio de oferta debe ser menor que el precio normal.',true);return}
+ button.disabled=true;msg.textContent=id?'Guardando cambios…':'Creando producto…';msg.className='formMessage';try{let product;if(id){const {data,error}=await supabaseClient.from('productos_adicionales').update(obj).eq('id',id).select().single();if(error)throw error;product=data||{id,sku:currentSku}}else{const {data,error}=await supabaseClient.from('productos_adicionales').insert(obj).select().single();if(error)throw error;product=data}msg.textContent='Procesando fotografías…';await syncAdditionalProductImages(product);cleanupNewImagePreviews();renderAdminPanel();showAdminProductsSection('adicionales')}catch(error){showProductMessage('No se pudo guardar: '+(error?.message||'Error inesperado.'),true);button.disabled=false}
+}
+async function deleteAdditionalProduct(id){
+ const p=adminAdditionalProductsCache.find(x=>x.id===id);if(!confirm(`¿Eliminar ${p?.nombre||'este producto'}? Esta acción no se puede deshacer.`))return;const {data:imgs,error:readError}=await supabaseClient.from('producto_adicional_imagenes').select('url').eq('producto_id',id);if(readError){alert('No se pudieron consultar las fotografías: '+readError.message);return}const paths=(imgs||[]).map(x=>storagePathFromPublicUrl(x.url)).filter(Boolean);if(paths.length){const {error}=await supabaseClient.storage.from('productos').remove(paths);if(error){alert('No se pudieron eliminar las fotografías de Storage: '+error.message);return}}const {error}=await supabaseClient.from('productos_adicionales').delete().eq('id',id);if(error){alert('No se pudo eliminar: '+error.message);return}await loadAdminAdditionalProducts();
+}
+
 function emptyNull(v){v=(v??'').toString().trim();return v===''?null:v}
 function escapeHtml(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
 function attr(v){return escapeHtml(v)}
