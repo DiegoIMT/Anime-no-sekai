@@ -8,7 +8,9 @@ let siteLogoFile = null;
 let siteHeroFile = null;
 let siteHeroMobileFile = null;
 let publicFranchiseFilter = 'Todas';
-let publicSearchQuery = ''; 
+let publicSearchQuery = '';
+let publicQuickFilter = 'todas';
+let publicCatalogFilters = {franquicia:'', personaje:'', fabricante:'', orden:'recientes'}; 
 const money = n => new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0}).format(n);
 const icon = (name) => ({search:'⌕',menu:'☰',arrow:'›',fire:'🔥',truck:'✈',shield:'✓',chat:'◉',sparkle:'✦'})[name] || '';
 const statusLabel = s => ({disponible:'Disponible',apartada:'Apartada',vendida:'Vendida',proximamente:'Próximamente'})[s] || s || '';
@@ -40,7 +42,7 @@ function photoMarkup(p){
 function productCard(p){
   const pct=p.sale?Math.round((1-p.sale/p.price)*100):null, action=productAction(p);
   const wa=`https://wa.me/529994739090?text=${encodeURIComponent(action.msg)}`;
-  return `<article class="card"><div class="photo">${photoMarkup(p)}${pct?`<span class="discount">-${pct}%</span>`:''}<span class="status ${p.status==='apartada'?'hold':''}">${statusLabel(p.status)}</span></div><div class="cardBody"><p class="series">${escapeHtml(p.series)}</p><h3>${escapeHtml(p.name)}</h3><div class="prices">${p.sale?`<span class="old">${money(p.price)}</span>`:''}<strong>${money(p.sale||p.price)}</strong></div><button class="details" data-product="${attr(p.sku)}" type="button">Ver detalles <span>${icon('arrow')}</span></button><a class="whatsapp ${action.cls}" href="${attr(wa)}" target="_blank" rel="noopener">${icon('chat')} ${action.text}</a></div></article>`;
+  return `<article class="card publicProductCard" data-card-product="${attr(p.sku)}" tabindex="0" role="link" aria-label="Ver ${attr(p.name)}"><div class="photo">${photoMarkup(p)}${pct?`<span class="discount">-${pct}%</span>`:''}<span class="status state-${attr(p.status)}">${statusLabel(p.status)}</span></div><div class="cardBody"><p class="series">${escapeHtml(p.series)}</p><h3>${escapeHtml(p.name)}</h3><p class="cardCharacter">${escapeHtml(p.character)}</p><div class="prices">${p.sale?`<span class="old">${money(p.price)}</span>`:''}<strong>${money(p.sale||p.price)}</strong></div><button class="details" data-product="${attr(p.sku)}" type="button">Ver figura <span>${icon('arrow')}</span></button><a class="whatsapp ${action.cls}" href="${attr(wa)}" target="_blank" rel="noopener">${icon('chat')} ${action.text}</a></div></article>`;
 }
 
 function renderStoreShell(){
@@ -49,7 +51,7 @@ function renderStoreShell(){
 <main><section class="hero"><div class="heroContent"><span class="eyebrow">${icon('sparkle')} <span id="homePortadaEtiqueta">DIRECTO DESDE JAPÓN</span></span><h1 id="homePortadaTitulo">Tu mundo de<br><em>figuras y coleccionables.</em></h1><p id="homePortadaDescripcion">Encuentra esa pieza que falta en tu colección. Figuras seleccionadas, disponibilidad real y atención directa por WhatsApp.</p><div class="heroBtns"><a href="#catalogo" class="primary">Explorar figuras ${icon('arrow')}</a><a href="#ofertas" class="secondary">${icon('fire')} Ver ofertas</a></div></div><div class="japan">日本<br><span>の世界</span></div></section>
 <section class="benefits"><div><span class="featureIcon">${icon('truck')}</span><span><b id="homeBeneficio1Titulo">Importadas de Japón</b><small id="homeBeneficio1Descripcion">Piezas seleccionadas</small></span></div><div><span class="featureIcon">${icon('shield')}</span><span><b id="homeBeneficio2Titulo">Compra con confianza</b><small id="homeBeneficio2Descripcion">Atención directa</small></span></div><div><span class="featureIcon">${icon('chat')}</span><span><b id="homeBeneficio3Titulo">Apártala por WhatsApp</b><small id="homeBeneficio3Descripcion">Rápido y sencillo</small></span></div></section>
 <section id="ofertas" class="section"><div class="sectionHead"><div><span class="kicker">🔥 PRECIOS ESPECIALES</span><h2 id="homeTituloOfertas">Ofertas del Sekai</h2></div><a href="#catalogo">Ver todas ${icon('arrow')}</a></div><div id="offersGrid" class="grid"><p class="catalogMessage">Cargando ofertas…</p></div></section>
-<section id="catalogo" class="section"><div class="sectionHead"><div><span class="kicker">COLECCIÓN</span><h2 id="homeTituloFiguras">Figuras destacadas</h2></div></div><div id="catalogChips" class="chips"></div><div id="catalogGrid" class="grid"><p class="catalogMessage">Cargando catálogo…</p></div></section>
+<section id="catalogo" class="section catalogSection"><div class="sectionHead catalogHeading"><div><span class="kicker">COLECCIÓN</span><h2 id="homeTituloFiguras">Explora nuestras figuras</h2><p class="catalogIntro">Encuentra personajes de tus animes favoritos y descubre nuevas piezas para tu colección.</p></div><span id="catalogCount" class="catalogCount"></span></div><div id="catalogQuickFilters" class="chips quickFilters"><button class="active" data-quick="todas">Todas</button><button data-quick="ofertas">🔥 Ofertas</button><button data-quick="proximamente">Próximamente</button></div><div class="catalogToolbar"><label><span>Franquicia</span><input id="filterFranchise" list="franchiseOptions" type="search" autocomplete="off" placeholder="Todas las franquicias"><datalist id="franchiseOptions"></datalist></label><label><span>Personaje</span><input id="filterCharacter" list="characterOptions" type="search" autocomplete="off" placeholder="Todos los personajes"><datalist id="characterOptions"></datalist></label><label><span>Fabricante</span><input id="filterManufacturer" list="manufacturerOptions" type="search" autocomplete="off" placeholder="Todos los fabricantes"><datalist id="manufacturerOptions"></datalist></label><label class="sortField"><span>Ordenar por</span><select id="catalogSort"><option value="recientes">Más recientes</option><option value="precio-asc">Precio: menor a mayor</option><option value="precio-desc">Precio: mayor a menor</option><option value="nombre">Nombre A–Z</option></select></label><button id="clearCatalogFilters" class="clearCatalogFilters" type="button">Limpiar filtros</button></div><div id="catalogChips" class="chips legacyChips" hidden></div><div id="catalogGrid" class="grid"><p class="catalogMessage">Cargando catálogo…</p></div></section>
 <section id="proximamente" class="arrival"><div><span class="kicker">PRÓXIMAMENTE 🇯🇵</span><h2 id="homeTituloProximamente">Próximamente</h2><p>Descubre próximas importaciones y pregunta por disponibilidad antes de que lleguen.</p></div><a class="primary" href="https://wa.me/529994739090" target="_blank" rel="noopener">Preguntar por WhatsApp</a></section></main>
 <footer><div class="brand"><span class="brandIcon"><span class="mark brandMark">界</span><img class="brandLogo footerLogo" id="footerLogo" alt="Logo Anime no Sekai" hidden></span><span class="brandText">ANIME NO <b>SEKAI</b></span></div><p>Tu mundo de figuras y coleccionables.</p><small>© 2026 Anime no Sekai</small></footer>`;
 }
@@ -105,19 +107,50 @@ function productMatchesSearch(p,query){
  const haystack=[p.name,p.sku,p.character,p.series,p.manufacturer].map(normalizeSearch).join(' ');
  return query.split(/\s+/).every(term=>haystack.includes(term));
 }
-function renderPublicProducts(filter=publicFranchiseFilter){
- publicFranchiseFilter=filter||'Todas';
+function uniqueSorted(values){return [...new Set(values.filter(v=>v&&v!=='No especificado'&&v!=='Sin franquicia'))].sort((a,b)=>a.localeCompare(b,'es',{sensitivity:'base'}))}
+function effectivePrice(p){return p.sale??p.price}
+function populatePublicFilterOptions(){
+ const franchise=document.getElementById('franchiseOptions'), character=document.getElementById('characterOptions'), manufacturer=document.getElementById('manufacturerOptions');
+ if(franchise)franchise.innerHTML=uniqueSorted(products.map(p=>p.series)).map(x=>`<option value="${attr(x)}"></option>`).join('');
+ const selectedFranchise=normalizeSearch(publicCatalogFilters.franquicia);
+ const characterSource=selectedFranchise?products.filter(p=>normalizeSearch(p.series)===selectedFranchise):products;
+ if(character)character.innerHTML=uniqueSorted(characterSource.map(p=>p.character)).map(x=>`<option value="${attr(x)}"></option>`).join('');
+ if(manufacturer)manufacturer.innerHTML=uniqueSorted(products.map(p=>p.manufacturer)).map(x=>`<option value="${attr(x)}"></option>`).join('');
+}
+function renderPublicProducts(){
  const query=normalizeSearch(publicSearchQuery);
  const searched=products.filter(p=>productMatchesSearch(p,query));
  const offers=searched.filter(p=>p.sale!=null);
- document.getElementById('offersGrid').innerHTML=offers.length?offers.map(productCard).join(''):`<p class="catalogMessage">${query?'No encontramos ofertas que coincidan con tu búsqueda.':'Por ahora no hay ofertas publicadas.'}</p>`;
- const franchises=[...new Set(products.map(p=>p.series).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es',{sensitivity:'base'}));
- if(publicFranchiseFilter!=='Todas'&&!franchises.includes(publicFranchiseFilter))publicFranchiseFilter='Todas';
- const chips=document.getElementById('catalogChips');
- chips.innerHTML=['Todas',...franchises].map(x=>`<button class="${x===publicFranchiseFilter?'active':''}" data-franchise="${attr(x)}">${escapeHtml(x)}</button>`).join('');
- chips.querySelectorAll('[data-franchise]').forEach(b=>b.onclick=()=>renderPublicProducts(b.dataset.franchise));
- const list=publicFranchiseFilter==='Todas'?searched:searched.filter(p=>p.series===publicFranchiseFilter);
- document.getElementById('catalogGrid').innerHTML=list.length?list.map(productCard).join(''):`<p class="catalogMessage">${query?'No encontramos figuras que coincidan con tu búsqueda.':'No hay figuras publicadas en esta categoría.'}</p>`;
+ document.getElementById('offersGrid').innerHTML=offers.length?offers.map(productCard).join(''):`<div class="catalogEmpty"><b>${query?'No encontramos ofertas con esa búsqueda.':'Aún no hay ofertas publicadas.'}</b><span>${query?'Prueba con otro nombre, personaje o franquicia.':'Cuando haya precios especiales aparecerán aquí.'}</span></div>`;
+ populatePublicFilterOptions();
+ let list=searched.filter(p=>{
+   if(publicQuickFilter==='ofertas'&&p.sale==null)return false;
+   if(publicQuickFilter==='proximamente'&&p.status!=='proximamente')return false;
+   if(publicCatalogFilters.franquicia&&!normalizeSearch(p.series).includes(normalizeSearch(publicCatalogFilters.franquicia)))return false;
+   if(publicCatalogFilters.personaje&&!normalizeSearch(p.character).includes(normalizeSearch(publicCatalogFilters.personaje)))return false;
+   if(publicCatalogFilters.fabricante&&!normalizeSearch(p.manufacturer).includes(normalizeSearch(publicCatalogFilters.fabricante)))return false;
+   return true;
+ });
+ if(publicCatalogFilters.orden==='precio-asc')list.sort((a,b)=>effectivePrice(a)-effectivePrice(b));
+ else if(publicCatalogFilters.orden==='precio-desc')list.sort((a,b)=>effectivePrice(b)-effectivePrice(a));
+ else if(publicCatalogFilters.orden==='nombre')list.sort((a,b)=>a.name.localeCompare(b.name,'es',{sensitivity:'base'}));
+ document.querySelectorAll('#catalogQuickFilters [data-quick]').forEach(b=>b.classList.toggle('active',b.dataset.quick===publicQuickFilter));
+ const count=document.getElementById('catalogCount');if(count)count.textContent=`${list.length} ${list.length===1?'figura':'figuras'}`;
+ const grid=document.getElementById('catalogGrid');
+ if(!products.length)grid.innerHTML='<div class="catalogEmpty"><b>Estamos preparando nuevas figuras ✨</b><span>Muy pronto encontrarás nuevas piezas para tu colección.</span></div>';
+ else if(!list.length)grid.innerHTML='<div class="catalogEmpty"><b>No encontramos figuras con esos filtros.</b><span>Prueba con otra franquicia o limpia los filtros.</span><button type="button" data-clear-public-filters>Limpiar filtros</button></div>';
+ else grid.innerHTML=list.map(productCard).join('');
+}
+function initPublicCatalogFilters(){
+ const bind=(id,key)=>document.getElementById(id)?.addEventListener('input',e=>{publicCatalogFilters[key]=e.target.value;if(key==='franquicia'){publicCatalogFilters.personaje='';const c=document.getElementById('filterCharacter');if(c)c.value=''}renderPublicProducts()});
+ bind('filterFranchise','franquicia');bind('filterCharacter','personaje');bind('filterManufacturer','fabricante');
+ document.getElementById('catalogSort')?.addEventListener('change',e=>{publicCatalogFilters.orden=e.target.value;renderPublicProducts()});
+ document.querySelectorAll('#catalogQuickFilters [data-quick]').forEach(b=>b.addEventListener('click',()=>{publicQuickFilter=b.dataset.quick;renderPublicProducts()}));
+ document.getElementById('clearCatalogFilters')?.addEventListener('click',clearPublicCatalogFilters);
+}
+function clearPublicCatalogFilters(){
+ publicQuickFilter='todas';publicCatalogFilters={franquicia:'',personaje:'',fabricante:'',orden:'recientes'};
+ [['filterFranchise',''],['filterCharacter',''],['filterManufacturer',''],['catalogSort','recientes']].forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.value=v});renderPublicProducts();
 }
 
 function openDetail(sku,push=true){
@@ -139,7 +172,8 @@ function openDetail(sku,push=true){
  if(push) history.pushState({detail:sku},'',`#figura=${encodeURIComponent(sku)}`);
 }
 function closeDetail(){document.getElementById('detailView')?.remove();document.body.classList.remove('detail-open');if(location.hash.startsWith('#figura='))history.replaceState({},'',location.pathname+location.search+'#catalogo')}
-document.addEventListener('click',e=>{const btn=e.target.closest('.details[data-product]');if(btn)openDetail(btn.dataset.product)});
+document.addEventListener('click',e=>{const clear=e.target.closest('[data-clear-public-filters]');if(clear){clearPublicCatalogFilters();return}const btn=e.target.closest('.details[data-product]');if(btn){openDetail(btn.dataset.product);return}const card=e.target.closest('.publicProductCard[data-card-product]');if(card&&!e.target.closest('a,button,input,select'))openDetail(card.dataset.cardProduct)});
+document.addEventListener('keydown',e=>{const card=e.target.closest?.('.publicProductCard[data-card-product]');if(card&&(e.key==='Enter'||e.key===' ')){e.preventDefault();openDetail(card.dataset.cardProduct)}});
 window.addEventListener('popstate',()=>{if(!location.hash.startsWith('#figura=')){document.getElementById('detailView')?.remove();document.body.classList.remove('detail-open')}});
 
 renderStoreShell();
