@@ -3,6 +3,9 @@ const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_5L3IfGy74SfEDB0YNnH9Fw_n3HjwND7
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
 let products = [];
+let catalogProducts = [];
+let publicCatalogTotal = 0;
+let publicCatalogRequestId = 0;
 let additionalProducts = [];
 let siteConfig = null;
 let siteLogoFile = null;
@@ -122,17 +125,52 @@ function applySiteVisuals(c){
 }
 
 async function loadPublicCatalog(){
- const {data,error}=await supabaseClient.from('productos').select('*, producto_imagenes(*)').eq('activo',true).order('destacada',{ascending:false}).order('fecha_creacion',{ascending:false});
- if(error){
-   document.getElementById('catalogGrid').innerHTML='<p class="catalogMessage error">No fue posible cargar el catálogo en este momento.</p>';
-   document.getElementById('offersGrid').innerHTML='<p class="catalogMessage error">No fue posible cargar las ofertas.</p>';
-   const featuredGrid=document.getElementById('featuredGrid');if(featuredGrid)featuredGrid.innerHTML='<p class="catalogMessage error">No fue posible cargar las figuras destacadas.</p>';
-   console.error(error); return;
- }
- products=(data||[]).map(mapProduct);
- renderPublicProducts();
+ const [offersRes,featuredRes]=await Promise.all([
+   supabaseClient.from('productos').select('*, producto_imagenes(*)').eq('activo',true).not('precio_oferta','is',null).order('fecha_creacion',{ascending:false}).limit(4),
+   supabaseClient.from('productos').select('*, producto_imagenes(*)').eq('activo',true).eq('destacada',true).order('fecha_creacion',{ascending:false}).limit(4)
+ ]);
+ if(offersRes.error||featuredRes.error){console.error(offersRes.error||featuredRes.error)}
+ const byId=new Map();[...(offersRes.data||[]),...(featuredRes.data||[])].forEach(r=>byId.set(r.id,mapProduct(r)));products=[...byId.values()];
+ const offers=(offersRes.data||[]).map(mapProduct),featured=(featuredRes.data||[]).map(mapProduct);
+ const offersSection=document.getElementById('ofertas'),featuredSection=document.getElementById('destacados');
+ if(offersSection)offersSection.hidden=!offers.length;if(featuredSection)featuredSection.hidden=!featured.length;
+ const offersGrid=document.getElementById('offersGrid'),featuredGrid=document.getElementById('featuredGrid');
+ if(offersGrid)offersGrid.innerHTML=offers.length?offers.map(productCard).join(''):'<div class="catalogEmpty"><b>Aún no hay ofertas.</b></div>';
+ if(featuredGrid)featuredGrid.innerHTML=featured.length?featured.map(productCard).join(''):'<div class="catalogEmpty"><b>Aún no hay figuras destacadas.</b></div>';
+ await Promise.all([loadPublicFilterOptions(),loadCatalogPage()]);
  const skuFromHash=location.hash.startsWith('#figura=')?decodeURIComponent(location.hash.slice(8)):null;
- if(skuFromHash) openDetail(skuFromHash,false);
+ if(skuFromHash) await openDetail(skuFromHash,false);
+}
+async function loadPublicFilterOptions(){
+ const [fRes,pRes,mRes]=await Promise.all([
+   supabaseClient.from('franquicias').select('nombre').eq('activo',true).order('nombre'),
+   supabaseClient.from('personajes').select('nombre, franquicias(nombre)').eq('activo',true).order('nombre'),
+   supabaseClient.from('fabricantes').select('nombre').eq('activo',true).order('nombre')
+ ]);
+ const franchise=document.getElementById('franchiseOptions'),character=document.getElementById('characterOptions'),manufacturer=document.getElementById('manufacturerOptions');
+ if(franchise&&!fRes.error)franchise.innerHTML=(fRes.data||[]).map(x=>`<option value="${attr(x.nombre)}"></option>`).join('');
+ if(manufacturer&&!mRes.error)manufacturer.innerHTML=(mRes.data||[]).map(x=>`<option value="${attr(x.nombre)}"></option>`).join('');
+ window.__publicCharacters=(pRes.data||[]).map(x=>({nombre:x.nombre,franquicia:x.franquicias?.nombre||''}));updateCharacterOptions();
+}
+function updateCharacterOptions(){
+ const character=document.getElementById('characterOptions');if(!character)return;const f=normalizeSearch(publicCatalogFilters.franquicia);
+ const rows=(window.__publicCharacters||[]).filter(x=>!f||normalizeSearch(x.franquicia)===f);character.innerHTML=rows.map(x=>`<option value="${attr(x.nombre)}"></option>`).join('');
+}
+function safeIlikeTerm(value){return String(value||'').trim().replace(/[,%()]/g,' ').replace(/\s+/g,' ')}
+async function loadCatalogPage(){
+ const requestId=++publicCatalogRequestId,grid=document.getElementById('catalogGrid');if(grid)grid.innerHTML='<p class="catalogMessage">Cargando figuras…</p>';
+ let q=supabaseClient.from('productos').select('*, producto_imagenes(*)',{count:'exact'}).eq('activo',true);
+ const search=safeIlikeTerm(publicCatalogFilters.busqueda||publicSearchQuery);if(search){const pattern=`%${search}%`;q=q.or(`nombre.ilike.${pattern},sku.ilike.${pattern},personaje.ilike.${pattern},franquicia.ilike.${pattern},fabricante.ilike.${pattern}`)}
+ if(publicQuickFilter==='ofertas')q=q.not('precio_oferta','is',null);else if(publicQuickFilter==='proximamente')q=q.eq('estado','proximamente');
+ if(publicCatalogFilters.franquicia)q=q.ilike('franquicia',`%${safeIlikeTerm(publicCatalogFilters.franquicia)}%`);
+ if(publicCatalogFilters.personaje)q=q.ilike('personaje',`%${safeIlikeTerm(publicCatalogFilters.personaje)}%`);
+ if(publicCatalogFilters.fabricante)q=q.ilike('fabricante',`%${safeIlikeTerm(publicCatalogFilters.fabricante)}%`);
+ if(publicCatalogFilters.orden==='precio-asc')q=q.order('precio',{ascending:true});else if(publicCatalogFilters.orden==='precio-desc')q=q.order('precio',{ascending:false});else if(publicCatalogFilters.orden==='nombre')q=q.order('nombre',{ascending:true});else q=q.order('fecha_creacion',{ascending:false});
+ const from=(publicCatalogPage-1)*PUBLIC_CATALOG_PAGE_SIZE,to=from+PUBLIC_CATALOG_PAGE_SIZE-1;const {data,error,count}=await q.range(from,to);if(requestId!==publicCatalogRequestId)return;
+ if(error){console.error(error);if(grid)grid.innerHTML='<p class="catalogMessage error">No fue posible cargar el catálogo en este momento.</p>';return}
+ catalogProducts=(data||[]).map(mapProduct);publicCatalogTotal=count||0;const totalPages=Math.max(1,Math.ceil(publicCatalogTotal/PUBLIC_CATALOG_PAGE_SIZE));
+ if(publicCatalogPage>totalPages){publicCatalogPage=totalPages;return loadCatalogPage()}
+ renderPublicProducts();
 }
 async function loadPublicAdditionalCatalog(){
  const {data,error}=await supabaseClient.from('productos_adicionales').select('*, tipos_producto(nombre), franquicias(nombre), personajes(nombre), producto_adicional_imagenes(*)').eq('activo',true).order('destacado',{ascending:false}).order('fecha_creacion',{ascending:false});
@@ -177,49 +215,13 @@ function productMatchesSearch(p,query){
 }
 function uniqueSorted(values){return [...new Set(values.filter(v=>v&&v!=='No especificado'&&v!=='Sin franquicia'))].sort((a,b)=>a.localeCompare(b,'es',{sensitivity:'base'}))}
 function effectivePrice(p){return p.sale??p.price}
-function populatePublicFilterOptions(){
- const franchise=document.getElementById('franchiseOptions'), character=document.getElementById('characterOptions'), manufacturer=document.getElementById('manufacturerOptions');
- if(franchise)franchise.innerHTML=uniqueSorted(products.map(p=>p.series)).map(x=>`<option value="${attr(x)}"></option>`).join('');
- const selectedFranchise=normalizeSearch(publicCatalogFilters.franquicia);
- const characterSource=selectedFranchise?products.filter(p=>normalizeSearch(p.series)===selectedFranchise):products;
- if(character)character.innerHTML=uniqueSorted(characterSource.map(p=>p.character)).map(x=>`<option value="${attr(x)}"></option>`).join('');
- if(manufacturer)manufacturer.innerHTML=uniqueSorted(products.map(p=>p.manufacturer)).map(x=>`<option value="${attr(x)}"></option>`).join('');
-}
+function populatePublicFilterOptions(){updateCharacterOptions()}
 function renderPublicProducts(){
- const query=normalizeSearch(publicSearchQuery);
- const searched=products.filter(p=>productMatchesSearch(p,query));
- // Las secciones promocionales son independientes del buscador del catálogo.
- // Ofertas depende exclusivamente de precio_oferta y Destacadas de destacada=true.
- const offers=products.filter(p=>p.sale!=null);
- const featured=products.filter(p=>p.featured);
- const offersSection=document.getElementById('ofertas'), featuredSection=document.getElementById('destacados');
- if(offersSection)offersSection.hidden=!offers.length;
- if(featuredSection)featuredSection.hidden=!featured.length;
- const offersGrid=document.getElementById('offersGrid');
- const featuredGrid=document.getElementById('featuredGrid');
- if(offersGrid&&offers.length)offersGrid.innerHTML=offers.slice(0,4).map(productCard).join('');
- if(featuredGrid&&featured.length)featuredGrid.innerHTML=featured.slice(0,4).map(productCard).join('');
- populatePublicFilterOptions();
- let list=searched.filter(p=>{
-   if(publicCatalogFilters.busqueda&&!productMatchesSearch(p,normalizeSearch(publicCatalogFilters.busqueda)))return false;
-   if(publicQuickFilter==='ofertas'&&p.sale==null)return false;
-   if(publicQuickFilter==='proximamente'&&p.status!=='proximamente')return false;
-   if(publicCatalogFilters.franquicia&&!normalizeSearch(p.series).includes(normalizeSearch(publicCatalogFilters.franquicia)))return false;
-   if(publicCatalogFilters.personaje&&!normalizeSearch(p.character).includes(normalizeSearch(publicCatalogFilters.personaje)))return false;
-   if(publicCatalogFilters.fabricante&&!normalizeSearch(p.manufacturer).includes(normalizeSearch(publicCatalogFilters.fabricante)))return false;
-   return true;
- });
- if(publicCatalogFilters.orden==='precio-asc')list.sort((a,b)=>effectivePrice(a)-effectivePrice(b));
- else if(publicCatalogFilters.orden==='precio-desc')list.sort((a,b)=>effectivePrice(b)-effectivePrice(a));
- else if(publicCatalogFilters.orden==='nombre')list.sort((a,b)=>a.name.localeCompare(b.name,'es',{sensitivity:'base'}));
  document.querySelectorAll('#catalogQuickFilters [data-quick]').forEach(b=>b.classList.toggle('active',b.dataset.quick===publicQuickFilter));
- const total=list.length; const totalPages=Math.max(1,Math.ceil(total/PUBLIC_CATALOG_PAGE_SIZE)); if(publicCatalogPage>totalPages)publicCatalogPage=totalPages;
- const start=(publicCatalogPage-1)*PUBLIC_CATALOG_PAGE_SIZE; const pageItems=list.slice(start,start+PUBLIC_CATALOG_PAGE_SIZE);
+ const total=publicCatalogTotal,totalPages=Math.max(1,Math.ceil(total/PUBLIC_CATALOG_PAGE_SIZE));
  const count=document.getElementById('catalogCount');if(count)count.textContent=`${total} ${total===1?'figura':'figuras'}`;
  const grid=document.getElementById('catalogGrid');
- if(!products.length)grid.innerHTML='<div class="catalogEmpty"><b>Estamos preparando nuevas figuras ✨</b><span>Muy pronto encontrarás nuevas piezas para tu colección.</span></div>';
- else if(!list.length)grid.innerHTML='<div class="catalogEmpty"><b>No encontramos figuras con esos filtros.</b><span>Prueba con otra franquicia o limpia los filtros.</span><button type="button" data-clear-public-filters>Limpiar filtros</button></div>';
- else grid.innerHTML=pageItems.map(productCard).join('');
+ if(grid)grid.innerHTML=catalogProducts.length?catalogProducts.map(productCard).join(''):'<div class="catalogEmpty"><b>No encontramos figuras con esos filtros.</b><span>Prueba con otra búsqueda o limpia los filtros.</span><button type="button" data-clear-public-filters>Limpiar filtros</button></div>';
  renderCatalogPagination(totalPages);
 }
 function renderCatalogPagination(totalPages){
@@ -231,33 +233,35 @@ function renderCatalogPagination(totalPages){
  html+=`<button type="button" data-page="${current+1}" ${current===totalPages?'disabled':''}>Siguiente ›</button>`; nav.innerHTML=html;
 }
 function initPublicCatalogFilters(){
- const bind=(id,key)=>document.getElementById(id)?.addEventListener('input',e=>{publicCatalogPage=1;publicCatalogFilters[key]=e.target.value;if(key==='franquicia'){publicCatalogFilters.personaje='';const c=document.getElementById('filterCharacter');if(c)c.value=''}renderPublicProducts()});
+ let timer;const refresh=()=>{clearTimeout(timer);timer=setTimeout(loadCatalogPage,220)};
+ const bind=(id,key)=>document.getElementById(id)?.addEventListener('input',e=>{publicCatalogPage=1;publicCatalogFilters[key]=e.target.value;if(key==='franquicia'){publicCatalogFilters.personaje='';const c=document.getElementById('filterCharacter');if(c)c.value='';updateCharacterOptions()}refresh()});
  bind('catalogSearch','busqueda');bind('filterFranchise','franquicia');bind('filterCharacter','personaje');bind('filterManufacturer','fabricante');
- document.getElementById('catalogSort')?.addEventListener('change',e=>{publicCatalogPage=1;publicCatalogFilters.orden=e.target.value;renderPublicProducts()});
- document.querySelectorAll('#catalogQuickFilters [data-quick]').forEach(b=>b.addEventListener('click',()=>{publicCatalogPage=1;publicQuickFilter=b.dataset.quick;renderPublicProducts()}));
+ document.getElementById('catalogSort')?.addEventListener('change',e=>{publicCatalogPage=1;publicCatalogFilters.orden=e.target.value;loadCatalogPage()});
+ document.querySelectorAll('#catalogQuickFilters [data-quick]').forEach(b=>b.addEventListener('click',()=>{publicCatalogPage=1;publicQuickFilter=b.dataset.quick;loadCatalogPage()}));
  document.getElementById('clearCatalogFilters')?.addEventListener('click',clearPublicCatalogFilters);
  document.getElementById('viewAllOffers')?.addEventListener('click',()=>openFigureCollection('ofertas'));
  document.getElementById('viewAllFeatured')?.addEventListener('click',()=>openFigureCollection('destacadas'));
- document.getElementById('catalogPagination')?.addEventListener('click',e=>{const b=e.target.closest('[data-page]');if(!b||b.disabled)return;publicCatalogPage=Number(b.dataset.page);renderPublicProducts();document.getElementById('catalogo')?.scrollIntoView({behavior:'smooth',block:'start'})});
+ document.getElementById('catalogPagination')?.addEventListener('click',e=>{const b=e.target.closest('[data-page]');if(!b||b.disabled)return;publicCatalogPage=Number(b.dataset.page);loadCatalogPage();document.getElementById('catalogo')?.scrollIntoView({behavior:'smooth',block:'start'})});
 }
 function clearPublicCatalogFilters(){
- publicQuickFilter='todas';publicCatalogPage=1;publicCatalogFilters={busqueda:'',franquicia:'',personaje:'',fabricante:'',orden:'recientes'};
- [['catalogSearch',''],['filterFranchise',''],['filterCharacter',''],['filterManufacturer',''],['catalogSort','recientes']].forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.value=v});renderPublicProducts();
+ publicQuickFilter='todas';publicSearchQuery='';publicCatalogPage=1;publicCatalogFilters={busqueda:'',franquicia:'',personaje:'',fabricante:'',orden:'recientes'};
+ [['catalogSearch',''],['filterFranchise',''],['filterCharacter',''],['filterManufacturer',''],['catalogSort','recientes'],['publicSearchInput','']].forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.value=v});updateCharacterOptions();loadCatalogPage();
 }
 
-function openFigureCollection(kind){
- document.getElementById('figureCollectionView')?.remove();
- const isOffers=kind==='ofertas', source=products.filter(p=>isOffers?p.sale!=null:p.featured);
- const title=isOffers?'Todas las ofertas':'Figuras destacadas', kicker=isOffers?'🔥 PRECIOS ESPECIALES':'COLECCIÓN DESTACADA';
+async function openFigureCollection(kind){
+ document.getElementById('figureCollectionView')?.remove();const isOffers=kind==='ofertas';
  const view=document.createElement('section');view.className='detailView figureCollectionView';view.id='figureCollectionView';
- view.innerHTML=`<div class="detailTop"><button class="backBtn" type="button">‹ Volver a la tienda</button><button class="detailClose" type="button" aria-label="Cerrar">×</button></div><div class="additionalCatalogShell"><span class="kicker">${kicker}</span><h1>${title}</h1><p>${isOffers?'Explora todas las figuras que actualmente tienen precio especial.':'Explora todas las figuras seleccionadas como destacadas.'}</p><div class="additionalCatalogTools single"><input class="figureCollectionSearch" type="search" placeholder="Buscar nombre, SKU, personaje, anime o fabricante…"></div><div class="figureCollectionCount catalogCount"></div><div class="figureCollectionGrid grid"></div></div>`;
+ const title=isOffers?'Todas las ofertas':'Figuras destacadas',kicker=isOffers?'🔥 PRECIOS ESPECIALES':'COLECCIÓN DESTACADA';
+ view.innerHTML=`<div class="detailTop"><button class="backBtn" type="button">‹ Volver a la tienda</button><button class="detailClose" type="button" aria-label="Cerrar">×</button></div><div class="additionalCatalogShell"><span class="kicker">${kicker}</span><h1>${title}</h1><p>${isOffers?'Explora todas las figuras que actualmente tienen precio especial.':'Explora todas las figuras seleccionadas como destacadas.'}</p><div class="additionalCatalogTools single"><input class="figureCollectionSearch" type="search" placeholder="Buscar nombre, SKU, personaje, anime o fabricante…"></div><div class="figureCollectionCount catalogCount"></div><div class="figureCollectionGrid grid"><p class="catalogMessage">Cargando figuras…</p></div></div>`;
  document.body.appendChild(view);document.body.classList.add('detail-open');
- const render=()=>{const q=normalizeSearch(view.querySelector('.figureCollectionSearch').value);const list=source.filter(p=>!q||productMatchesSearch(p,q));view.querySelector('.figureCollectionCount').textContent=`${list.length} ${list.length===1?'figura':'figuras'}`;view.querySelector('.figureCollectionGrid').innerHTML=list.length?list.map(productCard).join(''):'<div class="catalogEmpty"><b>No encontramos figuras.</b><span>Prueba con otra búsqueda.</span></div>'};
- view.querySelector('.figureCollectionSearch').addEventListener('input',render);render();
- const close=()=>{view.remove();document.body.classList.remove('detail-open')};view.querySelectorAll('.backBtn,.detailClose').forEach(b=>b.addEventListener('click',close));
+ let q=supabaseClient.from('productos').select('*, producto_imagenes(*)').eq('activo',true).order('fecha_creacion',{ascending:false});q=isOffers?q.not('precio_oferta','is',null):q.eq('destacada',true);const {data,error}=await q;
+ const source=error?[]:(data||[]).map(mapProduct);if(error)console.error(error);source.forEach(p=>{if(!products.some(x=>x.id===p.id))products.push(p)});
+ const render=()=>{const qv=normalizeSearch(view.querySelector('.figureCollectionSearch').value);const list=source.filter(p=>!qv||productMatchesSearch(p,qv));view.querySelector('.figureCollectionCount').textContent=`${list.length} ${list.length===1?'figura':'figuras'}`;view.querySelector('.figureCollectionGrid').innerHTML=list.length?list.map(productCard).join(''):'<div class="catalogEmpty"><b>No encontramos figuras.</b><span>Prueba con otra búsqueda.</span></div>'};
+ view.querySelector('.figureCollectionSearch').addEventListener('input',render);render();const close=()=>{view.remove();document.body.classList.remove('detail-open')};view.querySelectorAll('.backBtn,.detailClose').forEach(b=>b.addEventListener('click',close));
 }
-function openDetail(sku,push=true){
- const p=products.find(x=>x.sku===sku); if(!p)return;
+async function ensureProductLoaded(sku){let p=products.find(x=>x.sku===sku)||catalogProducts.find(x=>x.sku===sku);if(p)return p;const {data,error}=await supabaseClient.from('productos').select('*, producto_imagenes(*)').eq('activo',true).eq('sku',sku).maybeSingle();if(error||!data){if(error)console.error(error);return null}p=mapProduct(data);products.push(p);return p}
+async function openDetail(sku,push=true){
+ const p=await ensureProductLoaded(sku); if(!p)return;
  document.getElementById('detailView')?.remove();
  const pct=p.sale?Math.round((1-p.sale/p.price)*100):null, action=productAction(p), wa=`https://wa.me/529994739090?text=${encodeURIComponent(action.msg)}`;
  const gallery=p.images.length?p.images.map(x=>x.url):(p.img?[p.img]:[]);
@@ -303,11 +307,11 @@ function openPublicSearch(){
 }
 function closePublicSearch(clear=true){
  headerSearch?.classList.remove('open');headerSearch?.setAttribute('aria-hidden','true');searchToggle?.setAttribute('aria-expanded','false');
- if(clear){publicSearchQuery='';if(publicSearchInput)publicSearchInput.value='';renderPublicProducts();}
+ if(clear){publicSearchQuery='';publicCatalogFilters.busqueda='';publicCatalogPage=1;if(publicSearchInput)publicSearchInput.value='';const cs=document.getElementById('catalogSearch');if(cs)cs.value='';loadCatalogPage();}
 }
 searchToggle?.addEventListener('click',()=>headerSearch?.classList.contains('open')?closePublicSearch(false):openPublicSearch());
 searchClose?.addEventListener('click',()=>closePublicSearch(true));
-publicSearchInput?.addEventListener('input',e=>{publicSearchQuery=e.target.value;publicCatalogPage=1;const cs=document.getElementById('catalogSearch');if(cs)cs.value=e.target.value;publicCatalogFilters.busqueda=e.target.value;renderPublicProducts();document.getElementById('catalogo')?.scrollIntoView({behavior:'smooth',block:'start'});});
+publicSearchInput?.addEventListener('input',e=>{publicSearchQuery=e.target.value;publicCatalogPage=1;const cs=document.getElementById('catalogSearch');if(cs)cs.value=e.target.value;publicCatalogFilters.busqueda=e.target.value;clearTimeout(window.__headerSearchTimer);window.__headerSearchTimer=setTimeout(loadCatalogPage,220);document.getElementById('catalogo')?.scrollIntoView({behavior:'smooth',block:'start'});});
 publicSearchInput?.addEventListener('keydown',e=>{if(e.key==='Escape')closePublicSearch(true)});
 
 loadSiteConfig();
