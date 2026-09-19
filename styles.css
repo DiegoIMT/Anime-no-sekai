@@ -398,3 +398,28 @@ header{position:sticky}
   .adminProductPrice{padding-top:62px}
   .adminBadges{gap:18px}
 }
+
+
+/* V7.8.3.1 — hotfix de composición móvil de tarjetas del administrador */
+.adminMobilePrice{display:none}
+@media(max-width:760px){
+  .adminProduct{padding:18px;gap:14px}
+  .adminProductIdentity{display:grid;grid-template-columns:96px minmax(0,1fr);gap:14px;align-items:start}
+  .adminProductThumb{width:96px;height:96px;border-radius:11px}
+  .adminProductCopy{grid-column:2;grid-row:1;min-width:0}
+  .adminProduct h3{font-size:15px;line-height:1.25;margin:4px 0 4px}
+  .adminProduct p{font-size:11.5px;line-height:1.3;margin-bottom:0}
+  .adminProduct>.adminProductPrice{display:none}
+  .adminMobilePrice{display:flex;align-items:baseline;gap:9px;margin-top:10px}
+  .adminMobilePrice strong{font-size:20px;line-height:1;color:#9d72ff}
+  .adminMobilePrice small{font-size:13px;color:#7f828b;text-decoration:line-through}
+  .adminBadges{grid-column:1/-1;display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:28px;padding:5px 0 2px;margin-top:0}
+  .adminRowActions{grid-column:1/-1;margin-top:2px}
+}
+@media(max-width:430px){
+  .adminProduct{padding:16px}
+  .adminProductIdentity{grid-template-columns:88px minmax(0,1fr);gap:12px}
+  .adminProductThumb{width:88px;height:88px}
+  .adminProduct h3{font-size:14.5px}
+  .adminBadges{gap:22px}
+}
