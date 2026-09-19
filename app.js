@@ -375,7 +375,7 @@ document.getElementById('viewAllAdditional')?.addEventListener('click',openAddit
 // =========================================================
 function adminMarkup(){
  return `<section class="adminView" id="adminView">
-  <div class="adminTop"><a class="brand adminBrand" href="#"><span class="brandIcon"><span class="mark brandMark">界</span><img class="brandLogo" id="adminLogo" alt="Logo Anime no Sekai" hidden></span><span class="brandText">ANIME NO <b>SEKAI</b><small>ADMINISTRACIÓN</small></span><span class="adminBadge">ADMIN</span></a><button id="adminExit" class="detailClose" type="button">×</button></div>
+  <div class="adminTop"><a class="brand adminBrand" href="#"><span class="brandIcon"><span class="mark brandMark">界</span><img class="brandLogo" id="adminLogo" alt="Logo Anime no Sekai" hidden></span><span class="brandText">ANIME NO <b>SEKAI</b><small>ADMINISTRACIÓN</small></span><span class="adminBadge">ADMIN</span></a><div class="adminTopActions"><button id="adminLogoutTop" class="adminTopLogout" type="button" hidden>Cerrar sesión</button><button id="adminExit" class="detailClose" type="button">×</button></div></div>
   <div class="adminShell"><div id="adminContent"><div class="adminLogin"><span class="kicker">ACCESO PRIVADO</span><h1>Panel administrativo</h1><p>Inicia sesión para administrar el catálogo de Anime no Sekai.</p><form id="loginForm"><label>Correo<input id="loginEmail" type="email" autocomplete="username" required></label><label>Contraseña<input id="loginPassword" type="password" autocomplete="current-password" required></label><button class="primary adminPrimary" type="submit">Iniciar sesión</button><p id="loginMessage" class="formMessage"></p></form></div></div></div>
  </section>`;
 }
@@ -385,6 +385,7 @@ async function openAdmin(){
  document.body.classList.add('detail-open');
  if(siteConfig) applySiteVisuals(siteConfig);
  document.getElementById('adminExit').addEventListener('click',closeAdmin);
+ document.getElementById('adminLogoutTop').addEventListener('click',async()=>{await supabaseClient.auth.signOut();closeAdmin()});
  document.getElementById('loginForm').addEventListener('submit',loginAdmin);
  const {data:{session}}=await supabaseClient.auth.getSession();
  if(session) await verifyAdminAndRender();
@@ -400,6 +401,7 @@ async function loginAdmin(e){
 async function verifyAdminAndRender(){
  const {data,isError,error}=await (async()=>{const r=await supabaseClient.rpc('es_administrador');return {data:r.data,isError:!!r.error,error:r.error}})();
  if(isError||data!==true){await supabaseClient.auth.signOut(); const m=document.getElementById('loginMessage');if(m){m.textContent='Esta cuenta no tiene permisos de administrador.';m.className='formMessage error'}return}
+ const topLogout=document.getElementById('adminLogoutTop');if(topLogout)topLogout.hidden=false;
  renderAdminPanel();
 }
 function renderAdminPanel(){

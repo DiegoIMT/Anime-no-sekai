@@ -246,3 +246,42 @@ header{position:sticky}
 @media(max-width:520px){
   .productForm>.formChecks{grid-template-columns:1fr}
 }
+
+/* V7.7.7.3 — hotfix responsive Admin + textos largos en detalle de figuras */
+.adminTopActions{display:flex;align-items:center;gap:10px}
+.adminTopLogout{min-height:40px;padding:0 14px;border:1px solid #343741;border-radius:10px;background:#15171c;color:#f7f7f8;font-weight:700;cursor:pointer}
+.adminTopLogout:hover{border-color:#8b5cf6;color:#fff}
+#adminPanelBody .adminHeaderActions{display:none}
+
+/* Un dato dinámico largo nunca debe ampliar la columna del detalle. */
+.detailInfo{min-width:0;max-width:100%}
+.detailInfo h1,.detailInfo>p,.detailMeta b{max-width:100%;overflow-wrap:anywhere;word-break:normal}
+.detailInfo .series{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.detailActions,.detailActions .whatsapp{min-width:0;max-width:100%}
+
+@media(max-width:760px){
+  .adminTop{height:72px;padding:0 16px}
+  .adminShell{padding:30px 16px 60px}
+  .adminHeader{margin-bottom:22px}
+  .adminHeader h1{font-size:34px}
+  .adminProduct{grid-template-columns:1fr;gap:14px;padding:18px}
+  .adminProductPrice{text-align:left}
+  .adminBadges{grid-template-columns:max-content 1fr;align-items:center;gap:8px}
+  .adminState{justify-self:start}
+  .adminVisibility{width:100%}
+  .adminRowActions{display:grid;grid-template-columns:1fr 1fr;gap:9px;justify-self:stretch;width:100%}
+  .adminRowActions button{width:100%;min-height:46px;padding:9px 10px}
+}
+@media(max-width:560px){
+  .adminBrand.logoOnly .brandIcon{max-width:185px}
+  .adminTopActions{gap:7px}
+  .adminTopLogout{min-height:40px;padding:0 11px;font-size:12px}
+  .adminTop .detailClose{flex:0 0 40px}
+  .adminNav{margin-bottom:24px}
+  .adminHeader h1{font-size:32px}
+  .adminHeader p{font-size:14px;margin-bottom:0}
+  .adminProductKinds{margin-bottom:22px}
+  .adminSubHeader{display:grid;gap:16px}
+  .adminSubHeader .primary{width:100%}
+  .detailInfo h1{overflow-wrap:anywhere}
+}
