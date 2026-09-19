@@ -305,3 +305,31 @@ header{position:sticky}
   .catalogSubHeader{align-items:stretch;flex-direction:column}
   .catalogNewButton{width:100%}
 }
+
+/* V7.8.1 — jerarquía visual semántica del administrador */
+.adminState.state-disponible{background:#123d29;color:#79efaa;border:1px solid #236443}
+.adminVisibility.is-visible{background:#271846;color:#c9b5ff;border:1px solid #6843a5}
+.adminVisibility.is-hidden{background:#2b2d33;color:#c5c7cd;border:1px solid #4b4e57}
+
+.adminRowActions .adminActionEdit{background:#281a46;border-color:#6843a5;color:#d4c4ff}
+.adminRowActions .adminActionDuplicate{background:#132d49;border-color:#285f91;color:#9ed2ff}
+.adminRowActions .adminActionHide{background:#3e2b0f;border-color:#7b571b;color:#ffd17b}
+.adminRowActions .adminActionShow{background:#123d29;border-color:#236443;color:#79efaa}
+.adminRowActions .adminActionDelete{background:#3b171d;border-color:#7c303b;color:#ff9ba9}
+.adminRowActions .adminActionEdit:hover{background:#35225d}.adminRowActions .adminActionDuplicate:hover{background:#193b60}.adminRowActions .adminActionHide:hover{background:#503714}.adminRowActions .adminActionShow:hover{background:#185037}.adminRowActions .adminActionDelete:hover{background:#502029}
+
+/* Estado comercial dentro de Crear/Editar. El color sigue el valor seleccionado. */
+.productForm .adminStatusSelect{font-weight:800;border-width:1px}
+.productForm .adminStatusSelect[data-status="disponible"]{background:#102d20;border-color:#236443;color:#79efaa}
+.productForm .adminStatusSelect[data-status="apartada"]{background:#34250e;border-color:#76551e;color:#ffd17b}
+.productForm .adminStatusSelect[data-status="vendida"]{background:#35171d;border-color:#73303a;color:#ff9ba9}
+.productForm .adminStatusSelect[data-status="proximamente"]{background:#122b43;border-color:#285f91;color:#9ed2ff}
+.productForm .adminStatusSelect[data-status="sobre_pedido"]{background:#271846;border-color:#6843a5;color:#c9b5ff}
+
+/* Los switches de publicación también se diferencian por función. */
+.productForm>.formChecks label:has(input[name="destacada"]),
+.productForm>.formChecks label:has(input[name="destacado"]){border-color:#55401e;background:#17130d}
+.productForm>.formChecks input[name="destacada"]:checked,
+.productForm>.formChecks input[name="destacado"]:checked{background:#b7791f;border-color:#e0a33b;box-shadow:0 0 0 2px rgba(224,163,59,.12)}
+.productForm>.formChecks label:has(input[name="activo"]){border-color:#4b356f;background:#121018}
+.productForm>.formChecks input[name="activo"]:checked{background:#6d3ce9;border-color:#8b5cf6;box-shadow:0 0 0 2px rgba(139,92,246,.12)}
