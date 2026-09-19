@@ -285,3 +285,23 @@ header{position:sticky}
   .adminSubHeader .primary{width:100%}
   .detailInfo h1{overflow-wrap:anywhere}
 }
+
+/* V7.8 — Catálogos administrables y consistencia visual */
+.catalogSubHeader{display:flex;align-items:center;justify-content:space-between;gap:18px}
+.catalogNewButton{border:0;border-radius:9px;padding:11px 16px;min-height:42px;cursor:pointer;white-space:nowrap}
+.adminSwitch{position:relative;display:inline-flex;align-items:center;flex:0 0 auto}
+.adminSwitch input{position:absolute;opacity:0;pointer-events:none}
+.adminSwitchTrack{width:46px;height:26px;border-radius:999px;background:#292c33;border:1px solid #424650;position:relative;transition:.18s ease;display:block}
+.adminSwitchTrack::after{content:"";position:absolute;width:18px;height:18px;left:3px;top:3px;border-radius:50%;background:#92959e;transition:.18s ease}
+.adminSwitch input:checked + .adminSwitchTrack{background:#6d3ee8;border-color:#8B5CF6;box-shadow:0 0 0 2px rgba(139,92,246,.12)}
+.adminSwitch input:checked + .adminSwitchTrack::after{transform:translateX(20px);background:#fff}
+.adminSwitch input:focus-visible + .adminSwitchTrack{outline:2px solid #a78bfa;outline-offset:2px}
+.catalogSwitchRow{display:flex!important;align-items:center;justify-content:space-between;gap:18px;margin-top:16px!important;padding:12px 0;border-top:1px solid #252830;cursor:pointer}
+.featuredFranchiseCheck{justify-content:flex-start}
+.featuredFranchiseCheck .adminSwitch{margin-right:2px}
+@media(max-width:760px){
+  .adminBadges{grid-template-columns:1fr 1fr!important;width:100%}
+  .adminState,.adminVisibility{width:100%!important;justify-self:stretch!important;min-height:48px;display:flex;align-items:center;justify-content:center}
+  .catalogSubHeader{align-items:stretch;flex-direction:column}
+  .catalogNewButton{width:100%}
+}
