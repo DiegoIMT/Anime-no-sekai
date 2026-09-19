@@ -625,7 +625,14 @@ async function loadAdminProducts(){
  const box=document.getElementById('adminProducts');
  const {data,error}=await supabaseClient.from('productos').select('*').order('fecha_creacion',{ascending:false});
  if(error){box.innerHTML=`<p class="formMessage error">No fue posible cargar los productos: ${escapeHtml(error.message)}</p>`;return}
- adminProductsCache=data||[]; renderAdminProducts(adminProductsCache);
+ adminProductsCache=data||[];
+ const ids=adminProductsCache.map(p=>p.id);
+ if(ids.length){
+  const {data:images}=await supabaseClient.from('producto_imagenes').select('producto_id,url,principal,orden').in('producto_id',ids).order('orden');
+  const byProduct={};(images||[]).forEach(img=>(byProduct[img.producto_id]??=[]).push(img));
+  adminProductsCache.forEach(p=>{const list=byProduct[p.id]||[];p.__adminImage=(list.find(x=>x.principal)||list[0])?.url||''});
+ }
+ renderAdminProducts(adminProductsCache);
 }
 function filterAdminProducts(q){q=q.toLowerCase().trim();renderAdminProducts(adminProductsCache.filter(p=>[p.nombre,p.sku,p.franquicia].some(v=>(v||'').toLowerCase().includes(q))))}
 function initAdminStatusSelect(select){
@@ -636,7 +643,7 @@ function initAdminStatusSelect(select){
 function renderAdminProducts(items){
  const box=document.getElementById('adminProducts');
  if(!items.length){box.innerHTML='<div class="adminEmpty"><b>Aún no hay figuras registradas.</b><span>Usa “Nueva figura” para crear el primer producto real.</span></div>';return}
- box.innerHTML=items.map(p=>`<article class="adminProduct"><div><span class="adminSku">${escapeHtml(p.sku)}</span><h3>${escapeHtml(p.nombre)}</h3><p>${escapeHtml(p.franquicia||'Sin franquicia')}</p></div><div class="adminProductPrice"><strong>${money(Number(p.precio_oferta??p.precio))}</strong>${p.precio_oferta!=null?`<small>${money(Number(p.precio))}</small>`:''}</div><div class="adminBadges"><span class="adminState state-${p.estado}">${escapeHtml(p.estado)}</span><span class="adminVisibility ${p.activo===false?'is-hidden':'is-visible'}">${p.activo===false?'Oculto':'Visible'}</span></div><div class="adminRowActions"><button type="button" class="adminActionEdit" data-edit="${p.id}">Editar</button><button type="button" class="adminActionDuplicate" data-duplicate="${p.id}">Duplicar</button><button type="button" class="${p.activo===false?'adminActionShow':'adminActionHide'}" data-toggle-visible="${p.id}">${p.activo===false?'Mostrar':'Ocultar'}</button><button type="button" class="danger adminActionDelete" data-delete="${p.id}">Eliminar</button></div></article>`).join('');
+ box.innerHTML=items.map(p=>`<article class="adminProduct"><div class="adminProductIdentity"><div class="adminProductThumb">${p.__adminImage?`<img src="${attr(p.__adminImage)}" alt="">`:'<span>界</span>'}</div><div class="adminProductCopy"><span class="adminSku">${escapeHtml(p.sku)}</span><h3>${escapeHtml(p.nombre)}</h3><p>${escapeHtml(p.franquicia||'Sin franquicia')}</p></div></div><div class="adminProductPrice"><strong>${money(Number(p.precio_oferta??p.precio))}</strong>${p.precio_oferta!=null?`<small>${money(Number(p.precio))}</small>`:''}</div><div class="adminBadges"><span class="adminState state-${p.estado}"><i></i>${escapeHtml(p.estado)}</span><span class="adminVisibility ${p.activo===false?'is-hidden':'is-visible'}"><i>${p.activo===false?'○':'◉'}</i>${p.activo===false?'Oculto':'Visible'}</span></div><div class="adminRowActions"><button type="button" class="adminActionEdit" data-edit="${p.id}">Editar</button><button type="button" class="adminActionDuplicate" data-duplicate="${p.id}">Duplicar</button><button type="button" class="${p.activo===false?'adminActionShow':'adminActionHide'}" data-toggle-visible="${p.id}">${p.activo===false?'Mostrar':'Ocultar'}</button><button type="button" class="danger adminActionDelete" data-delete="${p.id}">Eliminar</button></div></article>`).join('');
  box.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>openProductForm(adminProductsCache.find(p=>p.id===b.dataset.edit)));
  box.querySelectorAll('[data-duplicate]').forEach(b=>b.onclick=()=>openProductForm(adminProductsCache.find(p=>p.id===b.dataset.duplicate),true));
  box.querySelectorAll('[data-toggle-visible]').forEach(b=>b.onclick=()=>toggleProductVisibility(b.dataset.toggleVisible));
@@ -849,13 +856,20 @@ async function loadAdminAdditionalProducts(){
  const box=document.getElementById('adminAdditionalProducts');if(!box)return;
  const {data,error}=await supabaseClient.from('productos_adicionales').select('*, tipos_producto(nombre), franquicias(nombre), personajes(nombre)').order('fecha_creacion',{ascending:false});
  if(error){box.innerHTML=`<p class="formMessage error">No fue posible cargar los productos adicionales: ${escapeHtml(error.message)}</p>`;return}
- adminAdditionalProductsCache=data||[];renderAdminAdditionalProducts(adminAdditionalProductsCache);
+ adminAdditionalProductsCache=data||[];
+ const ids=adminAdditionalProductsCache.map(p=>p.id);
+ if(ids.length){
+  const {data:images}=await supabaseClient.from('producto_adicional_imagenes').select('producto_id,url,principal,orden').in('producto_id',ids).order('orden');
+  const byProduct={};(images||[]).forEach(img=>(byProduct[img.producto_id]??=[]).push(img));
+  adminAdditionalProductsCache.forEach(p=>{const list=byProduct[p.id]||[];p.__adminImage=(list.find(x=>x.principal)||list[0])?.url||''});
+ }
+ renderAdminAdditionalProducts(adminAdditionalProductsCache);
 }
 function filterAdminAdditionalProducts(q){q=(q||'').toLowerCase().trim();renderAdminAdditionalProducts(adminAdditionalProductsCache.filter(p=>[p.nombre,p.sku,p.tipos_producto?.nombre,p.franquicias?.nombre,p.personajes?.nombre].some(v=>(v||'').toLowerCase().includes(q))))}
 function renderAdminAdditionalProducts(items){
  const box=document.getElementById('adminAdditionalProducts');if(!box)return;
  if(!items.length){box.innerHTML='<div class="adminEmpty"><b>Aún no hay productos adicionales.</b><span>Usa “Nuevo producto” para registrar el primero de “Más para tu colección”.</span></div>';return}
- box.innerHTML=items.map(p=>`<article class="adminProduct"><div><span class="adminSku">${escapeHtml(p.sku)}</span><h3>${escapeHtml(p.nombre)}</h3><p>${escapeHtml(p.tipos_producto?.nombre||'Sin tipo')} · ${escapeHtml(p.franquicias?.nombre||'Sin franquicia')}</p></div><div class="adminProductPrice"><strong>${money(Number(p.precio_oferta??p.precio))}</strong>${p.precio_oferta!=null?`<small>${money(Number(p.precio))}</small>`:''}</div><div class="adminBadges"><span class="adminState state-${p.estado}">${escapeHtml(p.estado.replace('_',' '))}</span><span class="adminVisibility ${p.activo===false?'is-hidden':'is-visible'}">${p.activo===false?'Oculto':'Visible'}</span></div><div class="adminRowActions"><button type="button" class="adminActionEdit" data-additional-edit="${p.id}">Editar</button><button type="button" class="adminActionDuplicate" data-additional-duplicate="${p.id}">Duplicar</button><button type="button" class="${p.activo===false?'adminActionShow':'adminActionHide'}" data-additional-toggle-visible="${p.id}">${p.activo===false?'Mostrar':'Ocultar'}</button><button type="button" class="danger adminActionDelete" data-additional-delete="${p.id}">Eliminar</button></div></article>`).join('');
+ box.innerHTML=items.map(p=>`<article class="adminProduct"><div class="adminProductIdentity"><div class="adminProductThumb">${p.__adminImage?`<img src="${attr(p.__adminImage)}" alt="">`:'<span>界</span>'}</div><div class="adminProductCopy"><span class="adminSku">${escapeHtml(p.sku)}</span><h3>${escapeHtml(p.nombre)}</h3><p>${escapeHtml(p.tipos_producto?.nombre||'Sin tipo')} · ${escapeHtml(p.franquicias?.nombre||'Sin franquicia')}</p></div></div><div class="adminProductPrice"><strong>${money(Number(p.precio_oferta??p.precio))}</strong>${p.precio_oferta!=null?`<small>${money(Number(p.precio))}</small>`:''}</div><div class="adminBadges"><span class="adminState state-${p.estado}"><i></i>${escapeHtml(p.estado.replace('_',' '))}</span><span class="adminVisibility ${p.activo===false?'is-hidden':'is-visible'}"><i>${p.activo===false?'○':'◉'}</i>${p.activo===false?'Oculto':'Visible'}</span></div><div class="adminRowActions"><button type="button" class="adminActionEdit" data-additional-edit="${p.id}">Editar</button><button type="button" class="adminActionDuplicate" data-additional-duplicate="${p.id}">Duplicar</button><button type="button" class="${p.activo===false?'adminActionShow':'adminActionHide'}" data-additional-toggle-visible="${p.id}">${p.activo===false?'Mostrar':'Ocultar'}</button><button type="button" class="danger adminActionDelete" data-additional-delete="${p.id}">Eliminar</button></div></article>`).join('');
  box.querySelectorAll('[data-additional-edit]').forEach(b=>b.onclick=()=>openAdditionalProductForm(adminAdditionalProductsCache.find(p=>p.id===b.dataset.additionalEdit)));
  box.querySelectorAll('[data-additional-duplicate]').forEach(b=>b.onclick=()=>openAdditionalProductForm(adminAdditionalProductsCache.find(p=>p.id===b.dataset.additionalDuplicate),true));
  box.querySelectorAll('[data-additional-toggle-visible]').forEach(b=>b.onclick=()=>toggleAdditionalProductVisibility(b.dataset.additionalToggleVisible));

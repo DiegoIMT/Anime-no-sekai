@@ -333,3 +333,35 @@ header{position:sticky}
 .productForm>.formChecks input[name="destacado"]:checked{background:#b7791f;border-color:#e0a33b;box-shadow:0 0 0 2px rgba(224,163,59,.12)}
 .productForm>.formChecks label:has(input[name="activo"]){border-color:#4b356f;background:#121018}
 .productForm>.formChecks input[name="activo"]:checked{background:#6d3ce9;border-color:#8b5cf6;box-shadow:0 0 0 2px rgba(139,92,246,.12)}
+
+/* V7.8.2 — identidad visual de productos + estados informativos + switches globales */
+.adminProduct{grid-template-columns:minmax(300px,1fr) 120px 125px auto}
+.adminProductIdentity{display:flex;align-items:center;gap:14px;min-width:0}
+.adminProductThumb{width:68px;height:68px;flex:0 0 68px;border:1px solid #30333b;border-radius:10px;overflow:hidden;background:#0b0c0f;display:grid;place-items:center;color:#6d3ce9;font:600 22px Oswald,sans-serif}
+.adminProductThumb img{width:100%;height:100%;object-fit:cover;display:block}
+.adminProductCopy{min-width:0}.adminProductCopy h3{overflow-wrap:anywhere}
+/* Los estados son información, no controles: sin caja, borde ni fondo de botón. */
+.adminBadges{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+.adminState,.adminVisibility{display:inline-flex;align-items:center;gap:7px;padding:0!important;border:0!important;background:transparent!important;border-radius:0!important;text-align:left;white-space:nowrap;font-size:10px;font-weight:800;text-transform:uppercase}
+.adminState i{width:8px;height:8px;border-radius:50%;background:#63e69a;box-shadow:0 0 0 3px rgba(99,230,154,.10)}
+.adminVisibility i{width:17px;height:17px;display:grid;place-items:center;border-radius:50%;font-style:normal;font-size:10px}
+.adminVisibility.is-visible{color:#b99cff}.adminVisibility.is-visible i{background:#2b1b45;color:#b99cff}
+.adminVisibility.is-hidden{color:#92959e}.adminVisibility.is-hidden i{background:#26282e;color:#a5a8b0}
+.adminState.state-apartada{color:#ffc767}.adminState.state-apartada i{background:#ffc767;box-shadow:0 0 0 3px rgba(255,199,103,.10)}
+.adminState.state-vendida{color:#ff7b86}.adminState.state-vendida i{background:#ff6674;box-shadow:0 0 0 3px rgba(255,102,116,.10)}
+.adminState.state-proximamente{color:#79bdff}.adminState.state-proximamente i{background:#63adf7;box-shadow:0 0 0 3px rgba(99,173,247,.10)}
+.adminState.state-sobre_pedido{color:#c4a7ff}.adminState.state-sobre_pedido i{background:#a47cff;box-shadow:0 0 0 3px rgba(164,124,255,.10)}
+/* Opciones booleanas del formulario: todos los checkbox funcionales se presentan como switch. */
+.productForm .inlineChecks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:18px}
+.productForm .inlineChecks label{display:flex;align-items:center;gap:12px;min-height:62px;padding:12px 14px;border:1px solid #30333b;border-radius:11px;background:#0d0f13;color:#e3e4e7;cursor:pointer}
+.productForm .inlineChecks input[type="checkbox"]{appearance:none;-webkit-appearance:none;position:relative;width:46px;height:25px;min-height:25px;flex:0 0 46px;margin:0;padding:0;border:1px solid #444852;border-radius:999px;background:#24272e;cursor:pointer;transition:.18s ease}
+.productForm .inlineChecks input[type="checkbox"]::after{content:"";position:absolute;width:19px;height:19px;left:2px;top:2px;border-radius:50%;background:#8d9098;transition:.18s ease}
+.productForm .inlineChecks input[type="checkbox"]:checked{background:#6d3ce9;border-color:#8b5cf6;box-shadow:0 0 0 2px rgba(139,92,246,.12)}
+.productForm .inlineChecks input[type="checkbox"]:checked::after{transform:translateX(21px);background:#fff}
+@media(max-width:760px){
+ .adminProduct{grid-template-columns:1fr;gap:14px}
+ .adminProductIdentity{align-items:flex-start}.adminProductThumb{width:76px;height:76px;flex-basis:76px}
+ .adminBadges{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;padding:2px 0}
+ .adminProductPrice{text-align:left}
+ .productForm .inlineChecks{grid-template-columns:1fr}
+}
