@@ -10,6 +10,7 @@ let additionalProducts = [];
 let siteConfig = null;
 let siteLogoFile = null;
 let franchiseLogoFiles = new Map();
+let siteFranchises = [];
 let siteHeroFile = null;
 let siteHeroMobileFile = null;
 let publicFranchiseFilter = 'Todas';
@@ -424,7 +425,7 @@ async function showSiteContentForm(){
  body.innerHTML='<p class="adminLoading">Cargando contenido del sitio…</p>';
  const [{data,error},franchiseResult]=await Promise.all([supabaseClient.from('configuracion_sitio').select('*').eq('id',1).single(),supabaseClient.from('franquicias').select('id,nombre,destacada,logo_url').eq('activo',true).order('nombre')]);
  if(error){body.innerHTML=`<p class="formMessage error">No fue posible cargar la configuración: ${escapeHtml(error.message)}</p>`;return}
- const siteFranchises=franchiseResult.error?[]:(franchiseResult.data||[]);
+ siteFranchises=franchiseResult.error?[]:(franchiseResult.data||[]);
  body.innerHTML=`<div class="adminHeader"><div><span class="kicker">ANIME NO SEKAI</span><h1>Contenido del sitio</h1><p>Edita únicamente los textos comerciales principales del catálogo.</p></div><div class="adminHeaderActions"><button id="logoutAdmin" class="secondary" type="button">Cerrar sesión</button></div></div>
  <form id="siteContentForm" class="productForm siteContentForm">
  <section class="formSection"><div class="formSectionTitle"><span>01</span><div><h2>Portada</h2><p>Mensaje principal que recibe el visitante.</p></div></div><div class="formGrid"><label>Etiqueta<input name="portada_etiqueta" maxlength="100" required value="${attr(data.portada_etiqueta)}"></label><label class="full">Título<input name="portada_titulo" maxlength="200" required value="${attr(data.portada_titulo)}"></label><label class="full">Descripción<textarea name="portada_descripcion" maxlength="500" rows="4" required>${escapeHtml(data.portada_descripcion)}</textarea></label></div></section>
@@ -518,7 +519,7 @@ async function saveSiteContent(e){
   if(siteHeroMobileFile?.file){msg.textContent='Procesando portada móvil…';const x=await uploadSiteAsset('hero-mobile',siteHeroMobileFile.file);uploaded.push(x.path);obj.portada_movil_url=x.url}else if(siteHeroMobileFile?.remove)obj.portada_movil_url=null;
   const {data,error}=await supabaseClient.from('configuracion_sitio').update(obj).eq('id',1).select().single();if(error)throw error;
   const obsolete=[];if(Object.prototype.hasOwnProperty.call(obj,'logo_url')&&oldLogo&&oldLogo!==data.logo_url){const x=siteStoragePathFromPublicUrl(oldLogo);if(x)obsolete.push(x)}if(Object.prototype.hasOwnProperty.call(obj,'portada_url')&&oldHero&&oldHero!==data.portada_url){const x=siteStoragePathFromPublicUrl(oldHero);if(x)obsolete.push(x)}if(Object.prototype.hasOwnProperty.call(obj,'portada_movil_url')&&oldHeroMobile&&oldHeroMobile!==data.portada_movil_url){const x=siteStoragePathFromPublicUrl(oldHeroMobile);if(x)obsolete.push(x)}if(obsolete.length)await supabaseClient.storage.from('sitio').remove(obsolete);
-  if(siteLogoFile?.preview)URL.revokeObjectURL(siteLogoFile.preview);if(siteHeroFile?.preview)URL.revokeObjectURL(siteHeroFile.preview);if(siteHeroMobileFile?.preview)URL.revokeObjectURL(siteHeroMobileFile.preview);franchiseLogoFiles.forEach(x=>{if(x?.preview)URL.revokeObjectURL(x.preview)});siteLogoFile=null;siteHeroFile=null;siteHeroMobileFile=null;franchiseLogoFiles=new Map();siteConfig=data;applySiteConfig(data);await loadFeaturedFranchises();msg.textContent='Contenido e identidad visual actualizados correctamente.';msg.className='formMessage success';setTimeout(()=>renderAdminContentPanel(),700);
+  if(siteLogoFile?.preview)URL.revokeObjectURL(siteLogoFile.preview);if(siteHeroFile?.preview)URL.revokeObjectURL(siteHeroFile.preview);if(siteHeroMobileFile?.preview)URL.revokeObjectURL(siteHeroMobileFile.preview);franchiseLogoFiles.forEach(x=>{if(x?.preview)URL.revokeObjectURL(x.preview)});siteLogoFile=null;siteHeroFile=null;siteHeroMobileFile=null;franchiseLogoFiles=new Map();siteConfig=data;applySiteConfig(data);await loadFeaturedFranchises();msg.textContent='Contenido e identidad visual actualizados correctamente.';msg.className='formMessage success';setTimeout(()=>showSiteContentForm(),700);
  }catch(error){if(uploaded.length)await supabaseClient.storage.from('sitio').remove(uploaded);msg.textContent='No se pudo guardar: '+(error?.message||'Error inesperado.');msg.className='formMessage error'}finally{button.disabled=false}
 }
 
