@@ -16,7 +16,13 @@ let publicSearchQuery = '';
 let publicQuickFilter = 'todas';
 let publicCatalogFilters = {busqueda:'', franquicia:'', personaje:'', fabricante:'', orden:'recientes'};
 let publicCatalogPage = 1;
-const PUBLIC_CATALOG_PAGE_SIZE = 24; 
+const PUBLIC_CATALOG_PAGE_SIZE = 24;
+const PUBLIC_ADDITIONAL_PAGE_SIZE = 24;
+let publicAdditionalPage = 1;
+let publicAdditionalTotal = 0;
+let publicAdditionalRequestId = 0;
+let publicAdditionalFilters = {busqueda:'', tipo:''};
+let publicAdditionalTypes = []; 
 const money = n => new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0}).format(n);
 const icon = (name) => ({search:'⌕',menu:'☰',arrow:'›',fire:'🔥',truck:'✈',shield:'✓',chat:'◉',sparkle:'✦'})[name] || '';
 const statusLabel = s => ({disponible:'Disponible',apartada:'Apartada',vendida:'Vendida',proximamente:'Próximamente'})[s] || s || '';
@@ -173,29 +179,50 @@ async function loadCatalogPage(){
  renderPublicProducts();
 }
 async function loadPublicAdditionalCatalog(){
- const {data,error}=await supabaseClient.from('productos_adicionales').select('*, tipos_producto(nombre), franquicias(nombre), personajes(nombre), producto_adicional_imagenes(*)').eq('activo',true).order('destacado',{ascending:false}).order('fecha_creacion',{ascending:false});
+ const {data,error}=await supabaseClient.from('productos_adicionales').select('*, tipos_producto(nombre), franquicias(nombre), personajes(nombre), producto_adicional_imagenes(*)').eq('activo',true).order('destacado',{ascending:false}).order('fecha_creacion',{ascending:false}).limit(4);
  const grid=document.getElementById('additionalGrid'), section=document.getElementById('mas-coleccion');
  if(error){if(grid)grid.innerHTML='<p class="catalogMessage error">No fue posible cargar Más para tu colección.</p>';console.error(error);return}
  additionalProducts=(data||[]).map(mapAdditionalProduct);
  if(section)section.hidden=!additionalProducts.length;
- if(grid&&additionalProducts.length)grid.innerHTML=additionalProducts.slice(0,4).map(additionalProductCard).join('');
+ if(grid)grid.innerHTML=additionalProducts.length?additionalProducts.map(additionalProductCard).join(''):'<p class="catalogMessage">Próximamente tendremos más productos para tu colección.</p>';
  const skuFromHash=location.hash.startsWith('#producto=')?decodeURIComponent(location.hash.slice(10)):null;
  if(skuFromHash)openAdditionalDetail(skuFromHash,false);
 }
-function openAdditionalCatalog(){
- document.getElementById('additionalCatalogView')?.remove();
- const view=document.createElement('section');view.className='detailView additionalCatalogView';view.id='additionalCatalogView';
- const types=uniqueSorted(additionalProducts.map(p=>p.type));
- view.innerHTML=`<div class="detailTop"><button class="backBtn" type="button">‹ Volver a la tienda</button><button class="detailClose" type="button" aria-label="Cerrar">×</button></div><div class="additionalCatalogShell"><span class="kicker">MÁS PARA TU COLECCIÓN</span><h1>Más para tu colección</h1><p>Explora amigurumis, peluches, llaveros, tazas y otros complementos.</p><div class="additionalCatalogTools"><input id="additionalPublicSearch" type="search" placeholder="Buscar producto, SKU, franquicia o personaje…"><select id="additionalTypeFilter"><option value="">Todos los tipos</option>${types.map(x=>`<option value="${attr(x)}">${escapeHtml(x)}</option>`).join('')}</select></div><div id="additionalCatalogCount" class="catalogCount"></div><div id="additionalCatalogGrid" class="grid"></div></div>`;
- document.body.appendChild(view);document.body.classList.add('detail-open');
- const render=()=>{const q=normalizeSearch(view.querySelector('#additionalPublicSearch').value),type=normalizeSearch(view.querySelector('#additionalTypeFilter').value);const list=additionalProducts.filter(p=>(!type||normalizeSearch(p.type)===type)&&(!q||productMatchesSearch({...p,manufacturer:p.type},q)));view.querySelector('#additionalCatalogCount').textContent=`${list.length} ${list.length===1?'producto':'productos'}`;view.querySelector('#additionalCatalogGrid').innerHTML=list.length?list.map(additionalProductCard).join(''):'<div class="catalogEmpty"><b>No encontramos productos.</b><span>Prueba con otra búsqueda o tipo.</span></div>'};
- view.querySelector('#additionalPublicSearch').addEventListener('input',render);view.querySelector('#additionalTypeFilter').addEventListener('change',render);render();
- const close=()=>{view.remove();document.body.classList.remove('detail-open');if(location.hash==='#mas-para-tu-coleccion')history.replaceState({},'',location.pathname+location.search+'#mas-coleccion')};
- view.querySelectorAll('.backBtn,.detailClose').forEach(b=>b.addEventListener('click',close));
- history.pushState({additionalCatalog:true},'','#mas-para-tu-coleccion');
+async function loadAdditionalTypes(){
+ if(publicAdditionalTypes.length)return publicAdditionalTypes;
+ const {data,error}=await supabaseClient.from('tipos_producto').select('id,nombre').eq('activo',true).order('nombre');
+ if(!error)publicAdditionalTypes=data||[];return publicAdditionalTypes;
 }
-function openAdditionalDetail(sku,push=true){
- const p=additionalProducts.find(x=>x.sku===sku);if(!p)return;
+async function loadAdditionalCatalogPage(){
+ const view=document.getElementById('additionalCatalogView');if(!view)return;
+ const requestId=++publicAdditionalRequestId,grid=view.querySelector('#additionalCatalogGrid');if(grid)grid.innerHTML='<p class="catalogMessage">Cargando productos…</p>';
+ let q=supabaseClient.from('productos_adicionales').select('*, tipos_producto(nombre), franquicias(nombre), personajes(nombre), producto_adicional_imagenes(*)',{count:'exact'}).eq('activo',true);
+ const search=safeIlikeTerm(publicAdditionalFilters.busqueda);if(search){const pattern=`%${search}%`;q=q.or(`nombre.ilike.${pattern},sku.ilike.${pattern},descripcion.ilike.${pattern}`)}
+ if(publicAdditionalFilters.tipo)q=q.eq('tipo_producto_id',publicAdditionalFilters.tipo);
+ q=q.order('destacado',{ascending:false}).order('fecha_creacion',{ascending:false});
+ const from=(publicAdditionalPage-1)*PUBLIC_ADDITIONAL_PAGE_SIZE,to=from+PUBLIC_ADDITIONAL_PAGE_SIZE-1;const {data,error,count}=await q.range(from,to);if(requestId!==publicAdditionalRequestId||!document.getElementById('additionalCatalogView'))return;
+ if(error){grid.innerHTML='<p class="catalogMessage error">No fue posible cargar los productos.</p>';console.error(error);return}
+ const pageProducts=(data||[]).map(mapAdditionalProduct);publicAdditionalTotal=count||0;additionalProducts=[...additionalProducts.filter(x=>!pageProducts.some(y=>y.id===x.id)),...pageProducts];
+ const totalPages=Math.max(1,Math.ceil(publicAdditionalTotal/PUBLIC_ADDITIONAL_PAGE_SIZE));if(publicAdditionalPage>totalPages){publicAdditionalPage=totalPages;return loadAdditionalCatalogPage()}
+ view.querySelector('#additionalCatalogCount').textContent=`${publicAdditionalTotal} ${publicAdditionalTotal===1?'producto':'productos'}`;
+ grid.innerHTML=pageProducts.length?pageProducts.map(additionalProductCard).join(''):'<div class="catalogEmpty"><b>No encontramos productos.</b><span>Prueba con otra búsqueda o tipo.</span></div>';
+ renderAdditionalPagination(totalPages);
+}
+function renderAdditionalPagination(totalPages){
+ const nav=document.querySelector('#additionalCatalogView #additionalCatalogPagination');if(!nav)return;if(totalPages<=1){nav.innerHTML='';return}
+ const current=publicAdditionalPage,pages=[];const add=n=>{if(n>=1&&n<=totalPages&&!pages.includes(n))pages.push(n)};add(1);for(let n=current-2;n<=current+2;n++)add(n);add(totalPages);pages.sort((a,b)=>a-b);
+ let last=0,html=`<button type="button" data-additional-page="${current-1}" ${current===1?'disabled':''}>‹</button>`;for(const n of pages){if(last&&n-last>1)html+='<span>…</span>';html+=`<button type="button" data-additional-page="${n}" class="${n===current?'active':''}">${n}</button>`;last=n}html+=`<button type="button" data-additional-page="${current+1}" ${current===totalPages?'disabled':''}>›</button>`;nav.innerHTML=html;
+}
+async function openAdditionalCatalog(){
+ document.getElementById('additionalCatalogView')?.remove();publicAdditionalPage=1;publicAdditionalFilters={busqueda:'',tipo:''};const types=await loadAdditionalTypes();
+ const view=document.createElement('section');view.className='detailView additionalCatalogView';view.id='additionalCatalogView';
+ view.innerHTML=`<div class="detailTop"><button class="backBtn" type="button">‹ Volver a la tienda</button><button class="detailClose" type="button" aria-label="Cerrar">×</button></div><div class="additionalCatalogShell"><span class="kicker">MÁS PARA TU COLECCIÓN</span><h1>Más para tu colección</h1><p>Explora amigurumis, peluches, llaveros, tazas y otros complementos.</p><div class="additionalCatalogTools"><input id="additionalPublicSearch" type="search" autocomplete="off" placeholder="Buscar producto, SKU o descripción…"><select id="additionalTypeFilter"><option value="">Todos los tipos</option>${types.map(x=>`<option value="${attr(x.id)}">${escapeHtml(x.nombre)}</option>`).join('')}</select></div><div id="additionalCatalogCount" class="catalogCount"></div><div id="additionalCatalogGrid" class="grid"></div><nav id="additionalCatalogPagination" class="catalogPagination" aria-label="Paginación de Más para tu colección"></nav></div>`;
+ document.body.appendChild(view);document.body.classList.add('detail-open');
+ let timer;view.querySelector('#additionalPublicSearch').addEventListener('input',e=>{publicAdditionalPage=1;publicAdditionalFilters.busqueda=e.target.value;clearTimeout(timer);timer=setTimeout(loadAdditionalCatalogPage,220)});view.querySelector('#additionalTypeFilter').addEventListener('change',e=>{publicAdditionalPage=1;publicAdditionalFilters.tipo=e.target.value;loadAdditionalCatalogPage()});view.querySelector('#additionalCatalogPagination').addEventListener('click',e=>{const b=e.target.closest('[data-additional-page]');if(!b||b.disabled)return;publicAdditionalPage=Number(b.dataset.additionalPage);loadAdditionalCatalogPage();view.querySelector('.additionalCatalogShell')?.scrollIntoView({behavior:'smooth',block:'start'})});
+ const close=()=>{view.remove();document.body.classList.remove('detail-open');if(location.hash==='#mas-para-tu-coleccion')history.replaceState({},'',location.pathname+location.search+'#mas-coleccion')};view.querySelectorAll('.backBtn,.detailClose').forEach(b=>b.addEventListener('click',close));history.pushState({additionalCatalog:true},'','#mas-para-tu-coleccion');loadAdditionalCatalogPage();
+}
+async function openAdditionalDetail(sku,push=true){
+ let p=additionalProducts.find(x=>x.sku===sku);if(!p){const {data,error}=await supabaseClient.from('productos_adicionales').select('*, tipos_producto(nombre), franquicias(nombre), personajes(nombre), producto_adicional_imagenes(*)').eq('activo',true).eq('sku',sku).maybeSingle();if(error||!data)return;p=mapAdditionalProduct(data);additionalProducts.push(p)}
  document.getElementById('detailView')?.remove();
  const pct=p.sale?Math.round((1-p.sale/p.price)*100):null,action=additionalProductAction(p),wa=`https://wa.me/529994739090?text=${encodeURIComponent(action.msg)}`;
  const gallery=p.images.length?p.images.map(x=>x.url):(p.img?[p.img]:[]),principal=p.images.find(x=>x.principal)?.url||p.img||gallery[0]||'';let currentIndex=Math.max(0,gallery.indexOf(principal)),main=gallery[currentIndex]||'';
