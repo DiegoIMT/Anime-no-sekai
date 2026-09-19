@@ -9,6 +9,7 @@ let publicCatalogRequestId = 0;
 let additionalProducts = [];
 let siteConfig = null;
 let siteLogoFile = null;
+let franchiseLogoFiles = new Map();
 let siteHeroFile = null;
 let siteHeroMobileFile = null;
 let publicFranchiseFilter = 'Todas';
@@ -133,10 +134,10 @@ function applySiteVisuals(c){
 
 async function loadFeaturedFranchises(){
  const section=document.getElementById('universos'),box=document.getElementById('featuredFranchises');if(!section||!box)return;
- const {data,error}=await supabaseClient.from('franquicias').select('id,nombre').eq('activo',true).eq('destacada',true).order('nombre').limit(8);
+ const {data,error}=await supabaseClient.from('franquicias').select('id,nombre,logo_url').eq('activo',true).eq('destacada',true).order('nombre').limit(8);
  if(error){console.error(error);section.hidden=true;return}
  const rows=data||[];section.hidden=!rows.length;if(!rows.length)return;
- box.innerHTML=rows.map(x=>`<button class="universeCard" type="button" data-universe="${attr(x.nombre)}"><span class="universeMark">界</span><span><small>FRANQUICIA</small><b>${escapeHtml(x.nombre)}</b></span><span class="universeArrow">${icon('arrow')}</span></button>`).join('');
+ box.innerHTML=rows.map(x=>`<button class="universeCard" type="button" data-universe="${attr(x.nombre)}"><span class="universeLogo">${x.logo_url?`<img src="${attr(x.logo_url)}" alt="Logo de ${attr(x.nombre)}">`:'<span class="universeMark">界</span>'}</span><b>${escapeHtml(x.nombre)}</b></button>`).join('');
  box.querySelectorAll('[data-universe]').forEach(b=>b.onclick=()=>{const name=b.dataset.universe;publicCatalogPage=1;publicQuickFilter='todas';publicCatalogFilters.franquicia=name;publicCatalogFilters.personaje='';const f=document.getElementById('filterFranchise'),c=document.getElementById('filterCharacter');if(f)f.value=name;if(c)c.value='';document.querySelectorAll('#catalogQuickFilters button').forEach(x=>x.classList.toggle('active',x.dataset.quick==='todas'));updateCharacterOptions();loadCatalogPage();document.getElementById('catalogo')?.scrollIntoView({behavior:'smooth',block:'start'});});
 }
 
@@ -421,7 +422,7 @@ async function showSiteContentForm(){
  setAdminTab('adminContentTab');
  const body=document.getElementById('adminPanelBody');
  body.innerHTML='<p class="adminLoading">Cargando contenido del sitio…</p>';
- const [{data,error},franchiseResult]=await Promise.all([supabaseClient.from('configuracion_sitio').select('*').eq('id',1).single(),supabaseClient.from('franquicias').select('id,nombre,destacada').eq('activo',true).order('nombre')]);
+ const [{data,error},franchiseResult]=await Promise.all([supabaseClient.from('configuracion_sitio').select('*').eq('id',1).single(),supabaseClient.from('franquicias').select('id,nombre,destacada,logo_url').eq('activo',true).order('nombre')]);
  if(error){body.innerHTML=`<p class="formMessage error">No fue posible cargar la configuración: ${escapeHtml(error.message)}</p>`;return}
  const siteFranchises=franchiseResult.error?[]:(franchiseResult.data||[]);
  body.innerHTML=`<div class="adminHeader"><div><span class="kicker">ANIME NO SEKAI</span><h1>Contenido del sitio</h1><p>Edita únicamente los textos comerciales principales del catálogo.</p></div><div class="adminHeaderActions"><button id="logoutAdmin" class="secondary" type="button">Cerrar sesión</button></div></div>
@@ -435,12 +436,15 @@ async function showSiteContentForm(){
  <div class="siteVisualField heroVisualField"><div class="siteVisualLabel"><b>Imagen de portada</b><small>La vista previa usa el mismo recorte <code>cover</code> que la página pública.</small></div><div class="siteVisualPreview heroPreview realHeroPreview" id="siteHeroPreview" style="--preview-hero:${data.portada_url?`url(\'${attr(data.portada_url)}\')`:'none'};--preview-x:${Number(data.portada_posicion_x??50)}%;--preview-y:${Number(data.portada_posicion_y??50)}%">${data.portada_url?'<div class="heroPreviewShade"><span>Vista real del encuadre</span></div>':'<div class="heroFallbackPreview"><span>Fondo negro + halo violeta</span></div>'}</div><div class="heroPositionControls"><label><span>Posición horizontal <b id="heroXValue">${Number(data.portada_posicion_x??50)}%</b></span><input id="heroPositionX" name="portada_posicion_x" type="range" min="0" max="100" step="1" value="${Number(data.portada_posicion_x??50)}"></label><label><span>Posición vertical <b id="heroYValue">${Number(data.portada_posicion_y??50)}%</b></span><input id="heroPositionY" name="portada_posicion_y" type="range" min="0" max="100" step="1" value="${Number(data.portada_posicion_y??50)}"></label><button id="resetHeroPosition" class="visualRemove" type="button">Centrar imagen</button></div><input id="siteHeroInput" type="file" accept="image/jpeg,image/png,image/webp" hidden><div class="siteVisualActions"><button id="chooseSiteHero" class="secondary" type="button">${data.portada_url?'Cambiar portada':'Agregar portada'}</button>${data.portada_url?'<button id="removeSiteHero" class="visualRemove" type="button">Quitar</button>':''}</div></div>
  <div class="siteVisualField heroVisualField mobileHeroField"><div class="siteVisualLabel"><b>Imagen de portada móvil <span class="optionalTag">opcional</span></b><small>Recomendada en formato vertical. Si no cargas una, se utilizará la portada de escritorio.</small></div><div class="siteVisualPreview heroPreview realHeroPreview mobileHeroPreview" id="siteHeroMobilePreview" style="--preview-hero:${data.portada_movil_url?`url(\'${attr(data.portada_movil_url)}\')`:data.portada_url?`url(\'${attr(data.portada_url)}\')`:'none'};--preview-x:${Number(data.portada_movil_posicion_x??50)}%;--preview-y:${Number(data.portada_movil_posicion_y??50)}%">${(data.portada_movil_url||data.portada_url)?'<div class="heroPreviewShade"><span>Vista previa móvil</span></div>':'<div class="heroFallbackPreview"><span>Sin portada</span></div>'}</div><div class="heroPositionControls"><label><span>Posición horizontal <b id="heroMobileXValue">${Number(data.portada_movil_posicion_x??50)}%</b></span><input id="heroMobilePositionX" name="portada_movil_posicion_x" type="range" min="0" max="100" step="1" value="${Number(data.portada_movil_posicion_x??50)}"></label><label><span>Posición vertical <b id="heroMobileYValue">${Number(data.portada_movil_posicion_y??50)}%</b></span><input id="heroMobilePositionY" name="portada_movil_posicion_y" type="range" min="0" max="100" step="1" value="${Number(data.portada_movil_posicion_y??50)}"></label><button id="resetHeroMobilePosition" class="visualRemove" type="button">Centrar imagen</button></div><input id="siteHeroMobileInput" type="file" accept="image/jpeg,image/png,image/webp" hidden><div class="siteVisualActions"><button id="chooseSiteHeroMobile" class="secondary" type="button">${data.portada_movil_url?'Cambiar portada móvil':'Agregar portada móvil'}</button>${data.portada_movil_url?'<button id="removeSiteHeroMobile" class="visualRemove" type="button">Quitar</button>':''}</div></div>
  </div></section>
- <section class="formSection"><div class="formSectionTitle"><span>05</span><div><h2>Franquicias destacadas</h2><p>Selecciona los universos que aparecerán en la portada. Máximo 8.</p></div></div><div class="featuredFranchiseAdmin" id="featuredFranchiseAdmin">${siteFranchises.length?siteFranchises.map(x=>`<label class="featuredFranchiseOption"><input type="checkbox" name="franquicias_destacadas" value="${attr(x.id)}" ${x.destacada?'checked':''}><span>${escapeHtml(x.nombre)}</span></label>`).join(''):'<p class="fieldHint">No hay franquicias disponibles.</p>'}</div><small class="fieldHint">Estas opciones solo controlan la sección “Explora por universo”; no ocultan franquicias del catálogo.</small></section>
+ <section class="formSection"><div class="formSectionTitle"><span>05</span><div><h2>Franquicias destacadas</h2><p>Selecciona los universos que aparecerán en la portada y carga el logo de cada anime. Máximo 8.</p></div></div><div class="featuredFranchiseAdmin" id="featuredFranchiseAdmin">${siteFranchises.length?siteFranchises.map(x=>`<div class="featuredFranchiseOption" data-franchise-row="${attr(x.id)}"><label class="featuredFranchiseCheck"><input type="checkbox" name="franquicias_destacadas" value="${attr(x.id)}" ${x.destacada?'checked':''}><span>${escapeHtml(x.nombre)}</span></label><div class="franchiseLogoPreview" id="franchiseLogoPreview-${attr(x.id)}">${x.logo_url?`<img src="${attr(x.logo_url)}" alt="Logo de ${attr(x.nombre)}">`:'<span>Sin logo</span>'}</div><input class="franchiseLogoInput" data-franchise-logo-input="${attr(x.id)}" type="file" accept="image/jpeg,image/png,image/webp" hidden><div class="franchiseLogoActions"><button class="visualRemove" data-franchise-logo-choose="${attr(x.id)}" type="button">${x.logo_url?'Cambiar logo':'Agregar logo'}</button>${x.logo_url?`<button class="visualRemove" data-franchise-logo-remove="${attr(x.id)}" type="button">Quitar</button>`:''}</div></div>`).join(''):'<p class="fieldHint">No hay franquicias disponibles.</p>'}</div><small class="fieldHint">El logo se utiliza en “Explora por universo”. Recomendado: PNG o WebP con fondo transparente.</small></section>
  <div class="formActions"><button id="saveSiteContent" class="primary" type="submit">Guardar contenido</button></div><p id="siteContentMessage" class="formMessage"></p></form>`;
  document.getElementById('logoutAdmin').onclick=async()=>{await supabaseClient.auth.signOut();closeAdmin()};
  document.getElementById('siteContentForm').onsubmit=saveSiteContent;
  document.querySelectorAll('input[name="franquicias_destacadas"]').forEach(ch=>ch.addEventListener('change',e=>{const checked=[...document.querySelectorAll('input[name="franquicias_destacadas"]:checked')];if(checked.length>8){e.target.checked=false;alert('Puedes destacar un máximo de 8 franquicias.')}}));
- siteLogoFile=null;siteHeroFile=null;siteHeroMobileFile=null;
+ document.querySelectorAll('[data-franchise-logo-choose]').forEach(btn=>btn.addEventListener('click',()=>document.querySelector(`[data-franchise-logo-input="${btn.dataset.franchiseLogoChoose}"]`)?.click()));
+ document.querySelectorAll('[data-franchise-logo-input]').forEach(input=>input.addEventListener('change',()=>previewFranchiseLogo(input.dataset.franchiseLogoInput,input.files?.[0])));
+ document.querySelectorAll('[data-franchise-logo-remove]').forEach(btn=>btn.addEventListener('click',()=>markFranchiseLogoRemoved(btn.dataset.franchiseLogoRemove)));
+ siteLogoFile=null;siteHeroFile=null;siteHeroMobileFile=null;franchiseLogoFiles=new Map();
  const logoInput=document.getElementById('siteLogoInput'),heroInput=document.getElementById('siteHeroInput'),heroMobileInput=document.getElementById('siteHeroMobileInput');
  document.getElementById('chooseSiteLogo').onclick=()=>logoInput.click();
  document.getElementById('chooseSiteHero').onclick=()=>heroInput.click();
@@ -462,6 +466,14 @@ async function showSiteContentForm(){
  const syncHeroMobilePosition=()=>{const preview=document.getElementById('siteHeroMobilePreview');if(!preview)return;preview.style.setProperty('--preview-x',`${mobilePosX.value}%`);preview.style.setProperty('--preview-y',`${mobilePosY.value}%`);document.getElementById('heroMobileXValue').textContent=`${mobilePosX.value}%`;document.getElementById('heroMobileYValue').textContent=`${mobilePosY.value}%`};
  mobilePosX?.addEventListener('input',syncHeroMobilePosition);mobilePosY?.addEventListener('input',syncHeroMobilePosition);document.getElementById('resetHeroMobilePosition')?.addEventListener('click',()=>{mobilePosX.value=50;mobilePosY.value=50;syncHeroMobilePosition()});syncHeroMobilePosition();
 }
+function previewFranchiseLogo(id,file){
+ if(!file)return;if(!/^image\/(jpeg|png|webp)$/.test(file.type)){alert('Selecciona una imagen JPG, PNG o WebP.');return}
+ const previous=franchiseLogoFiles.get(id);if(previous?.preview)URL.revokeObjectURL(previous.preview);const preview=URL.createObjectURL(file);franchiseLogoFiles.set(id,{file,preview,remove:false});
+ const box=document.getElementById(`franchiseLogoPreview-${id}`);if(box)box.innerHTML=`<img src="${attr(preview)}" alt="Vista previa del logo">`;
+}
+function markFranchiseLogoRemoved(id){
+ const previous=franchiseLogoFiles.get(id);if(previous?.preview)URL.revokeObjectURL(previous.preview);franchiseLogoFiles.set(id,{file:null,preview:null,remove:true});const box=document.getElementById(`franchiseLogoPreview-${id}`);if(box)box.innerHTML='<span>Sin logo</span>';
+}
 function previewSiteAsset(kind,file){
  if(!file)return;
  if(!/^image\/(jpeg|png|webp)$/.test(file.type)){alert('Selecciona una imagen JPG, PNG o WebP.');return}
@@ -476,14 +488,14 @@ function markSiteAssetRemoved(kind){
  if(isLogo)preview.innerHTML='<div class="visualFallback"><span class="mark">界</span><span>ANIME NO <b>SEKAI</b></span></div>';else{const fallbackUrl=isMobile&&!siteHeroFile?.remove?(siteHeroFile?.preview||siteConfig?.portada_url):null;if(fallbackUrl){preview.style.setProperty('--preview-hero',`url('${fallbackUrl}')`);preview.innerHTML='<div class="heroPreviewShade"><span>Usando portada de escritorio</span></div>'}else{preview.innerHTML='<div class="heroFallbackPreview"><span>Sin portada</span></div>';preview.style.setProperty('--preview-hero','none')}}
 }
 async function compressSiteImage(file,kind){
- const bitmap=await createImageBitmap(file),max=kind==='logo'?1000:2200,scale=Math.min(1,max/Math.max(bitmap.width,bitmap.height));
+ const bitmap=await createImageBitmap(file),isLogo=kind==='logo'||kind==='franchise-logo',max=isLogo?1200:2200,scale=Math.min(1,max/Math.max(bitmap.width,bitmap.height));
  const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));
- const ctx=canvas.getContext('2d',{alpha:kind==='logo'});if(kind!=='logo'){ctx.fillStyle='#090a0d';ctx.fillRect(0,0,canvas.width,canvas.height)}ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close?.();
- return await new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('No fue posible optimizar la imagen.')),'image/webp',kind==='logo'?0.9:0.84));
+ const ctx=canvas.getContext('2d',{alpha:isLogo});if(!isLogo){ctx.fillStyle='#090a0d';ctx.fillRect(0,0,canvas.width,canvas.height)}ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close?.();
+ return await new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('No fue posible optimizar la imagen.')),'image/webp',isLogo?0.9:0.84));
 }
 function siteStoragePathFromPublicUrl(url){const marker='/storage/v1/object/public/sitio/';const i=(url||'').indexOf(marker);return i>=0?decodeURIComponent(url.slice(i+marker.length)):null}
 async function uploadSiteAsset(kind,file){
- const blob=await compressSiteImage(file,kind),path=`${kind==='logo'?'logo':kind==='hero-mobile'?'portada-movil':'portada'}-${crypto.randomUUID()}.webp`;
+ const blob=await compressSiteImage(file,kind),path=`${kind==='logo'?'logo':kind==='franchise-logo'?'franquicias/logo':kind==='hero-mobile'?'portada-movil':'portada'}-${crypto.randomUUID()}.webp`;
  const {error}=await supabaseClient.storage.from('sitio').upload(path,blob,{contentType:'image/webp',upsert:false,cacheControl:'3600'});if(error)throw error;
  const {data}=supabaseClient.storage.from('sitio').getPublicUrl(path);return {url:data.publicUrl,path};
 }
@@ -495,12 +507,18 @@ async function saveSiteContent(e){
   const featuredIds=[...document.querySelectorAll('input[name="franquicias_destacadas"]:checked')].map(x=>x.value);
   const {error:clearFeaturedError}=await supabaseClient.from('franquicias').update({destacada:false}).eq('destacada',true);if(clearFeaturedError)throw clearFeaturedError;
   if(featuredIds.length){const {error:featuredError}=await supabaseClient.from('franquicias').update({destacada:true}).in('id',featuredIds);if(featuredError)throw featuredError;}
+  for(const [franchiseId,change] of franchiseLogoFiles){
+   const original=siteFranchises.find(x=>String(x.id)===String(franchiseId));let logoUrl=original?.logo_url||null;
+   if(change?.file){msg.textContent=`Procesando logo de ${original?.nombre||'franquicia'}…`;const x=await uploadSiteAsset('franchise-logo',change.file);uploaded.push(x.path);logoUrl=x.url}else if(change?.remove)logoUrl=null;else continue;
+   const {error:franchiseLogoError}=await supabaseClient.from('franquicias').update({logo_url:logoUrl}).eq('id',franchiseId);if(franchiseLogoError)throw franchiseLogoError;
+   if(original?.logo_url&&original.logo_url!==logoUrl){const oldPath=siteStoragePathFromPublicUrl(original.logo_url);if(oldPath)await supabaseClient.storage.from('sitio').remove([oldPath]);}
+  }
   if(siteLogoFile?.file){msg.textContent='Procesando logo…';const x=await uploadSiteAsset('logo',siteLogoFile.file);uploaded.push(x.path);obj.logo_url=x.url}else if(siteLogoFile?.remove)obj.logo_url=null;
   if(siteHeroFile?.file){msg.textContent='Procesando portada…';const x=await uploadSiteAsset('hero',siteHeroFile.file);uploaded.push(x.path);obj.portada_url=x.url}else if(siteHeroFile?.remove)obj.portada_url=null;
   if(siteHeroMobileFile?.file){msg.textContent='Procesando portada móvil…';const x=await uploadSiteAsset('hero-mobile',siteHeroMobileFile.file);uploaded.push(x.path);obj.portada_movil_url=x.url}else if(siteHeroMobileFile?.remove)obj.portada_movil_url=null;
   const {data,error}=await supabaseClient.from('configuracion_sitio').update(obj).eq('id',1).select().single();if(error)throw error;
   const obsolete=[];if(Object.prototype.hasOwnProperty.call(obj,'logo_url')&&oldLogo&&oldLogo!==data.logo_url){const x=siteStoragePathFromPublicUrl(oldLogo);if(x)obsolete.push(x)}if(Object.prototype.hasOwnProperty.call(obj,'portada_url')&&oldHero&&oldHero!==data.portada_url){const x=siteStoragePathFromPublicUrl(oldHero);if(x)obsolete.push(x)}if(Object.prototype.hasOwnProperty.call(obj,'portada_movil_url')&&oldHeroMobile&&oldHeroMobile!==data.portada_movil_url){const x=siteStoragePathFromPublicUrl(oldHeroMobile);if(x)obsolete.push(x)}if(obsolete.length)await supabaseClient.storage.from('sitio').remove(obsolete);
-  if(siteLogoFile?.preview)URL.revokeObjectURL(siteLogoFile.preview);if(siteHeroFile?.preview)URL.revokeObjectURL(siteHeroFile.preview);if(siteHeroMobileFile?.preview)URL.revokeObjectURL(siteHeroMobileFile.preview);siteLogoFile=null;siteHeroFile=null;siteHeroMobileFile=null;siteConfig=data;applySiteConfig(data);await loadFeaturedFranchises();msg.textContent='Contenido e identidad visual actualizados correctamente.';msg.className='formMessage success';setTimeout(()=>renderAdminContentPanel(),700);
+  if(siteLogoFile?.preview)URL.revokeObjectURL(siteLogoFile.preview);if(siteHeroFile?.preview)URL.revokeObjectURL(siteHeroFile.preview);if(siteHeroMobileFile?.preview)URL.revokeObjectURL(siteHeroMobileFile.preview);franchiseLogoFiles.forEach(x=>{if(x?.preview)URL.revokeObjectURL(x.preview)});siteLogoFile=null;siteHeroFile=null;siteHeroMobileFile=null;franchiseLogoFiles=new Map();siteConfig=data;applySiteConfig(data);await loadFeaturedFranchises();msg.textContent='Contenido e identidad visual actualizados correctamente.';msg.className='formMessage success';setTimeout(()=>renderAdminContentPanel(),700);
  }catch(error){if(uploaded.length)await supabaseClient.storage.from('sitio').remove(uploaded);msg.textContent='No se pudo guardar: '+(error?.message||'Error inesperado.');msg.className='formMessage error'}finally{button.disabled=false}
 }
 
