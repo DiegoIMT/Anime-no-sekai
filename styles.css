@@ -462,3 +462,25 @@ header{position:sticky}
   box-shadow:none;
   filter:drop-shadow(0 0 4px currentColor);
 }
+
+/* V7.8.3.4 — halo refinado: compacto, uniforme y sin contorno en el punto */
+.adminState.state-disponible::after,
+.adminVisibility.is-visible::after,
+.adminVisibility.is-hidden::after{
+  inset:-1px -3px;
+  filter:blur(3px);
+}
+.adminState.state-disponible::after{background:rgba(99,230,154,.075)}
+.adminVisibility.is-visible::after{background:rgba(167,139,250,.075)}
+.adminVisibility.is-hidden::after{background:rgba(168,171,179,.055)}
+.adminState.state-disponible{color:#79efaa;text-shadow:0 0 4px rgba(121,239,170,.24)}
+.adminVisibility.is-visible{color:#c5adff;text-shadow:0 0 4px rgba(197,173,255,.24)}
+.adminVisibility.is-hidden{color:#aeb1b9;text-shadow:0 0 4px rgba(174,177,185,.17)}
+.adminState.state-disponible i,
+.adminVisibility.is-visible i,
+.adminVisibility.is-hidden i{
+  box-shadow:none!important;
+  filter:none!important;
+}
+.adminVisibility.is-visible i{background:#2b1b45;color:#b99cff}
+.adminVisibility.is-hidden i{background:#26282e;color:#a5a8b0}
