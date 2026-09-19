@@ -471,10 +471,16 @@ function filterAdminProducts(q){q=q.toLowerCase().trim();renderAdminProducts(adm
 function renderAdminProducts(items){
  const box=document.getElementById('adminProducts');
  if(!items.length){box.innerHTML='<div class="adminEmpty"><b>Aún no hay figuras registradas.</b><span>Usa “Nueva figura” para crear el primer producto real.</span></div>';return}
- box.innerHTML=items.map(p=>`<article class="adminProduct"><div><span class="adminSku">${escapeHtml(p.sku)}</span><h3>${escapeHtml(p.nombre)}</h3><p>${escapeHtml(p.franquicia||'Sin franquicia')}</p></div><div class="adminProductPrice"><strong>${money(Number(p.precio_oferta??p.precio))}</strong>${p.precio_oferta!=null?`<small>${money(Number(p.precio))}</small>`:''}</div><span class="adminState state-${p.estado}">${escapeHtml(p.estado)}</span><div class="adminRowActions"><button type="button" data-edit="${p.id}">Editar</button><button type="button" data-duplicate="${p.id}">Duplicar</button><button type="button" class="danger" data-delete="${p.id}">Eliminar</button></div></article>`).join('');
+ box.innerHTML=items.map(p=>`<article class="adminProduct"><div><span class="adminSku">${escapeHtml(p.sku)}</span><h3>${escapeHtml(p.nombre)}</h3><p>${escapeHtml(p.franquicia||'Sin franquicia')}</p></div><div class="adminProductPrice"><strong>${money(Number(p.precio_oferta??p.precio))}</strong>${p.precio_oferta!=null?`<small>${money(Number(p.precio))}</small>`:''}</div><div class="adminBadges"><span class="adminState state-${p.estado}">${escapeHtml(p.estado)}</span><span class="adminVisibility ${p.activo===false?'is-hidden':'is-visible'}">${p.activo===false?'Oculto':'Visible'}</span></div><div class="adminRowActions"><button type="button" data-edit="${p.id}">Editar</button><button type="button" data-duplicate="${p.id}">Duplicar</button><button type="button" data-toggle-visible="${p.id}">${p.activo===false?'Mostrar':'Ocultar'}</button><button type="button" class="danger" data-delete="${p.id}">Eliminar</button></div></article>`).join('');
  box.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>openProductForm(adminProductsCache.find(p=>p.id===b.dataset.edit)));
  box.querySelectorAll('[data-duplicate]').forEach(b=>b.onclick=()=>openProductForm(adminProductsCache.find(p=>p.id===b.dataset.duplicate),true));
+ box.querySelectorAll('[data-toggle-visible]').forEach(b=>b.onclick=()=>toggleProductVisibility(b.dataset.toggleVisible));
  box.querySelectorAll('[data-delete]').forEach(b=>b.onclick=()=>deleteProduct(b.dataset.delete));
+}
+async function toggleProductVisibility(id){
+ const p=adminProductsCache.find(x=>x.id===id);if(!p)return;const next=p.activo===false;
+ if(!next&&!confirm(`¿Ocultar ${p.nombre}? Dejará de mostrarse en el catálogo público.`))return;
+ const {error}=await supabaseClient.from('productos').update({activo:next}).eq('id',id);if(error){alert('No se pudo cambiar la visibilidad: '+error.message);return}await loadAdminProducts();
 }
 let productFormImages=[];
 let existingProductImages=[];
@@ -684,10 +690,16 @@ function filterAdminAdditionalProducts(q){q=(q||'').toLowerCase().trim();renderA
 function renderAdminAdditionalProducts(items){
  const box=document.getElementById('adminAdditionalProducts');if(!box)return;
  if(!items.length){box.innerHTML='<div class="adminEmpty"><b>Aún no hay productos adicionales.</b><span>Usa “Nuevo producto” para registrar el primero de “Más para tu colección”.</span></div>';return}
- box.innerHTML=items.map(p=>`<article class="adminProduct"><div><span class="adminSku">${escapeHtml(p.sku)}</span><h3>${escapeHtml(p.nombre)}</h3><p>${escapeHtml(p.tipos_producto?.nombre||'Sin tipo')} · ${escapeHtml(p.franquicias?.nombre||'Sin franquicia')}</p></div><div class="adminProductPrice"><strong>${money(Number(p.precio_oferta??p.precio))}</strong>${p.precio_oferta!=null?`<small>${money(Number(p.precio))}</small>`:''}</div><span class="adminState state-${p.estado}">${escapeHtml(p.estado.replace('_',' '))}</span><div class="adminRowActions"><button type="button" data-additional-edit="${p.id}">Editar</button><button type="button" data-additional-duplicate="${p.id}">Duplicar</button><button type="button" class="danger" data-additional-delete="${p.id}">Eliminar</button></div></article>`).join('');
+ box.innerHTML=items.map(p=>`<article class="adminProduct"><div><span class="adminSku">${escapeHtml(p.sku)}</span><h3>${escapeHtml(p.nombre)}</h3><p>${escapeHtml(p.tipos_producto?.nombre||'Sin tipo')} · ${escapeHtml(p.franquicias?.nombre||'Sin franquicia')}</p></div><div class="adminProductPrice"><strong>${money(Number(p.precio_oferta??p.precio))}</strong>${p.precio_oferta!=null?`<small>${money(Number(p.precio))}</small>`:''}</div><div class="adminBadges"><span class="adminState state-${p.estado}">${escapeHtml(p.estado.replace('_',' '))}</span><span class="adminVisibility ${p.activo===false?'is-hidden':'is-visible'}">${p.activo===false?'Oculto':'Visible'}</span></div><div class="adminRowActions"><button type="button" data-additional-edit="${p.id}">Editar</button><button type="button" data-additional-duplicate="${p.id}">Duplicar</button><button type="button" data-additional-toggle-visible="${p.id}">${p.activo===false?'Mostrar':'Ocultar'}</button><button type="button" class="danger" data-additional-delete="${p.id}">Eliminar</button></div></article>`).join('');
  box.querySelectorAll('[data-additional-edit]').forEach(b=>b.onclick=()=>openAdditionalProductForm(adminAdditionalProductsCache.find(p=>p.id===b.dataset.additionalEdit)));
  box.querySelectorAll('[data-additional-duplicate]').forEach(b=>b.onclick=()=>openAdditionalProductForm(adminAdditionalProductsCache.find(p=>p.id===b.dataset.additionalDuplicate),true));
+ box.querySelectorAll('[data-additional-toggle-visible]').forEach(b=>b.onclick=()=>toggleAdditionalProductVisibility(b.dataset.additionalToggleVisible));
  box.querySelectorAll('[data-additional-delete]').forEach(b=>b.onclick=()=>deleteAdditionalProduct(b.dataset.additionalDelete));
+}
+async function toggleAdditionalProductVisibility(id){
+ const p=adminAdditionalProductsCache.find(x=>x.id===id);if(!p)return;const next=p.activo===false;
+ if(!next&&!confirm(`¿Ocultar ${p.nombre}? Dejará de mostrarse en “Más para tu colección”.`))return;
+ const {error}=await supabaseClient.from('productos_adicionales').update({activo:next}).eq('id',id);if(error){alert('No se pudo cambiar la visibilidad: '+error.message);return}await loadAdminAdditionalProducts();
 }
 function openAdditionalProductForm(p=null,duplicating=false){
  const editing=!!p&&!duplicating;productFormImages=[];existingProductImages=[];
