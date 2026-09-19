@@ -423,3 +423,11 @@ header{position:sticky}
   .adminProduct h3{font-size:14.5px}
   .adminBadges{gap:22px}
 }
+
+/* V7.8.3.2 — halo sutil para indicadores de estado/visibilidad del Admin */
+.adminState.state-disponible{color:#79efaa;text-shadow:0 0 9px rgba(121,239,170,.22)}
+.adminState.state-disponible i{box-shadow:0 0 0 4px rgba(99,230,154,.12),0 0 13px rgba(99,230,154,.58)}
+.adminVisibility.is-visible{color:#c5adff;text-shadow:0 0 9px rgba(185,156,255,.24)}
+.adminVisibility.is-visible i{box-shadow:0 0 0 4px rgba(167,139,250,.10),0 0 14px rgba(167,139,250,.48)}
+.adminVisibility.is-hidden{color:#a8abb3;text-shadow:0 0 8px rgba(168,171,179,.14)}
+.adminVisibility.is-hidden i{box-shadow:0 0 0 4px rgba(168,171,179,.07),0 0 11px rgba(168,171,179,.22)}
