@@ -178,3 +178,17 @@ header{position:sticky}
 .catalogAdminRow{grid-template-columns:minmax(260px,1fr) auto auto}.catalogAdminIdentity{display:flex;align-items:center;gap:13px;min-width:0}.catalogAdminIdentity h3{margin:0 0 5px}.catalogAdminIdentity p{margin:0;color:#858892;font-size:12px}.catalogAdminLogo{width:48px;height:48px;border-radius:50%;overflow:hidden;flex:0 0 auto;border:1px solid #34303d;background:#0d0f13;display:grid;place-items:center;color:#a78bfa}.catalogAdminLogo img{width:100%;height:100%;object-fit:cover;display:block}.adminVisibility.is-featured{background:#24173a;color:#c4b5fd;border:1px solid #51377c}.catalogEditModal label+label{margin-top:16px}.catalogEditModal select{width:100%;background:#0d0f13;border:1px solid #30333b;border-radius:9px;color:#fff;padding:12px 13px;outline:none}.catalogEditLogo{display:grid;gap:10px;margin-top:18px}.franchiseLogoPreview.large{width:96px;height:96px;border-radius:50%}.franchiseLogoPreview.large img{width:100%;height:100%;object-fit:cover}.catalogInlineCheck{display:flex!important;align-items:center;gap:9px;margin-top:4px!important}.catalogInlineCheck input{width:auto!important}.catalogEditModal .siteVisualActions{display:flex;gap:8px;flex-wrap:wrap}.catalogEditModal .siteVisualActions button{cursor:pointer}
 @media(max-width:760px){.catalogAdminRow{grid-template-columns:1fr auto}.catalogAdminRow .adminRowActions{grid-column:1/-1;justify-self:stretch}.catalogAdminRow .adminRowActions button{flex:1}}
 @media(max-width:480px){.catalogAdminRow{grid-template-columns:1fr}.catalogAdminRow .adminBadges{justify-items:start}}
+
+/* V7.7.7 - filtros móviles del catálogo */
+.mobileCatalogFilterToggle,.applyMobileCatalogFilters{display:none}
+@media(max-width:560px){
+  .mobileCatalogFilterToggle{display:flex;width:100%;height:42px;margin:0 0 10px;padding:0 13px;align-items:center;justify-content:center;gap:8px;border:1px solid #30333b;border-radius:9px;background:#17191f;color:#e7e8eb;font-size:12px;font-weight:800;cursor:pointer}
+  .mobileCatalogFilterToggle.active{border-color:#8B5CF6;background:#18131f;color:#c4b5fd}
+  .mobileCatalogFilterToggle span{min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:#7c3aed;color:#fff;font-size:10px;line-height:20px;text-align:center}
+  .catalogToolbar{display:grid;grid-template-columns:1fr;padding:10px;margin-bottom:18px}
+  .catalogToolbar:not(.mobile-open)>:not(.catalogSearchField){display:none}
+  .catalogToolbar.mobile-open{border-color:#35303f;box-shadow:0 12px 28px rgba(0,0,0,.18)}
+  .catalogToolbar .catalogSearchField,.catalogToolbar label:nth-child(3),.catalogToolbar .sortField,.clearCatalogFilters{grid-column:1}
+  .applyMobileCatalogFilters{display:block;grid-column:1;height:42px;border:0;border-radius:8px;background:#7c3aed;color:#fff;font-size:12px;font-weight:800;cursor:pointer}
+  .catalogToolbar:not(.mobile-open) .catalogSearchField{display:grid}
+}
