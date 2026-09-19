@@ -476,8 +476,9 @@ async function saveAdminCatalogEdit(e,item,logoChange,close){
    const visualChanges={destacada:form.destacada.checked};if(logoChange){if(logoChange.file){const up=await uploadSiteAsset('franchise-logo',logoChange.file);visualChanges.logo_url=up.url;uploadedPath=up.path}else if(logoChange.remove)visualChanges.logo_url=null}
    const {error:visualError}=await supabaseClient.from('franquicias').update(visualChanges).eq('id',item.id);if(visualError)throw visualError;
    if(Object.prototype.hasOwnProperty.call(visualChanges,'logo_url')&&item.logo_url&&item.logo_url!==visualChanges.logo_url){const old=siteStoragePathFromPublicUrl(item.logo_url);if(old)await supabaseClient.storage.from('sitio').remove([old])}
-   await loadFeaturedFranchises();await loadPublicCatalogOptions();
+   await loadFeaturedFranchises();
   }
+  await loadPublicFilterOptions();
   close();await loadAdminCatalogs();
  }catch(error){if(uploadedPath)await supabaseClient.storage.from('sitio').remove([uploadedPath]);msg.textContent='No se pudo guardar: '+(error?.message||'Error inesperado.');msg.className='catalogModalMessage error'}finally{button.disabled=false}
 }
