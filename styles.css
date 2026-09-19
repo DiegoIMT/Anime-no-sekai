@@ -431,3 +431,34 @@ header{position:sticky}
 .adminVisibility.is-visible i{box-shadow:0 0 0 4px rgba(167,139,250,.10),0 0 14px rgba(167,139,250,.48)}
 .adminVisibility.is-hidden{color:#a8abb3;text-shadow:0 0 8px rgba(168,171,179,.14)}
 .adminVisibility.is-hidden i{box-shadow:0 0 0 4px rgba(168,171,179,.07),0 0 11px rgba(168,171,179,.22)}
+
+/* V7.8.3.3 — halo uniforme en punto e indicador completo */
+.adminState.state-disponible,
+.adminVisibility.is-visible,
+.adminVisibility.is-hidden{
+  position:relative;
+  isolation:isolate;
+}
+.adminState.state-disponible::after,
+.adminVisibility.is-visible::after,
+.adminVisibility.is-hidden::after{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  inset:-4px -7px;
+  border-radius:999px;
+  pointer-events:none;
+  filter:blur(7px);
+}
+.adminState.state-disponible::after{background:rgba(99,230,154,.15)}
+.adminVisibility.is-visible::after{background:rgba(167,139,250,.15)}
+.adminVisibility.is-hidden::after{background:rgba(168,171,179,.11)}
+.adminState.state-disponible{color:#79efaa;text-shadow:0 0 7px rgba(121,239,170,.34)}
+.adminVisibility.is-visible{color:#c5adff;text-shadow:0 0 7px rgba(197,173,255,.34)}
+.adminVisibility.is-hidden{color:#aeb1b9;text-shadow:0 0 7px rgba(174,177,185,.24)}
+.adminState.state-disponible i,
+.adminVisibility.is-visible i,
+.adminVisibility.is-hidden i{
+  box-shadow:none;
+  filter:drop-shadow(0 0 4px currentColor);
+}
