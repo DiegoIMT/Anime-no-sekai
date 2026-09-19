@@ -393,8 +393,9 @@ async function verifyAdminAndRender(){
  renderAdminPanel();
 }
 function renderAdminPanel(){
- document.getElementById('adminContent').innerHTML=`<div class="adminNav"><button class="active" id="adminProductsTab" type="button">Productos</button><button id="adminContentTab" type="button">Contenido del sitio</button></div><div id="adminPanelBody"></div>`;
+ document.getElementById('adminContent').innerHTML=`<div class="adminNav"><button class="active" id="adminProductsTab" type="button">Productos</button><button id="adminCatalogsTab" type="button">Catálogos</button><button id="adminContentTab" type="button">Contenido del sitio</button></div><div id="adminPanelBody"></div>`;
  document.getElementById('adminProductsTab').onclick=()=>showAdminProductsSection();
+ document.getElementById('adminCatalogsTab').onclick=()=>showAdminCatalogsSection();
  document.getElementById('adminContentTab').onclick=()=>showSiteContentForm();
  showAdminProductsSection();
 }
@@ -419,6 +420,68 @@ function showAdminProductsSection(section='figuras'){
    loadAdminProducts();
  }
 }
+
+let adminCatalogKind='franquicias';
+let adminCatalogCache=[];
+function normalizeCatalogName(v){return (v||'').trim().toLocaleLowerCase('es-MX').normalize('NFD').replace(/[\u0300-\u036f]/g,'')}
+function catalogKindMeta(kind){
+ if(kind==='personajes')return {title:'Personajes',singular:'personaje',description:'Edita nombres y la franquicia a la que pertenece cada personaje.'};
+ if(kind==='fabricantes')return {title:'Fabricantes',singular:'fabricante',description:'Administra los fabricantes utilizados por las figuras.'};
+ return {title:'Franquicias',singular:'franquicia',description:'Edita nombres, logos, visibilidad y franquicias destacadas.'};
+}
+async function showAdminCatalogsSection(kind='franquicias'){
+ adminCatalogKind=kind;setAdminTab('adminCatalogsTab');const meta=catalogKindMeta(kind),body=document.getElementById('adminPanelBody');
+ body.innerHTML=`<div class="adminHeader"><div><span class="kicker">ANIME NO SEKAI</span><h1>Catálogos</h1><p>Corrige y administra los datos maestros sin entrar a Supabase.</p></div><div class="adminHeaderActions"><button id="logoutAdmin" class="secondary" type="button">Cerrar sesión</button></div></div><div class="adminProductKinds"><button type="button" data-catalog-kind="franquicias" class="${kind==='franquicias'?'active':''}">Franquicias</button><button type="button" data-catalog-kind="personajes" class="${kind==='personajes'?'active':''}">Personajes</button><button type="button" data-catalog-kind="fabricantes" class="${kind==='fabricantes'?'active':''}">Fabricantes</button></div><div class="adminSubHeader"><div><h2>${meta.title}</h2><p>${meta.description}</p></div></div><div class="adminToolbar"><input id="adminCatalogSearch" type="search" placeholder="Buscar ${meta.title.toLowerCase()}…"></div><div id="adminCatalogList" class="adminProducts"><p class="adminLoading">Cargando ${meta.title.toLowerCase()}…</p></div>`;
+ document.getElementById('logoutAdmin').onclick=async()=>{await supabaseClient.auth.signOut();closeAdmin()};
+ document.querySelectorAll('[data-catalog-kind]').forEach(b=>b.onclick=()=>showAdminCatalogsSection(b.dataset.catalogKind));
+ document.getElementById('adminCatalogSearch').oninput=e=>renderAdminCatalogs(e.target.value);await loadAdminCatalogs();
+}
+async function loadAdminCatalogs(){
+ const kind=adminCatalogKind;let select=kind==='personajes'?'id,nombre,activo,franquicia_id,franquicias(nombre)':kind==='franquicias'?'id,nombre,activo,destacada,logo_url':'id,nombre,activo';
+ const {data,error}=await supabaseClient.from(kind).select(select).order('nombre');const box=document.getElementById('adminCatalogList');if(error){box.innerHTML=`<p class="formMessage error">No fue posible cargar el catálogo: ${escapeHtml(error.message)}</p>`;return}
+ adminCatalogCache=data||[];await loadAdminCatalogUsage();renderAdminCatalogs(document.getElementById('adminCatalogSearch')?.value||'');
+}
+async function loadAdminCatalogUsage(){
+ const kind=adminCatalogKind,ids=adminCatalogCache.map(x=>x.id);if(!ids.length)return;const usage=new Map(ids.map(id=>[String(id),0]));
+ const field=kind==='franquicias'?'franquicia_id':kind==='personajes'?'personaje_id':'fabricante_id';
+ const queries=[supabaseClient.from('productos').select(field).in(field,ids)];if(kind!=='fabricantes')queries.push(supabaseClient.from('productos_adicionales').select(field).in(field,ids));
+ const results=await Promise.all(queries);results.forEach(r=>{if(r.error)return;(r.data||[]).forEach(x=>{const id=x[field];if(id!=null)usage.set(String(id),(usage.get(String(id))||0)+1)})});adminCatalogCache.forEach(x=>x.__usage=usage.get(String(x.id))||0);
+}
+function renderAdminCatalogs(search=''){
+ const box=document.getElementById('adminCatalogList');if(!box)return;const q=normalizeCatalogName(search),items=adminCatalogCache.filter(x=>!q||normalizeCatalogName(x.nombre).includes(q)||normalizeCatalogName(x.franquicias?.nombre).includes(q));
+ if(!items.length){box.innerHTML='<div class="adminEmpty"><b>Sin resultados</b><span>No encontramos registros con esa búsqueda.</span></div>';return}
+ box.innerHTML=items.map(x=>`<article class="adminProduct catalogAdminRow"><div class="catalogAdminIdentity">${adminCatalogKind==='franquicias'?`<div class="catalogAdminLogo">${x.logo_url?`<img src="${attr(x.logo_url)}" alt="Logo de ${attr(x.nombre)}">`:'<span>界</span>'}</div>`:''}<div><h3>${escapeHtml(x.nombre)}</h3><p>${adminCatalogKind==='personajes'?escapeHtml(x.franquicias?.nombre||'Sin franquicia'):`${x.__usage||0} ${(x.__usage||0)===1?'producto relacionado':'productos relacionados'}`}</p></div></div><div class="adminBadges">${adminCatalogKind==='franquicias'&&x.destacada?'<span class="adminVisibility is-featured">Destacada</span>':''}<span class="adminVisibility ${x.activo===false?'is-hidden':'is-visible'}">${x.activo===false?'Inactivo':'Activo'}</span></div><div class="adminRowActions"><button type="button" data-catalog-edit="${attr(x.id)}">Editar</button><button type="button" data-catalog-toggle="${attr(x.id)}">${x.activo===false?'Activar':'Desactivar'}</button></div></article>`).join('');
+ box.querySelectorAll('[data-catalog-edit]').forEach(b=>b.onclick=()=>openAdminCatalogEdit(b.dataset.catalogEdit));box.querySelectorAll('[data-catalog-toggle]').forEach(b=>b.onclick=()=>toggleAdminCatalog(b.dataset.catalogToggle));
+}
+async function toggleAdminCatalog(id){
+ const item=adminCatalogCache.find(x=>String(x.id)===String(id));if(!item)return;const next=item.activo===false;if(!next&&item.__usage&&!confirm(`${item.nombre} está relacionado con ${item.__usage} producto(s). Se desactivará del catálogo maestro, pero las relaciones existentes se conservarán. ¿Continuar?`))return;
+ const {error}=await supabaseClient.from(adminCatalogKind).update({activo:next}).eq('id',id);if(error){alert('No se pudo cambiar el estado: '+error.message);return}await loadAdminCatalogs();if(adminCatalogKind==='franquicias')await loadFeaturedFranchises();
+}
+async function openAdminCatalogEdit(id){
+ const item=adminCatalogCache.find(x=>String(x.id)===String(id));if(!item)return;document.getElementById('catalogEditBackdrop')?.remove();let franchises=[];
+ if(adminCatalogKind==='personajes'){const r=await supabaseClient.from('franquicias').select('id,nombre,activo').order('nombre');if(r.error){alert('No fue posible cargar franquicias: '+r.error.message);return}franchises=r.data||[]}
+ const wrap=document.createElement('div');wrap.id='catalogEditBackdrop';wrap.className='catalogModalBackdrop';const logo=adminCatalogKind==='franquicias';
+ wrap.innerHTML=`<div class="catalogModal catalogEditModal" role="dialog" aria-modal="true"><div class="catalogModalHead"><h3>Editar ${escapeHtml(catalogKindMeta(adminCatalogKind).singular)}</h3><button class="catalogModalClose" type="button">×</button></div><form id="catalogEditForm"><label>Nombre <span class="required">*</span><input name="nombre" maxlength="150" required value="${attr(item.nombre)}"></label>${adminCatalogKind==='personajes'?`<label>Franquicia <span class="required">*</span><select name="franquicia_id" required>${franchises.map(f=>`<option value="${attr(f.id)}" ${String(f.id)===String(item.franquicia_id)?'selected':''}>${escapeHtml(f.nombre)}${f.activo===false?' (inactiva)':''}</option>`).join('')}</select></label>`:''}${logo?`<div class="catalogEditLogo"><b>Logo</b><div id="catalogEditLogoPreview" class="franchiseLogoPreview large">${item.logo_url?`<img src="${attr(item.logo_url)}" alt="Logo actual">`:'<span>Sin logo</span>'}</div><input id="catalogEditLogoInput" type="file" accept="image/jpeg,image/png,image/webp" hidden><div class="siteVisualActions"><button id="catalogEditLogoChoose" class="secondary" type="button">${item.logo_url?'Cambiar logo':'Agregar logo'}</button>${item.logo_url?'<button id="catalogEditLogoRemove" class="visualRemove" type="button">Quitar</button>':''}</div><label class="catalogInlineCheck"><input name="destacada" type="checkbox" ${item.destacada?'checked':''}> Mostrar en “Explora por universo”</label></div>`:''}<p id="catalogEditMessage" class="catalogModalMessage"></p><div class="catalogModalActions"><button class="secondary" id="cancelCatalogEdit" type="button">Cancelar</button><button class="primary" id="saveCatalogEdit" type="submit">Guardar cambios</button></div></form></div>`;
+ document.body.appendChild(wrap);let logoChange=null;const close=()=>{if(logoChange?.preview)URL.revokeObjectURL(logoChange.preview);wrap.remove()};wrap.querySelector('.catalogModalClose').onclick=close;document.getElementById('cancelCatalogEdit').onclick=close;wrap.onclick=e=>{if(e.target===wrap)close()};
+ if(logo){const input=document.getElementById('catalogEditLogoInput'),preview=document.getElementById('catalogEditLogoPreview');document.getElementById('catalogEditLogoChoose').onclick=()=>input.click();input.onchange=()=>{const file=input.files?.[0];if(!file)return;if(!/^image\/(jpeg|png|webp)$/.test(file.type)){alert('Selecciona una imagen JPG, PNG o WebP.');return}if(logoChange?.preview)URL.revokeObjectURL(logoChange.preview);const url=URL.createObjectURL(file);logoChange={file,preview:url,remove:false};preview.innerHTML=`<img src="${attr(url)}" alt="Vista previa">`};const rm=document.getElementById('catalogEditLogoRemove');if(rm)rm.onclick=()=>{if(logoChange?.preview)URL.revokeObjectURL(logoChange.preview);logoChange={file:null,preview:null,remove:true};preview.innerHTML='<span>Sin logo</span>'}}
+ document.getElementById('catalogEditForm').onsubmit=e=>saveAdminCatalogEdit(e,item,logoChange,close);
+}
+async function saveAdminCatalogEdit(e,item,logoChange,close){
+ e.preventDefault();const form=e.currentTarget,msg=document.getElementById('catalogEditMessage'),button=document.getElementById('saveCatalogEdit'),name=form.nombre.value.trim();if(!name)return;const duplicate=adminCatalogCache.some(x=>String(x.id)!==String(item.id)&&normalizeCatalogName(x.nombre)===normalizeCatalogName(name));if(duplicate){msg.textContent='Ya existe otro registro con ese nombre.';msg.className='catalogModalMessage error';return}
+ button.disabled=true;msg.textContent='Guardando…';msg.className='catalogModalMessage';let uploadedPath=null;
+ try{
+  const newFranchiseId=adminCatalogKind==='personajes'?form.franquicia_id.value:null;
+  const {error:syncError}=await supabaseClient.rpc('actualizar_catalogo_admin',{p_tipo:adminCatalogKind,p_id:item.id,p_nombre:name,p_franquicia_id:newFranchiseId||null});if(syncError)throw syncError;
+  if(adminCatalogKind==='franquicias'){
+   const visualChanges={destacada:form.destacada.checked};if(logoChange){if(logoChange.file){const up=await uploadSiteAsset('franchise-logo',logoChange.file);visualChanges.logo_url=up.url;uploadedPath=up.path}else if(logoChange.remove)visualChanges.logo_url=null}
+   const {error:visualError}=await supabaseClient.from('franquicias').update(visualChanges).eq('id',item.id);if(visualError)throw visualError;
+   if(Object.prototype.hasOwnProperty.call(visualChanges,'logo_url')&&item.logo_url&&item.logo_url!==visualChanges.logo_url){const old=siteStoragePathFromPublicUrl(item.logo_url);if(old)await supabaseClient.storage.from('sitio').remove([old])}
+   await loadFeaturedFranchises();await loadPublicCatalogOptions();
+  }
+  close();await loadAdminCatalogs();
+ }catch(error){if(uploadedPath)await supabaseClient.storage.from('sitio').remove([uploadedPath]);msg.textContent='No se pudo guardar: '+(error?.message||'Error inesperado.');msg.className='catalogModalMessage error'}finally{button.disabled=false}
+}
+
 async function showSiteContentForm(){
  setAdminTab('adminContentTab');
  const body=document.getElementById('adminPanelBody');
