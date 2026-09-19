@@ -192,3 +192,16 @@ header{position:sticky}
   .applyMobileCatalogFilters{display:block;grid-column:1;height:42px;border:0;border-radius:8px;background:#7c3aed;color:#fff;font-size:12px;font-weight:800;cursor:pointer}
   .catalogToolbar:not(.mobile-open) .catalogSearchField{display:grid}
 }
+
+/* V7.7.7.1 — hotfix responsive: icono de búsqueda y enlaces "Ver todos" */
+.headerSearchTriggerIcon,.headerSearch .searchIcon{position:relative;display:inline-block;width:18px;height:18px;flex:0 0 18px;font-size:0;line-height:0}
+.headerSearchTriggerIcon::before,.headerSearch .searchIcon::before{content:'';position:absolute;width:9px;height:9px;border:2px solid currentColor;border-radius:50%;left:1px;top:1px}
+.headerSearchTriggerIcon::after,.headerSearch .searchIcon::after{content:'';position:absolute;width:7px;height:2px;background:currentColor;border-radius:2px;transform:rotate(45deg);transform-origin:left center;left:11px;top:12px}
+.sectionLinkButton{white-space:nowrap;flex:0 0 auto}
+.sectionHead>div{min-width:0}
+@media(max-width:560px){
+  .headerSearchTrigger{display:grid!important;place-items:center!important}
+  .headerSearchTriggerIcon{margin:0}
+  .additionalSection .sectionHead{align-items:flex-end}
+  .additionalSection .sectionLinkButton{white-space:nowrap;flex-shrink:0}
+}
