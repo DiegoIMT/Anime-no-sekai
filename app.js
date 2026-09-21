@@ -403,7 +403,7 @@ async function openAdmin(){
  const {data:{session}}=await supabaseClient.auth.getSession();
  if(session) await verifyAdminAndRender();
 }
-function closeAdmin(){document.getElementById('adminView')?.remove();document.body.classList.remove('detail-open');if(location.hash==='#admin')history.replaceState({},'',location.pathname+location.search+'#catalogo')}
+function closeAdmin(){if(!confirmLeaveProductForm())return;adminProductFormDirty=false;cleanupNewImagePreviews();document.getElementById('adminView')?.remove();document.body.classList.remove('detail-open');if(location.hash==='#admin')history.replaceState({},'',location.pathname+location.search+'#catalogo')}
 async function loginAdmin(e){
  e.preventDefault(); const msg=document.getElementById('loginMessage'); msg.textContent='Validando…';
  const email=document.getElementById('loginEmail').value.trim(), password=document.getElementById('loginPassword').value;
@@ -688,6 +688,29 @@ async function toggleProductVisibility(id){
 }
 let productFormImages=[];
 let existingProductImages=[];
+let adminProductFormDirty=false;
+function setAdminProductFormDirty(value=true){adminProductFormDirty=value}
+function confirmLeaveProductForm(){return !adminProductFormDirty||confirm('Tienes cambios sin guardar. ¿Quieres salir sin guardarlos?')}
+function bindProductFormDirtyTracking(form){
+ adminProductFormDirty=false;if(!form)return;
+ form.addEventListener('input',()=>setAdminProductFormDirty(true));
+ form.addEventListener('change',()=>setAdminProductFormDirty(true));
+}
+function activePhotoCount(){return existingProductImages.filter(x=>!x.removed).length+productFormImages.length}
+function validateProductCommon(obj,visible){
+ if(!obj.nombre?.trim())return 'Escribe el nombre del producto.';
+ if(!Number.isFinite(obj.precio)||obj.precio<=0)return 'El precio normal debe ser mayor que $0.';
+ if(obj.precio_oferta!==null&&(!Number.isFinite(obj.precio_oferta)||obj.precio_oferta<=0))return 'El precio de oferta debe ser mayor que $0.';
+ if(obj.precio_oferta!==null&&obj.precio_oferta>=obj.precio)return 'El precio de oferta debe ser menor que el precio normal.';
+ if(!Number.isInteger(obj.stock)||obj.stock<0)return 'El stock debe ser un número entero igual o mayor que 0.';
+ if(visible&&activePhotoCount()===0)return 'Agrega al menos una fotografía antes de publicar el producto. Si aún lo estás preparando, puedes guardarlo como oculto.';
+ return '';
+}
+function commercialStateWarning(obj){
+ if(obj.estado==='disponible'&&obj.stock===0)return 'El producto está marcado como Disponible pero tiene stock 0. ¿Deseas guardarlo así?';
+ if(obj.estado==='vendida'&&obj.stock>0)return `El producto está marcado como Vendido pero tiene stock ${obj.stock}. ¿Deseas guardarlo así?`;
+ return '';
+}
 
 function openProductForm(p=null,duplicating=false){
  const editing=!!p&&!duplicating;
@@ -701,18 +724,18 @@ function openProductForm(p=null,duplicating=false){
  <div class="catalogField"><span>Personaje</span><div class="catalogPicker"><div class="searchableSelect" id="personajeCombo"><input class="searchableSelectInput" id="personajeSearch" type="text" autocomplete="off" placeholder="Selecciona primero una franquicia…" disabled><button class="searchableSelectArrow" type="button" tabindex="-1" aria-label="Mostrar personajes">⌄</button><div class="searchableSelectMenu"></div><select name="personaje_id" id="personajeSelect" class="catalogNativeSelect" disabled><option value="">Selecciona primero una franquicia…</option></select></div><button class="catalogAdd" id="addPersonaje" type="button" disabled>＋ Nuevo</button></div><small class="fieldHint">Escribe para buscar. Los personajes dependen de la franquicia seleccionada.</small></div>
  <div class="catalogField"><span>Fabricante</span><div class="catalogPicker"><div class="searchableSelect" id="fabricanteCombo"><input class="searchableSelectInput" id="fabricanteSearch" type="text" autocomplete="off" placeholder="Buscar fabricante…"><button class="searchableSelectArrow" type="button" tabindex="-1" aria-label="Mostrar fabricantes">⌄</button><div class="searchableSelectMenu"></div><select name="fabricante_id" id="fabricanteSelect" class="catalogNativeSelect"><option value="">Cargando fabricantes…</option></select></div><button class="catalogAdd" id="addFabricante" type="button">＋ Nuevo</button></div><small class="fieldHint">Escribe para buscar un fabricante existente.</small></div>
  </div></section>
- <section class="formSection"><div class="formSectionTitle"><span>02</span><div><h2>Precio e inventario</h2><p>Precio de venta y disponibilidad.</p></div></div><div class="formGrid"><label><span class="fieldLabel">Precio normal <span class="required">*</span></span><div class="moneyInput"><span>$</span><input name="precio" type="number" min="0" step="0.01" required value="${attr(p?.precio??'')}"></div></label><label><span class="fieldLabel">Precio oferta <span class="fieldOptional">(opcional)</span></span><div class="moneyInput"><span>$</span><input name="precio_oferta" type="number" min="0" step="0.01" value="${attr(p?.precio_oferta??'')}"></div></label><label>Stock<input name="stock" type="number" min="0" step="1" required value="${attr(p?.stock??1)}"></label><label>Procedencia<input name="procedencia" value="${attr(p?.procedencia||'Japón')}"></label></div></section>
+ <section class="formSection"><div class="formSectionTitle"><span>02</span><div><h2>Precio e inventario</h2><p>Precio de venta y disponibilidad.</p></div></div><div class="formGrid"><label><span class="fieldLabel">Precio normal <span class="required">*</span></span><div class="moneyInput"><span>$</span><input name="precio" type="number" min="0" step="0.01" required value="${attr(p?.precio??'')}"></div></label><label><span class="fieldLabel">Precio oferta <span class="fieldOptional">(opcional)</span></span><div class="moneyInput"><span>$</span><input name="precio_oferta" type="number" min="0" step="0.01" value="${attr(p?.precio_oferta??'')}"></div></label><label>Stock<input name="stock" type="number" min="0" step="1" required value="${attr(p?.stock??1)}"></label><label>Procedencia<input name="procedencia" maxlength="100" value="${attr(p?.procedencia||'Japón')}"></label></div></section>
  <section class="formSection"><div class="formSectionTitle"><span>03</span><div><h2>Estado físico</h2><p>Condición de la pieza y su empaque.</p></div></div><div class="formGrid"><label>Condición figura<select name="condicion_figura"><option>Nueva</option><option>Usada - Excelente</option><option>Usada - Buena</option><option>Usada - Con detalles</option></select></label><label>Condición caja<select name="condicion_caja"><option value="">Seleccionar…</option><option>Excelente</option><option>Buena</option><option>Con detalles</option><option>Sin caja</option></select></label></div></section>
- <section class="formSection"><div class="formSectionTitle"><span>04</span><div><h2>Publicación</h2><p>Información que verá el cliente.</p></div></div><div class="formGrid"><label class="full">Entrega<input name="entrega" value="${attr(p?.entrega||'A convenir')}"></label><label class="full">Descripción<textarea name="descripcion" rows="5" placeholder="Describe la figura, edición, detalles relevantes, contenido incluido…">${escapeHtml(p?.descripcion||'')}</textarea></label></div></section>
+ <section class="formSection"><div class="formSectionTitle"><span>04</span><div><h2>Publicación</h2><p>Información que verá el cliente.</p></div></div><div class="formGrid"><label class="full">Entrega<input name="entrega" maxlength="150" value="${attr(p?.entrega||'A convenir')}"></label><label class="full">Descripción<textarea name="descripcion" maxlength="2000" rows="5" placeholder="Describe la figura, edición, detalles relevantes, contenido incluido…">${escapeHtml(p?.descripcion||'')}</textarea><small class="fieldHint charCount" data-count-for="descripcion">0 / 2000</small></label></div></section>
  <section class="formSection"><div class="formSectionTitle"><span>05</span><div><h2>Fotografías</h2><p>Agrega varias imágenes y elige la principal.</p></div></div><div class="photoUploader"><input id="productPhotos" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden><button id="selectPhotos" class="uploadButton" type="button"><span>＋</span><b>Agregar fotografías</b><small>JPG, PNG o WebP · se optimizan antes de subir</small></button><div id="photoPreview" class="photoPreview"></div></div></section>
  <div class="formChecks"><label><input name="destacada" type="checkbox" ${p?.destacada?'checked':''}> Figura destacada</label><label><input name="activo" type="checkbox" ${p?.activo===false?'':'checked'}> Visible en catálogo</label></div><div class="formActions"><button id="saveProductButton" class="primary" type="submit">${editing?'Guardar cambios':duplicating?'Crear copia':'Crear figura'}</button></div><p id="productMessage" class="formMessage"></p></form>`;
  document.querySelector('[name="estado"]').value=p?.estado||'disponible'; initAdminStatusSelect(document.querySelector('[name="estado"]'));
  document.querySelector('[name="condicion_figura"]').value=p?.condicion_figura||'Nueva';
  if(p?.condicion_caja && [...document.querySelector('[name="condicion_caja"]').options].some(o=>o.value===p.condicion_caja)) document.querySelector('[name="condicion_caja"]').value=p.condicion_caja;
- document.getElementById('backAdmin').onclick=()=>{cleanupNewImagePreviews();renderAdminPanel();loadAdminProducts()};
+ document.getElementById('backAdmin').onclick=()=>{if(!confirmLeaveProductForm())return;adminProductFormDirty=false;cleanupNewImagePreviews();renderAdminPanel();loadAdminProducts()};
  document.getElementById('selectPhotos').onclick=()=>document.getElementById('productPhotos').click();
  document.getElementById('productPhotos').onchange=handlePhotoSelection;
- document.getElementById('productForm').onsubmit=e=>saveProduct(e,editing?p?.id:null,editing?p?.sku:null);
+ document.getElementById('productForm').onsubmit=e=>saveProduct(e,editing?p?.id:null,editing?p?.sku:null);bindProductFormDirtyTracking(document.getElementById('productForm'));initDescriptionCounter(document.getElementById('productForm'));
  document.getElementById('addFranquicia').onclick=()=>openCatalogModal('franquicias','franquiciaSelect','Nueva franquicia',null,async()=>{await loadCharactersForFranchise(null);});
  document.getElementById('addFabricante').onclick=()=>openCatalogModal('fabricantes','fabricanteSelect','Nuevo fabricante');
  document.getElementById('addPersonaje').onclick=()=>{const franquiciaId=document.getElementById('franquiciaSelect')?.value;if(franquiciaId)openCatalogModal('personajes','personajeSelect','Nuevo personaje',{franquicia_id:franquiciaId});};
@@ -798,11 +821,14 @@ async function loadExistingProductImages(productId){
 function handlePhotoSelection(e){
  const files=[...e.target.files];
  const allowed=['image/jpeg','image/png','image/webp'];
+ let rejectedSize=false;
  for(const file of files){
    if(!allowed.includes(file.type)) continue;
+   if(file.size>10*1024*1024){rejectedSize=true;continue}
    if(productFormImages.length+existingProductImages.filter(x=>!x.removed).length>=8) break;
-   productFormImages.push({id:crypto.randomUUID(),file,preview:URL.createObjectURL(file),principal:false});
+   productFormImages.push({id:crypto.randomUUID(),file,preview:URL.createObjectURL(file),principal:false});setAdminProductFormDirty(true);
  }
+ if(rejectedSize)showProductMessage('Una o más imágenes superaban 10 MB y no se agregaron.',true);
  if(!hasPrincipalPhoto()) setFirstPhotoPrincipal();
  e.target.value=''; renderPhotoPreview();
 }
@@ -823,12 +849,12 @@ function renderPhotoPreview(){
 }
 function setPrincipalPhoto(kind,id){
  existingProductImages.forEach(x=>x.principal=false); productFormImages.forEach(x=>x.principal=false);
- const list=kind==='old'?existingProductImages:productFormImages; const item=list.find(x=>x.id===id); if(item)item.principal=true; renderPhotoPreview();
+ const list=kind==='old'?existingProductImages:productFormImages; const item=list.find(x=>x.id===id); if(item)item.principal=true;setAdminProductFormDirty(true); renderPhotoPreview();
 }
 function removePhoto(kind,id){
  if(kind==='old'){const x=existingProductImages.find(x=>x.id===id);if(x)x.removed=true}
  else {const i=productFormImages.findIndex(x=>x.id===id);if(i>=0){URL.revokeObjectURL(productFormImages[i].preview);productFormImages.splice(i,1)}}
- if(!hasPrincipalPhoto())setFirstPhotoPrincipal(); renderPhotoPreview();
+ if(!hasPrincipalPhoto())setFirstPhotoPrincipal();setAdminProductFormDirty(true); renderPhotoPreview();
 }
 function cleanupNewImagePreviews(){productFormImages.forEach(x=>URL.revokeObjectURL(x.preview));productFormImages=[]}
 
@@ -864,16 +890,17 @@ async function saveProduct(e,id,currentSku){
  const personajeNombre=personajeId?emptyNull(personajeSelect?.selectedOptions?.[0]?.dataset?.name):null;
  const fabricanteNombre=fabricanteId?emptyNull(fabricanteSelect?.selectedOptions?.[0]?.dataset?.name):null;
  const obj={nombre:f.get('nombre').trim(),personaje_id:personajeId,personaje:personajeNombre,franquicia_id:franquiciaId,franquicia:franquiciaNombre,fabricante_id:fabricanteId,fabricante:fabricanteNombre,descripcion:emptyNull(f.get('descripcion')),precio:Number(f.get('precio')),precio_oferta:f.get('precio_oferta')===''?null:Number(f.get('precio_oferta')),estado:f.get('estado'),stock:Number(f.get('stock')),condicion_figura:emptyNull(f.get('condicion_figura')),condicion_caja:emptyNull(f.get('condicion_caja')),procedencia:emptyNull(f.get('procedencia')),entrega:emptyNull(f.get('entrega')),destacada:f.get('destacada')==='on',activo:f.get('activo')==='on'};
- if(obj.precio_oferta!==null&&obj.precio_oferta>=obj.precio){showProductMessage('El precio de oferta debe ser menor que el precio normal.',true);return}
- button.disabled=true;msg.textContent=id?'Guardando cambios…':'Creando figura…';msg.className='formMessage';
+ const validationError=validateProductCommon(obj,obj.activo);if(validationError){showProductMessage(validationError,true);return}const stateWarning=commercialStateWarning(obj);if(stateWarning&&!confirm(stateWarning))return;
+ button.disabled=true;button.dataset.originalText=button.textContent;button.textContent=id?'Guardando…':'Creando…';msg.textContent=id?'Guardando cambios…':'Creando figura…';msg.className='formMessage';
  try{
    let product;
    if(id){const {data,error}=await supabaseClient.from('productos').update(obj).eq('id',id).select().single();if(error)throw error;product=data||{id,sku:currentSku}}
    else {const {data,error}=await supabaseClient.from('productos').insert(obj).select().single();if(error)throw error;product=data}
    msg.textContent=productFormImages.length||existingProductImages.some(x=>x.removed)?'Procesando fotografías…':'Guardado correctamente…';
-   await syncProductImages(product); cleanupNewImagePreviews(); renderAdminPanel();await loadAdminProducts();
- }catch(error){showProductMessage('No se pudo guardar: '+(error?.message||'Error inesperado.'),true);button.disabled=false}
+   await syncProductImages(product);adminProductFormDirty=false;cleanupNewImagePreviews(); renderAdminPanel();await loadAdminProducts();
+ }catch(error){showProductMessage('No se pudo guardar: '+(error?.message||'Error inesperado.'),true);button.disabled=false;button.textContent=button.dataset.originalText||button.textContent}
 }
+function initDescriptionCounter(form){const area=form?.querySelector('textarea[name="descripcion"]'),counter=form?.querySelector('[data-count-for="descripcion"]');if(!area||!counter)return;const sync=()=>counter.textContent=`${area.value.length} / ${area.maxLength}`;area.addEventListener('input',sync);sync()}
 function showProductMessage(text,error=false){const m=document.getElementById('productMessage');if(!m)return;m.textContent=text;m.className='formMessage'+(error?' error':'')}
 async function deleteProduct(id){
  const p=adminProductsCache.find(x=>x.id===id); if(!confirm(`¿Eliminar ${p?.nombre||'este producto'}? Esta acción no se puede deshacer.`))return;
@@ -925,15 +952,15 @@ function openAdditionalProductForm(p=null,duplicating=false){
  <label class="full">Nombre<input name="nombre" maxlength="150" required value="${attr(p?.nombre||'')}"></label>
  <div class="catalogField"><span>Franquicia</span><div class="catalogPicker"><div class="searchableSelect" id="additionalFranquiciaCombo"><input class="searchableSelectInput" id="additionalFranquiciaSearch" type="text" autocomplete="off" placeholder="Buscar franquicia…"><button class="searchableSelectArrow" type="button" tabindex="-1">⌄</button><div class="searchableSelectMenu"></div><select name="franquicia_id" id="additionalFranquiciaSelect" class="catalogNativeSelect"><option value="">Cargando franquicias…</option></select></div><button class="catalogAdd" id="addAdditionalFranquicia" type="button">＋ Nueva</button></div><small class="fieldHint">Opcional.</small></div>
  <div class="catalogField"><span>Personaje</span><div class="catalogPicker"><div class="searchableSelect" id="additionalPersonajeCombo"><input class="searchableSelectInput" id="additionalPersonajeSearch" type="text" autocomplete="off" placeholder="Selecciona primero una franquicia…" disabled><button class="searchableSelectArrow" type="button" tabindex="-1">⌄</button><div class="searchableSelectMenu"></div><select name="personaje_id" id="additionalPersonajeSelect" class="catalogNativeSelect" disabled><option value="">Selecciona primero una franquicia…</option></select></div><button class="catalogAdd" id="addAdditionalPersonaje" type="button" disabled>＋ Nuevo</button></div><small class="fieldHint">Opcional y dependiente de la franquicia.</small></div>
- <label class="full">Descripción<textarea name="descripcion" maxlength="2000" rows="5">${escapeHtml(p?.descripcion||'')}</textarea></label></div></section>
+ <label class="full">Descripción<textarea name="descripcion" maxlength="2000" rows="5">${escapeHtml(p?.descripcion||'')}</textarea><small class="fieldHint charCount" data-count-for="descripcion">0 / 2000</small></label></div></section>
  <section class="formSection"><div class="formSectionTitle"><span>02</span><div><h2>Precio y disponibilidad</h2><p>Precio, existencia y estado comercial.</p></div></div><div class="formGrid"><label><span class="fieldLabel">Precio <span class="required">*</span></span><div class="moneyInput"><span>$</span><input name="precio" type="number" min="0" step="0.01" required value="${attr(p?.precio??'')}"></div></label><label>Precio de oferta<div class="moneyInput"><span>$</span><input name="precio_oferta" type="number" min="0" step="0.01" value="${attr(p?.precio_oferta??'')}"></div></label><label>Estado<select name="estado" class="adminStatusSelect"><option value="disponible">Disponible</option><option value="apartada">Apartada</option><option value="vendida">Vendida</option><option value="proximamente">Próximamente</option><option value="sobre_pedido">Sobre pedido</option></select></label><label>Stock<input name="stock" type="number" min="0" step="1" required value="${attr(p?.stock??1)}"></label></div></section>
  <section class="formSection"><div class="formSectionTitle"><span>03</span><div><h2>Elaboración</h2><p>Opciones útiles especialmente para productos artesanales.</p></div></div><div class="formGrid"><label class="full">Tiempo de elaboración<input name="tiempo_elaboracion" maxlength="100" placeholder="Ej. 3 a 5 días" value="${attr(p?.tiempo_elaboracion||'')}"><small class="fieldHint">Déjalo vacío cuando no aplique.</small></label></div><div class="inlineChecks"><label><input name="hecho_mano" type="checkbox" ${p?.hecho_mano?'checked':''}> Hecho a mano</label><label><input name="sobre_pedido" type="checkbox" ${p?.sobre_pedido?'checked':''}> Acepta pedidos</label></div></section>
  <section class="formSection"><div class="formSectionTitle"><span>04</span><div><h2>Fotografías</h2><p>Agrega varias imágenes y elige la principal.</p></div></div><div class="photoUploader"><input id="additionalProductPhotos" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden><button id="selectAdditionalPhotos" class="uploadButton" type="button"><span>＋</span><b>Agregar fotografías</b><small>JPG, PNG o WebP · se optimizan antes de subir</small></button><div id="photoPreview" class="photoPreview"></div></div></section>
  <div class="formChecks"><label><input name="destacado" type="checkbox" ${p?.destacado?'checked':''}> Producto destacado</label><label><input name="activo" type="checkbox" ${p?.activo===false?'':'checked'}> Visible en la tienda</label></div><div class="formActions"><button id="saveAdditionalProductButton" class="primary" type="submit">${editing?'Guardar cambios':duplicating?'Crear copia':'Crear producto'}</button></div><p id="productMessage" class="formMessage"></p></form>`;
  document.querySelector('[name="estado"]').value=p?.estado||'disponible'; initAdminStatusSelect(document.querySelector('[name="estado"]'));
- document.getElementById('backAdmin').onclick=()=>{cleanupNewImagePreviews();renderAdminPanel();showAdminProductsSection('adicionales')};
+ document.getElementById('backAdmin').onclick=()=>{if(!confirmLeaveProductForm())return;adminProductFormDirty=false;cleanupNewImagePreviews();renderAdminPanel();showAdminProductsSection('adicionales')};
  document.getElementById('selectAdditionalPhotos').onclick=()=>document.getElementById('additionalProductPhotos').click();document.getElementById('additionalProductPhotos').onchange=handlePhotoSelection;
- document.getElementById('additionalProductForm').onsubmit=e=>saveAdditionalProduct(e,editing?p?.id:null,editing?p?.sku:null);
+ document.getElementById('additionalProductForm').onsubmit=e=>saveAdditionalProduct(e,editing?p?.id:null,editing?p?.sku:null);bindProductFormDirtyTracking(document.getElementById('additionalProductForm'));initDescriptionCounter(document.getElementById('additionalProductForm'));
  document.getElementById('addTipoProducto').onclick=()=>openCatalogModal('tipos_producto','tipoProductoSelect','Nuevo tipo de producto');
  document.getElementById('addAdditionalFranquicia').onclick=()=>openCatalogModal('franquicias','additionalFranquiciaSelect','Nueva franquicia',null,async()=>loadAdditionalCharacters(null));
  document.getElementById('addAdditionalPersonaje').onclick=()=>{const id=document.getElementById('additionalFranquiciaSelect')?.value;if(id)openCatalogModal('personajes','additionalPersonajeSelect','Nuevo personaje',{franquicia_id:id})};
@@ -963,8 +990,8 @@ async function syncAdditionalProductImages(product){
 }
 async function saveAdditionalProduct(e,id,currentSku){
  e.preventDefault();const f=new FormData(e.currentTarget),msg=document.getElementById('productMessage'),button=document.getElementById('saveAdditionalProductButton');const obj={tipo_producto_id:emptyNull(f.get('tipo_producto_id')),nombre:f.get('nombre').trim(),franquicia_id:emptyNull(f.get('franquicia_id')),personaje_id:emptyNull(f.get('personaje_id')),descripcion:emptyNull(f.get('descripcion')),precio:Number(f.get('precio')),precio_oferta:f.get('precio_oferta')===''?null:Number(f.get('precio_oferta')),estado:f.get('estado'),stock:Number(f.get('stock')),hecho_mano:f.get('hecho_mano')==='on',sobre_pedido:f.get('sobre_pedido')==='on',tiempo_elaboracion:emptyNull(f.get('tiempo_elaboracion')),destacado:f.get('destacado')==='on',activo:f.get('activo')==='on'};
- if(!obj.tipo_producto_id){showProductMessage('Selecciona un tipo de producto.',true);return}if(obj.precio_oferta!==null&&obj.precio_oferta>=obj.precio){showProductMessage('El precio de oferta debe ser menor que el precio normal.',true);return}
- button.disabled=true;msg.textContent=id?'Guardando cambios…':'Creando producto…';msg.className='formMessage';try{let product;if(id){const {data,error}=await supabaseClient.from('productos_adicionales').update(obj).eq('id',id).select().single();if(error)throw error;product=data||{id,sku:currentSku}}else{const {data,error}=await supabaseClient.from('productos_adicionales').insert(obj).select().single();if(error)throw error;product=data}msg.textContent='Procesando fotografías…';await syncAdditionalProductImages(product);cleanupNewImagePreviews();renderAdminPanel();showAdminProductsSection('adicionales')}catch(error){showProductMessage('No se pudo guardar: '+(error?.message||'Error inesperado.'),true);button.disabled=false}
+ if(!obj.tipo_producto_id){showProductMessage('Selecciona un tipo de producto.',true);return}const validationError=validateProductCommon(obj,obj.activo);if(validationError){showProductMessage(validationError,true);return}const stateWarning=commercialStateWarning(obj);if(stateWarning&&!confirm(stateWarning))return;
+ button.disabled=true;button.dataset.originalText=button.textContent;button.textContent=id?'Guardando…':'Creando…';msg.textContent=id?'Guardando cambios…':'Creando producto…';msg.className='formMessage';try{let product;if(id){const {data,error}=await supabaseClient.from('productos_adicionales').update(obj).eq('id',id).select().single();if(error)throw error;product=data||{id,sku:currentSku}}else{const {data,error}=await supabaseClient.from('productos_adicionales').insert(obj).select().single();if(error)throw error;product=data}msg.textContent='Procesando fotografías…';await syncAdditionalProductImages(product);adminProductFormDirty=false;cleanupNewImagePreviews();renderAdminPanel();showAdminProductsSection('adicionales')}catch(error){showProductMessage('No se pudo guardar: '+(error?.message||'Error inesperado.'),true);button.disabled=false;button.textContent=button.dataset.originalText||button.textContent}
 }
 async function deleteAdditionalProduct(id){
  const p=adminAdditionalProductsCache.find(x=>x.id===id);if(!confirm(`¿Eliminar ${p?.nombre||'este producto'}? Esta acción no se puede deshacer.`))return;const {data:imgs,error:readError}=await supabaseClient.from('producto_adicional_imagenes').select('url').eq('producto_id',id);if(readError){alert('No se pudieron consultar las fotografías: '+readError.message);return}const paths=(imgs||[]).map(x=>storagePathFromPublicUrl(x.url)).filter(Boolean);if(paths.length){const {error}=await supabaseClient.storage.from('productos').remove(paths);if(error){alert('No se pudieron eliminar las fotografías de Storage: '+error.message);return}}const {error}=await supabaseClient.from('productos_adicionales').delete().eq('id',id);if(error){alert('No se pudo eliminar: '+error.message);return}await loadAdminAdditionalProducts();

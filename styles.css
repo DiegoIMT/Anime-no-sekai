@@ -513,3 +513,6 @@ header{position:sticky}
  .adminFormHead .backBtn{top:82px;left:14px;right:14px;width:max-content;max-width:calc(100% - 28px)}
  .adminFormHead{padding-top:50px}
 }
+/* V7.8.8 — validación y prevención de errores */
+.charCount{text-align:right;min-height:auto!important;font-variant-numeric:tabular-nums}
+.productForm input:invalid:not(:placeholder-shown),.productForm textarea:invalid:not(:placeholder-shown){border-color:#7a3f4a}
