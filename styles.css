@@ -526,3 +526,6 @@ header{position:sticky}
 .fieldErrorText{display:block;color:#ff9dac;font-size:10px;font-weight:650;line-height:1.35;margin-top:1px}
 .photoUploader.fieldInvalid{border:1px solid #d75468;border-radius:12px;padding:10px;box-shadow:0 0 0 2px rgba(215,84,104,.08)}
 @media(max-width:760px){.formMessage.adminAlert{margin:0 18px 20px!important}}
+
+/* V7.8.12 · feedback preventivo de longitud */
+.charCount{display:block;text-align:right;font-variant-numeric:tabular-nums;transition:color .18s ease}.charCount.nearLimit{color:#a78bfa;font-weight:700}
