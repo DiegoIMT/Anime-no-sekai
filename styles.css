@@ -516,3 +516,13 @@ header{position:sticky}
 /* V7.8.8 — validación y prevención de errores */
 .charCount{text-align:right;min-height:auto!important;font-variant-numeric:tabular-nums}
 .productForm input:invalid:not(:placeholder-shown),.productForm textarea:invalid:not(:placeholder-shown){border-color:#7a3f4a}
+
+/* V7.8.9 — sistema unificado de alertas y validación del Admin */
+.formMessage.adminAlert{min-height:0!important;margin:0 26px 24px!important;padding:15px 16px 15px 48px!important;border:1px solid #7b3340;border-radius:11px;background:linear-gradient(135deg,rgba(94,28,39,.34),rgba(35,17,24,.58));color:#ffd8de!important;position:relative;font-size:12px!important;line-height:1.55;box-shadow:0 0 0 1px rgba(255,105,125,.04),0 10px 28px rgba(0,0,0,.16)}
+.formMessage.adminAlert::before{content:'!';position:absolute;left:15px;top:15px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:#b54254;color:#fff;font-weight:900;font-size:13px;box-shadow:0 0 14px rgba(255,91,116,.22)}
+.formMessage.adminAlert strong{display:block;color:#fff;font-size:13px;margin-bottom:4px}.formMessage.adminAlert ul{margin:5px 0 0;padding-left:17px}.formMessage.adminAlert li+li{margin-top:3px}
+.formMessage.adminAlert.info{border-color:#55407d;background:linear-gradient(135deg,rgba(68,42,108,.3),rgba(25,20,36,.55));color:#ded1ff!important}.formMessage.adminAlert.info::before{content:'i';background:#6d3ce9}
+.productForm .fieldInvalid,.productForm input.fieldInvalid,.productForm select.fieldInvalid,.productForm textarea.fieldInvalid,.productForm .searchableSelect.fieldInvalid{border-color:#d75468!important;box-shadow:0 0 0 2px rgba(215,84,104,.11)!important}
+.fieldErrorText{display:block;color:#ff9dac;font-size:10px;font-weight:650;line-height:1.35;margin-top:1px}
+.photoUploader.fieldInvalid{border:1px solid #d75468;border-radius:12px;padding:10px;box-shadow:0 0 0 2px rgba(215,84,104,.08)}
+@media(max-width:760px){.formMessage.adminAlert{margin:0 18px 20px!important}}
