@@ -500,3 +500,16 @@ header{position:sticky}
 .analyticsRefresh:disabled{opacity:.62;cursor:wait}
 .analyticsUpdated{align-self:center;color:#777b84;font-size:11px;margin-left:2px}
 @media(max-width:520px){.analyticsUpdated{flex-basis:100%;margin-top:2px}}
+
+
+/* V7.8.7 — navegación administrativa más explícita */
+.adminSiteButton{min-height:40px;padding:0 14px;border:1px solid #343741;border-radius:10px;background:#15171c;color:#f7f7f8;font-weight:700;cursor:pointer;white-space:nowrap}
+.adminSiteButton:hover{border-color:#8b5cf6;color:#fff}
+.adminFormHead .backBtn{position:fixed;top:86px;left:max(18px,calc((100% - 1100px)/2));z-index:6;padding:10px 14px;border:1px solid #343741;border-radius:10px;background:rgba(17,19,24,.96);box-shadow:0 8px 24px rgba(0,0,0,.28);backdrop-filter:blur(8px);margin:0}
+.adminFormHead{padding-top:48px}
+.adminFormHead .backBtn:hover{border-color:#8b5cf6;background:#17191f}
+@media(max-width:700px){
+ .adminSiteButton{padding:0 10px;font-size:12px}
+ .adminFormHead .backBtn{top:82px;left:14px;right:14px;width:max-content;max-width:calc(100% - 28px)}
+ .adminFormHead{padding-top:50px}
+}
