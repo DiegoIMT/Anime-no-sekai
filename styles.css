@@ -484,3 +484,9 @@ header{position:sticky}
 }
 .adminVisibility.is-visible i{background:#2b1b45;color:#b99cff}
 .adminVisibility.is-hidden i{background:#26282e;color:#a5a8b0}
+
+/* V7.8.3.5 — Próximamente conectado al catálogo */
+.upcomingSection{padding-top:58px}
+.upcomingSection .upcomingCta{max-width:none;margin:34px 0 0}
+@media(max-width:900px){.upcomingSection .upcomingCta{margin:30px 0 0}}
+@media(max-width:560px){.upcomingSection .upcomingCta{margin:26px 0 0;padding:28px}.upcomingSection .upcomingCta .primary{margin-top:20px;width:100%}}
