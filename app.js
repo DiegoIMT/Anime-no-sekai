@@ -716,7 +716,7 @@ function openProductForm(p=null,duplicating=false){
  document.getElementById('addFranquicia').onclick=()=>openCatalogModal('franquicias','franquiciaSelect','Nueva franquicia',null,async()=>{await loadCharactersForFranchise(null);});
  document.getElementById('addFabricante').onclick=()=>openCatalogModal('fabricantes','fabricanteSelect','Nuevo fabricante');
  document.getElementById('addPersonaje').onclick=()=>{const franquiciaId=document.getElementById('franquiciaSelect')?.value;if(franquiciaId)openCatalogModal('personajes','personajeSelect','Nuevo personaje',{franquicia_id:franquiciaId});};
- document.getElementById('franquiciaSelect').onchange=()=>loadCharactersForFranchise(null);
+ document.getElementById('franquiciaSelect').onchange=()=>{clearCharacterSelectionForFranchiseChange('personajeSelect','addPersonaje');loadCharactersForFranchise(null);};
  initCatalogCombobox('franquiciaSelect','franquiciaSearch');
  initCatalogCombobox('personajeSelect','personajeSearch');
  initCatalogCombobox('fabricanteSelect','fabricanteSearch');
@@ -734,6 +734,10 @@ async function loadProductCatalogs(product=null){
  fillCatalogSelect('franquiciaSelect',fr.data||[],product?.franquicia_id,product?.franquicia,'Sin franquicia');
  fillCatalogSelect('fabricanteSelect',fa.data||[],product?.fabricante_id,product?.fabricante,'Sin fabricante');
  await loadCharactersForFranchise(product);
+}
+function clearCharacterSelectionForFranchiseChange(selectId,addButtonId){
+ const select=document.getElementById(selectId),add=document.getElementById(addButtonId);if(!select)return;
+ select.value='';select.innerHTML='<option value="">Cargando personajes…</option>';select.disabled=true;if(add)add.disabled=true;syncCatalogCombobox(selectId);
 }
 async function loadCharactersForFranchise(product=null){
  const franquiciaId=document.getElementById('franquiciaSelect')?.value||'';
@@ -933,7 +937,7 @@ function openAdditionalProductForm(p=null,duplicating=false){
  document.getElementById('addTipoProducto').onclick=()=>openCatalogModal('tipos_producto','tipoProductoSelect','Nuevo tipo de producto');
  document.getElementById('addAdditionalFranquicia').onclick=()=>openCatalogModal('franquicias','additionalFranquiciaSelect','Nueva franquicia',null,async()=>loadAdditionalCharacters(null));
  document.getElementById('addAdditionalPersonaje').onclick=()=>{const id=document.getElementById('additionalFranquiciaSelect')?.value;if(id)openCatalogModal('personajes','additionalPersonajeSelect','Nuevo personaje',{franquicia_id:id})};
- document.getElementById('additionalFranquiciaSelect').onchange=()=>loadAdditionalCharacters(null);
+ document.getElementById('additionalFranquiciaSelect').onchange=()=>{clearCharacterSelectionForFranchiseChange('additionalPersonajeSelect','addAdditionalPersonaje');loadAdditionalCharacters(null);};
  initCatalogCombobox('tipoProductoSelect','tipoProductoSearch');initCatalogCombobox('additionalFranquiciaSelect','additionalFranquiciaSearch');initCatalogCombobox('additionalPersonajeSelect','additionalPersonajeSearch');
  loadAdditionalProductCatalogs(p);if(editing)loadExistingAdditionalProductImages(p.id);
 }
