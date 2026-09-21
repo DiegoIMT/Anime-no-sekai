@@ -529,3 +529,25 @@ header{position:sticky}
 
 /* V7.8.12 · feedback preventivo de longitud */
 .charCount{display:block;text-align:right;font-variant-numeric:tabular-nums;transition:color .18s ease}.charCount.nearLimit{color:#a78bfa;font-weight:700}
+
+/* V7.8.13 - UX/UI tarjetas publicas */
+.publicProductCard{display:flex;flex-direction:column}
+.publicProductCard .cardBody{flex:1;min-height:250px}
+.publicProductCard .series{min-height:14px}
+.publicProductCard h3{line-height:1.28;min-height:44px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.publicProductCard .cardCharacter{min-height:14px}
+.publicProductCard .prices{margin-top:auto;padding-top:4px;min-height:52px;align-items:center}
+.publicProductCard .prices strong{font-size:24px;line-height:1;color:#bca7ff}
+.publicProductCard .prices .old{font-size:12px;opacity:.85}
+.publicProductCard .details{background:transparent;border-color:#383b45;color:#d9dbe0}
+.publicProductCard .details:hover,.publicProductCard .details:focus-visible{border-color:#6d5a91;background:#17151d;color:#fff;outline:none}
+.publicProductCard .whatsapp{font-size:12px;border:1px solid rgba(128,228,170,.16);transition:.18s ease}
+.publicProductCard .whatsapp:hover,.publicProductCard .whatsapp:focus-visible{filter:brightness(1.12);outline:2px solid rgba(128,228,170,.28);outline-offset:2px}
+@media(max-width:560px){
+  .publicProductCard .cardBody{min-height:238px}
+  .publicProductCard h3{min-height:36px;line-height:1.25}
+  .publicProductCard .prices{min-height:50px;padding-top:2px}
+  .publicProductCard .prices strong{font-size:20px}
+  .publicProductCard .details{min-height:40px}
+  .publicProductCard .whatsapp{min-height:44px}
+}
