@@ -29,6 +29,8 @@ const money = n => new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN
 const icon = (name) => ({search:'⌕',menu:'☰',arrow:'›',fire:'🔥',truck:'✈',shield:'✓',chat:'◉',sparkle:'✦'})[name] || '';
 const statusLabel = s => ({disponible:'Disponible',apartada:'Apartada',vendida:'Vendida',proximamente:'Próximamente'})[s] || s || '';
 const currentSiteUrl = (hash='') => `${window.location.origin}/${hash}`;
+const publicProductUrl = (sku,kind='figura') => `${window.location.origin}/${kind==='adicional'?'producto':'figura'}/${encodeURIComponent(sku)}`;
+function skuFromPublicPath(kind='figura'){const prefix=kind==='adicional'?'/producto/':'/figura/';return location.pathname.startsWith(prefix)?decodeURIComponent(location.pathname.slice(prefix.length).split('/')[0]||''):null}
 
 // Analítica comercial propia. Nunca bloquea la experiencia pública si falla el registro.
 async function registerAnalyticsEvent(tipo_evento,{producto_id=null,sku=null,contexto={}}={}){
@@ -62,7 +64,7 @@ function mapAdditionalProduct(row){
   };
 }
 function additionalProductAction(p){
-  const url=currentSiteUrl(`#producto=${encodeURIComponent(p.sku)}`), base=`${p.name} (${p.sku})`;
+  const url=publicProductUrl(p.sku,'adicional'), base=`${p.name} (${p.sku})`;
   if(p.status==='apartada') return {text:'Consultar disponibilidad',cls:'disabled',msg:`Hola, vi ${base} como apartado en Anime no Sekai. ¿Podrías avisarme si vuelve a estar disponible? ${url}`};
   if(p.status==='proximamente') return {text:'Avísame cuando esté disponible',cls:'notify',msg:`Hola, me interesa ${base}. ¿Podrías avisarme cuando esté disponible en Anime no Sekai? ${url}`};
   if(p.status==='vendida') return {text:'¿Puedes hacer/conseguir otro?',cls:'sold',msg:`Hola, vi ${base} en Anime no Sekai. ¿Podrías hacer o conseguir otro? ${url}`};
@@ -76,7 +78,7 @@ function additionalProductCard(p){
 }
 
 function productAction(p){
-  const url=currentSiteUrl(`#figura=${encodeURIComponent(p.sku)}`);
+  const url=publicProductUrl(p.sku,'figura');
   const base=`${p.name} (${p.sku})`;
   if(p.status==='apartada') return {text:'Consultar disponibilidad',cls:'disabled',msg:`Hola, vi ${base} como apartada en Anime no Sekai. ¿Podrías avisarme si vuelve a estar disponible? ${url}`};
   if(p.status==='proximamente') return {text:'Avísame cuando llegue',cls:'notify',msg:`Hola, me interesa ${base}. ¿Podrías avisarme cuando llegue a Anime no Sekai? ${url}`};
@@ -95,11 +97,11 @@ function productCard(p){
 const INTEREST_LIST_KEY='animeNoSekaiInterestList';
 function getInterestList(){try{return JSON.parse(sessionStorage.getItem(INTEREST_LIST_KEY)||'[]')}catch{return []}}
 function saveInterestList(items){sessionStorage.setItem(INTEREST_LIST_KEY,JSON.stringify(items));updateInterestListUI()}
-function interestItem(p,kind='figura'){return {kind,sku:p.sku,name:p.name,price:p.price,sale:p.sale,status:p.status,img:p.img||'',url:currentSiteUrl(`#${kind==='adicional'?'producto':'figura'}=${encodeURIComponent(p.sku)}`)}}
+function interestItem(p,kind='figura'){return {kind,sku:p.sku,name:p.name,price:p.price,sale:p.sale,status:p.status,img:p.img||'',url:publicProductUrl(p.sku,kind)}}
 function isInInterestList(sku,kind='figura'){return getInterestList().some(x=>x.sku===sku&&x.kind===kind)}
 function toggleInterest(p,kind='figura'){const items=getInterestList(),i=items.findIndex(x=>x.sku===p.sku&&x.kind===kind);if(i>=0)items.splice(i,1);else items.push(interestItem(p,kind));saveInterestList(items);return i<0}
 function updateInterestListUI(){const items=getInterestList();document.querySelectorAll('[data-interest-count]').forEach(x=>{x.textContent=items.length;x.hidden=!items.length});document.querySelectorAll('[data-interest-toggle]').forEach(b=>{const active=isInInterestList(b.dataset.interestToggle,b.dataset.interestKind||'figura');b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));const label=b.querySelector('.interestLabel');if(label)label.textContent=active?'En mi lista':'Agregar a mi lista'});const panel=document.getElementById('interestListPanel');if(panel)renderInterestListPanel(panel)}
-function productShareData(p,kind='figura'){const label=kind==='adicional'?'producto':'figura',url=currentSiteUrl(`#${kind==='adicional'?'producto':'figura'}=${encodeURIComponent(p.sku)}`);return {title:`${p.name} | Anime no Sekai`,text:`Mira esta ${label} que encontré en Anime no Sekai 💜\n${p.name} · ${money(p.sale||p.price)}`,url}}
+function productShareData(p,kind='figura'){const label=kind==='adicional'?'producto':'figura',url=publicProductUrl(p.sku,kind);return {title:`${p.name} | Anime no Sekai`,text:`Mira esta ${label} que encontré en Anime no Sekai 💜\n${p.name} · ${money(p.sale||p.price)}`,url}}
 async function copyText(text){try{await navigator.clipboard.writeText(text);showPublicToast('Enlace copiado.')}catch{const t=document.createElement('textarea');t.value=text;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove();showPublicToast('Enlace copiado.')}}
 function showPublicToast(message){let t=document.getElementById('publicToast');if(!t){t=document.createElement('div');t.id='publicToast';t.className='publicToast';document.body.appendChild(t)}t.textContent=message;t.classList.add('show');clearTimeout(showPublicToast.timer);showPublicToast.timer=setTimeout(()=>t.classList.remove('show'),2200)}
 function openShareMenu(data){document.getElementById('shareMenu')?.remove();const wrap=document.createElement('div');wrap.id='shareMenu';wrap.className='shareMenuBackdrop';const full=`${data.text}\n${data.url}`;wrap.innerHTML=`<div class="shareMenu" role="dialog" aria-modal="true" aria-label="Compartir"><div class="shareMenuHead"><div><b>Compartir</b><small>${escapeHtml(data.title)}</small></div><button type="button" data-share-close aria-label="Cerrar">×</button></div><div class="shareMenuActions"><button type="button" data-native-share>↗ Compartir…</button><a href="https://wa.me/?text=${encodeURIComponent(full)}" target="_blank" rel="noopener">◉ WhatsApp</a><button type="button" data-copy-share>⧉ Copiar enlace</button></div><p>En celular, “Compartir…” abre las aplicaciones disponibles. Si WhatsApp ofrece <b>Mi estado</b>, puedes publicarlo desde ahí.</p></div>`;document.body.appendChild(wrap);const close=()=>wrap.remove();wrap.addEventListener('click',e=>{if(e.target===wrap||e.target.closest('[data-share-close]'))close()});wrap.querySelector('[data-copy-share]').addEventListener('click',()=>{copyText(data.url);close()});wrap.querySelector('[data-native-share]').addEventListener('click',async()=>{if(navigator.share){try{await navigator.share(data);close()}catch(e){if(e.name!=='AbortError')showPublicToast('No se pudo abrir el menú para compartir.')}}else{copyText(full);close()}})}
@@ -181,7 +183,8 @@ async function loadPublicCatalog(){
  if(upcomingGrid)upcomingGrid.innerHTML=upcoming.length?upcoming.map(productCard).join(''):'<div class="catalogEmpty"><b>Aún no hay próximas figuras publicadas.</b><span>Cuando marques una figura como Próximamente aparecerá aquí.</span></div>';
  await Promise.all([loadPublicFilterOptions(),loadCatalogPage()]);
  const skuFromHash=location.hash.startsWith('#figura=')?decodeURIComponent(location.hash.slice(8)):null;
- if(skuFromHash) await openDetail(skuFromHash,false);
+ const skuFromRoute=skuFromPublicPath('figura');
+ if(skuFromRoute||skuFromHash) await openDetail(skuFromRoute||skuFromHash,false);
 }
 async function loadPublicFilterOptions(){
  const [fRes,pRes,mRes]=await Promise.all([
@@ -225,7 +228,8 @@ async function loadPublicAdditionalCatalog(){
  if(section)section.hidden=!additionalProducts.length;
  if(grid)grid.innerHTML=additionalProducts.length?additionalProducts.map(additionalProductCard).join(''):'<p class="catalogMessage">Próximamente tendremos más productos para tu colección.</p>';
  const skuFromHash=location.hash.startsWith('#producto=')?decodeURIComponent(location.hash.slice(10)):null;
- if(skuFromHash)openAdditionalDetail(skuFromHash,false);
+ const skuFromRoute=skuFromPublicPath('adicional');
+ if(skuFromRoute||skuFromHash)openAdditionalDetail(skuFromRoute||skuFromHash,false);
 }
 async function loadAdditionalTypes(){
  if(publicAdditionalTypes.length)return publicAdditionalTypes;
@@ -270,9 +274,9 @@ async function openAdditionalDetail(sku,push=true){
  const detail=document.createElement('section');detail.className='detailView';detail.id='detailView';
  detail.innerHTML=`<div class="detailTop"><button class="backBtn" type="button">‹ Volver a Más para tu colección</button><button class="detailClose" type="button" aria-label="Cerrar">×</button></div><div class="detailShell"><div class="detailGallery"><div class="detailMainPhoto">${main?`<img id="detailMainImage" src="${attr(main)}" alt="${attr(p.name)}"><button class="galleryFullscreen" type="button">⛶ <span>Ver imagen completa</span></button>${gallery.length>1?`<button class="galleryArrow galleryPrev" type="button">‹</button><button class="galleryArrow galleryNext" type="button">›</button>`:''}<span class="galleryCounter" id="galleryCounter">${currentIndex+1} / ${gallery.length}</span>`:`<div class="photoPlaceholder large"><span>界</span><small>Fotografía próximamente</small></div>`}</div>${gallery.length?`<div class="detailThumbs">${gallery.map((img,i)=>`<button class="detailThumb ${i===currentIndex?'active':''}" type="button" data-index="${i}"><img src="${attr(img)}" alt="Vista ${i+1} de ${attr(p.name)}"></button>`).join('')}</div>`:''}</div><div class="detailInfo"><p class="series">${escapeHtml(p.type)}</p><h1>${escapeHtml(p.name)}</h1><p class="detailSku">${escapeHtml(p.sku)}</p><div class="detailBadges">${pct?`<span class="detailBadge sale">-${pct}%</span>`:''}<span class="detailBadge ${p.status==='apartada'?'hold':''}">${statusLabel(p.status)}</span>${p.handmade?'<span class="detailBadge craft">Hecho a mano</span>':''}</div><div class="detailPrice">${p.sale?`<span class="old">Antes ${money(p.price)}</span>`:''}<strong>${money(p.sale||p.price)}</strong></div><p>${escapeHtml(p.description)}</p><div class="detailMeta additionalMeta">${meta.map(([k,v])=>`<div><small>${escapeHtml(k)}</small><b>${escapeHtml(v)}</b></div>`).join('')}</div><div class="detailActions"><a class="whatsapp ${action.cls}" data-analytics-whatsapp="${attr(p.sku)}" data-analytics-kind="adicional" href="${attr(wa)}" target="_blank" rel="noopener">${icon('chat')} ${action.text}</a><div class="detailUtilityActions"><button class="interestToggle ${isInInterestList(p.sku,'adicional')?'active':''}" data-interest-toggle="${attr(p.sku)}" data-interest-kind="adicional" type="button" aria-pressed="${isInInterestList(p.sku,'adicional')}"><span>＋</span> <span class="interestLabel">${isInInterestList(p.sku,'adicional')?'En mi lista':'Agregar a mi lista'}</span></button><button class="shareProductButton" data-share-product="${attr(p.sku)}" data-share-kind="adicional" type="button">↗ Compartir</button></div><p class="detailNote">La compra y entrega se acuerdan directamente por WhatsApp.</p></div></div></div>`;
  document.body.appendChild(detail);document.body.classList.add('detail-open');updateInterestListUI();
- const close=()=>{detail.remove();document.body.classList.remove('detail-open');if(location.hash.startsWith('#producto='))history.replaceState({},'',location.pathname+location.search+'#mas-coleccion')};detail.querySelectorAll('.backBtn,.detailClose').forEach(b=>b.addEventListener('click',close));
+ const close=()=>{detail.remove();document.body.classList.remove('detail-open');if(location.pathname.startsWith('/producto/')||location.hash.startsWith('#producto='))history.replaceState({},'','/#mas-coleccion')};detail.querySelectorAll('.backBtn,.detailClose').forEach(b=>b.addEventListener('click',close));
  const show=i=>{currentIndex=(i+gallery.length)%gallery.length;detail.querySelector('#detailMainImage').src=gallery[currentIndex];detail.querySelectorAll('.detailThumb').forEach((x,j)=>x.classList.toggle('active',j===currentIndex));detail.querySelector('#galleryCounter').textContent=`${currentIndex+1} / ${gallery.length}`};detail.querySelectorAll('.detailThumb').forEach(t=>t.onclick=()=>show(Number(t.dataset.index)));detail.querySelector('.galleryPrev')?.addEventListener('click',()=>show(currentIndex-1));detail.querySelector('.galleryNext')?.addEventListener('click',()=>show(currentIndex+1));detail.querySelector('.galleryFullscreen')?.addEventListener('click',()=>{const viewer=document.createElement('div');viewer.className='imageLightbox';viewer.innerHTML=`<button class="imageLightboxClose" type="button">×</button><img src="${attr(gallery[currentIndex])}" alt="${attr(p.name)}">`;document.body.appendChild(viewer);viewer.querySelector('button').onclick=()=>viewer.remove();viewer.onclick=e=>{if(e.target===viewer)viewer.remove()}});
- if(push)history.pushState({additional:sku},'',`#producto=${encodeURIComponent(sku)}`);
+ if(push)history.pushState({additional:sku},'',`/producto/${encodeURIComponent(sku)}`);
 }
 function normalizeSearch(value){return String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim()}
 function productMatchesSearch(p,query){
@@ -361,12 +365,12 @@ async function openDetail(sku,push=true){
    viewer.querySelector('.imageLightboxClose').addEventListener('click',closeViewer);
    viewer.addEventListener('click',e=>{if(e.target===viewer)closeViewer()});
  });
- if(push) history.pushState({detail:sku},'',`#figura=${encodeURIComponent(sku)}`);
+ if(push) history.pushState({detail:sku},'',`/figura/${encodeURIComponent(sku)}`);
 }
-function closeDetail(){document.getElementById('detailView')?.remove();document.body.classList.remove('detail-open');if(location.hash.startsWith('#figura='))history.replaceState({},'',location.pathname+location.search+'#catalogo')}
+function closeDetail(){document.getElementById('detailView')?.remove();document.body.classList.remove('detail-open');if(location.pathname.startsWith('/figura/')||location.hash.startsWith('#figura='))history.replaceState({},'','/#catalogo')}
 document.addEventListener('click',e=>{const listToggle=e.target.closest('[data-interest-toggle]');if(listToggle){const p=findPublicProduct(listToggle.dataset.interestToggle,listToggle.dataset.interestKind||'figura');if(p){toggleInterest(p,listToggle.dataset.interestKind||'figura');showPublicToast(isInInterestList(p.sku,listToggle.dataset.interestKind||'figura')?'Agregado a Mi lista.':'Quitado de Mi lista.')}return}const share=e.target.closest('[data-share-product]');if(share){const p=findPublicProduct(share.dataset.shareProduct,share.dataset.shareKind||'figura');if(p)openShareMenu(productShareData(p,share.dataset.shareKind||'figura'));return}const remove=e.target.closest('[data-interest-remove]');if(remove){const items=getInterestList().filter(x=>!(x.sku===remove.dataset.interestRemove&&x.kind===remove.dataset.interestKind));saveInterestList(items);return}if(e.target.closest('[data-interest-clear]')){saveInterestList([]);return}const wa=e.target.closest('[data-analytics-whatsapp]');if(wa){const kind=wa.dataset.analyticsKind,sku=wa.dataset.analyticsWhatsapp,p=kind==='adicional'?additionalProducts.find(x=>x.sku===sku):(products.find(x=>x.sku===sku)||catalogProducts.find(x=>x.sku===sku));if(p)trackWhatsapp(p,kind);return}const clear=e.target.closest('[data-clear-public-filters]');if(clear){clearPublicCatalogFilters();return}const abtn=e.target.closest('.additionalDetails[data-additional]');if(abtn){openAdditionalDetail(abtn.dataset.additional);return}const acard=e.target.closest('.publicAdditionalCard[data-additional-product]');if(acard&&!e.target.closest('a,button,input,select')){openAdditionalDetail(acard.dataset.additionalProduct);return}const btn=e.target.closest('.details[data-product]');if(btn){openDetail(btn.dataset.product);return}const card=e.target.closest('.publicProductCard[data-card-product]');if(card&&!e.target.closest('a,button,input,select'))openDetail(card.dataset.cardProduct)});
 document.addEventListener('keydown',e=>{const acard=e.target.closest?.('.publicAdditionalCard[data-additional-product]');if(acard&&(e.key==='Enter'||e.key===' ')){e.preventDefault();openAdditionalDetail(acard.dataset.additionalProduct);return}const card=e.target.closest?.('.publicProductCard[data-card-product]');if(card&&(e.key==='Enter'||e.key===' ')){e.preventDefault();openDetail(card.dataset.cardProduct)}});
-window.addEventListener('popstate',()=>{if(!location.hash.startsWith('#figura=')){document.getElementById('detailView')?.remove();document.body.classList.remove('detail-open')}});
+window.addEventListener('popstate',()=>{if(!location.pathname.startsWith('/figura/')&&!location.pathname.startsWith('/producto/')&&!location.hash.startsWith('#figura=')&&!location.hash.startsWith('#producto=')){document.getElementById('detailView')?.remove();document.body.classList.remove('detail-open')}});
 
 renderStoreShell();
 updateInterestListUI();
