@@ -86,3 +86,4 @@ export async function onRequest(context) {
   }
   return env.ASSETS.fetch(request);
 }
+
