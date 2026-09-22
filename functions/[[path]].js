@@ -11,6 +11,12 @@ async function rest(table, params) {
   if (!r.ok) return [];
   return r.json();
 }
+
+async function siteShareImage() {
+  const rows = await rest('configuracion_sitio', { select:'portada_url', id:'eq.1', limit:'1' });
+  return rows[0]?.portada_url || null;
+}
+
 async function productData(kind, sku) {
   if (kind === 'figura') {
     const rows = await rest('productos', { select:'id,sku,nombre,descripcion,precio,precio_oferta,estado,activo', sku:`eq.${sku}`, activo:'eq.true', limit:'1' });
@@ -73,6 +79,19 @@ export async function onRequest(context) {
     const kind=m[1].toLowerCase(), sku=decodeURIComponent(m[2]);
     const p=await productData(kind,sku); if(!p?.image)return new Response('Imagen no disponible',{status:404});
     return proxyImage(p.image);
+  }
+  if (path === '/' || path === '') {
+    const heroImage = await siteShareImage();
+    if (heroImage) {
+      const html = injectMeta(await indexHtml(request,env), {
+        title:'Anime no Sekai | Figuras & Coleccionables',
+        description:'Figuras de anime, coleccionables, ofertas y próximos lanzamientos.',
+        url:`${url.origin}/`,
+        image:heroImage
+      });
+      return new Response(html,{headers:{'Content-Type':'text/html; charset=UTF-8','Cache-Control':'public, max-age=300'}});
+    }
+    return env.ASSETS.fetch(request);
   }
   m = path.match(/^\/(figura|producto)\/([^/]+)\/?$/i);
   if (m) {
