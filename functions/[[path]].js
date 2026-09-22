@@ -68,12 +68,6 @@ async function proxyImage(url) {
 }
 export async function onRequest(context) {
   const {request, env} = context, url = new URL(request.url), path = url.pathname;
-  if (path === '/social/portada.jpg') {
-    const asset = await env.ASSETS.fetch(new Request(new URL('/AnimenoSekai.jpg', url), request));
-    if (!asset.ok) return asset;
-    const h=new Headers(asset.headers);h.set('Content-Type','image/jpeg');h.set('Cache-Control','public, max-age=86400');
-    return new Response(asset.body,{status:200,headers:h});
-  }
   let m = path.match(/^\/social\/(figura|producto)\/([^/]+)\.jpg$/i);
   if (m) {
     const kind=m[1].toLowerCase(), sku=decodeURIComponent(m[2]);
