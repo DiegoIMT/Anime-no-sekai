@@ -49,8 +49,15 @@ function injectMeta(html, meta) {
   return html.replace('</head>', `${tags}\n</head>`);
 }
 async function indexHtml(request, env) {
-  const u = new URL('/index.html', request.url);
-  const r = await env.ASSETS.fetch(new Request(u, request));
+  // Cloudflare Pages ASSETS expects the pretty route for HTML assets.
+  // Requesting /index.html can be redirected to /; fetch the root asset directly.
+  const u = new URL(request.url);
+  u.pathname = '/';
+  u.search = '';
+  u.hash = '';
+  const assetRequest = new Request(u.toString(), { method: 'GET', headers: request.headers });
+  const r = await env.ASSETS.fetch(assetRequest);
+  if (!r.ok) throw new Error(`No se pudo cargar la portada base (${r.status})`);
   return r.text();
 }
 async function proxyImage(url) {
@@ -76,7 +83,12 @@ export async function onRequest(context) {
   m = path.match(/^\/(figura|producto)\/([^/]+)\/?$/i);
   if (m) {
     const kind=m[1].toLowerCase(), sku=decodeURIComponent(m[2]);
-    const p=await productData(kind,sku); if(!p)return env.ASSETS.fetch(new Request(new URL('/index.html',url),request));
+    const p=await productData(kind,sku);
+    if(!p){
+      const fallback = new URL(url);
+      fallback.pathname = '/'; fallback.search = ''; fallback.hash = '';
+      return env.ASSETS.fetch(new Request(fallback.toString(), { method:'GET', headers:request.headers }));
+    }
     const canonical=`${url.origin}/${kind}/${encodeURIComponent(p.sku)}`;
     const image=`${url.origin}/social/${kind}/${encodeURIComponent(p.sku)}.jpg`;
     const price=money(p.precio_oferta ?? p.precio);
@@ -86,4 +98,3 @@ export async function onRequest(context) {
   }
   return env.ASSETS.fetch(request);
 }
-
