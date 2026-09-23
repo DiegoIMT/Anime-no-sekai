@@ -590,3 +590,53 @@ header{position:sticky}
 .universeCard.active>b{color:#ddd2ff;text-shadow:0 0 14px rgba(139,92,246,.28)}
 @media (hover:hover) and (pointer:fine){.universeCard.active:hover .universeLogo{box-shadow:0 0 0 2px rgba(167,139,250,.24),0 0 22px rgba(139,92,246,.38),0 0 44px rgba(139,92,246,.20),0 14px 34px rgba(0,0,0,.30)}}
 @media (prefers-reduced-motion:reduce){.universeCard.active .universeLogo{transform:none}}
+
+/* V7.9.1 — dinamismo e interacciones, sin observers */
+@keyframes ansHeroIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes ansHeroSoftGlow{0%,100%{opacity:.55;transform:scale(1)}50%{opacity:.78;transform:scale(1.035)}}
+@keyframes ansUniverseSelected{0%{transform:scale(.98);box-shadow:0 0 0 0 rgba(139,92,246,0)}55%{transform:scale(1.045);box-shadow:0 0 0 3px rgba(139,92,246,.18),0 0 34px rgba(139,92,246,.42)}100%{transform:scale(1.025)}}
+@keyframes ansHelpOpen{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
+
+/* Entrada inicial escalonada del hero */
+.heroContent .eyebrow{animation:ansHeroIn .45s cubic-bezier(.2,.7,.2,1) both}
+.heroContent h1{animation:ansHeroIn .55s .08s cubic-bezier(.2,.7,.2,1) both}
+.heroContent>p{animation:ansHeroIn .55s .16s cubic-bezier(.2,.7,.2,1) both}
+.heroContent .heroBtns{animation:ansHeroIn .55s .24s cubic-bezier(.2,.7,.2,1) both}
+.hero::before{content:"";position:absolute;width:420px;height:420px;right:9%;top:50%;margin-top:-210px;border-radius:50%;pointer-events:none;background:radial-gradient(circle,rgba(139,92,246,.13),rgba(139,92,246,.035) 45%,transparent 70%);filter:blur(10px);animation:ansHeroSoftGlow 10s ease-in-out infinite;z-index:0}
+
+/* Botones: respuesta inmediata, sin rebotes */
+.primary,.secondary,.details,.whatsapp,.interestToggle,.chips button,.sectionHead>a,.footerShare,.footerHelp,.helpQuick a{transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease,background-color .18s ease,color .18s ease}
+@media (hover:hover) and (pointer:fine){
+ .primary:hover{transform:translateY(-2px);box-shadow:0 9px 22px rgba(124,58,237,.24)}
+ .secondary:hover,.details:hover{transform:translateY(-2px);border-color:rgba(139,92,246,.55);box-shadow:0 8px 20px rgba(0,0,0,.2)}
+ .whatsapp:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(21,58,42,.3)}
+ .chips button:hover{transform:translateY(-1px);border-color:rgba(139,92,246,.48);color:#e6defe}
+ .sectionHead>a:hover{transform:translateX(3px);color:#fff}
+}
+.primary:active,.secondary:active,.details:active,.whatsapp:active,.interestToggle:active,.chips button:active{transform:scale(.975)}
+
+/* Encabezados con acento visual sutil */
+.sectionHead h2,.arrival h2{position:relative}
+.sectionHead h2::after,.arrival h2::after{content:"";display:block;width:34px;height:2px;margin-top:9px;border-radius:999px;background:linear-gradient(90deg,#8B5CF6,rgba(167,139,250,.12));box-shadow:0 0 12px rgba(139,92,246,.28);transition:width .28s ease,box-shadow .28s ease}
+.section:hover .sectionHead h2::after,.arrival:hover h2::after{width:58px;box-shadow:0 0 18px rgba(139,92,246,.38)}
+
+/* Universo activo: pulso una sola vez al cambiar el filtro */
+.universeCard.active .universeLogo{animation:ansUniverseSelected .38s cubic-bezier(.2,.75,.25,1)}
+
+/* Detalle: galería más reactiva */
+.detailMainPhoto{transition:border-color .22s ease,box-shadow .22s ease}
+.detailMainPhoto:hover{border-color:rgba(139,92,246,.38);box-shadow:0 0 34px rgba(139,92,246,.10)}
+.detailThumb{transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+@media (hover:hover) and (pointer:fine){.detailThumb:hover{transform:translateY(-2px);border-color:rgba(139,92,246,.58)}}
+.detailThumb.active{box-shadow:0 0 0 1px rgba(139,92,246,.25),0 0 16px rgba(139,92,246,.18)}
+
+/* Ayuda: apertura con transición visual */
+.helpFaq details[open]>div{animation:ansHelpOpen .22s ease both}
+.helpFaq summary{transition:background-color .18s ease,color .18s ease}
+.helpFaq details[open] summary{background:rgba(139,92,246,.045)}
+
+/* El movimiento nunca debe imponerse a quien lo desactive */
+@media (prefers-reduced-motion:reduce){
+ .heroContent .eyebrow,.heroContent h1,.heroContent>p,.heroContent .heroBtns,.hero::before,.universeCard.active .universeLogo,.helpFaq details[open]>div{animation:none!important}
+ .primary,.secondary,.details,.whatsapp,.interestToggle,.chips button,.sectionHead>a,.footerShare,.footerHelp,.helpQuick a,.sectionHead h2::after,.arrival h2::after,.detailMainPhoto,.detailThumb{transition:none!important}
+}
