@@ -633,3 +633,10 @@ header{position:sticky}
  .cardEntering,.cardEntering.cardEntered{opacity:1!important;transform:none!important;transition:none!important}
  .detailMainPhoto img.detailImageEnter,.detailMainPhoto img.detailImageEnter.detailImageReady{opacity:1!important;transform:none!important;transition:none!important}
 }
+
+/* V7.9.1 — entrada perceptible validada sobre render real */
+.hero.heroEntering{opacity:0;transform:translateY(18px) scale(1.012);transition:opacity .9s cubic-bezier(.16,.84,.24,1),transform .9s cubic-bezier(.16,.84,.24,1)}
+.hero.heroEntering.heroReady{opacity:1;transform:translateY(0) scale(1)}
+/* La entrada de cards ahora la controla Web Animations API en app.js; el hover queda independiente. */
+.cardEntering,.cardEntering.cardEntered{opacity:1;transform:none;transition:border-color .26s ease,box-shadow .26s ease}
+@media (prefers-reduced-motion:reduce){.hero.heroEntering,.hero.heroEntering.heroReady{opacity:1!important;transform:none!important;transition:none!important}}

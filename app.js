@@ -133,7 +133,7 @@ function openHelpView(push=true){
 function renderStoreShell(){
  document.getElementById('app').innerHTML=`
 <header><a class="brand" href="#"><span class="brandIcon"><span class="mark brandMark">界</span><img class="brandLogo" id="homeLogo" alt="Logo Anime no Sekai" hidden></span><span class="brandText">ANIME NO <b>SEKAI</b><small>FIGURAS & COLECCIONABLES</small></span></a><nav><a href="#catalogo">Figuras</a><a href="#ofertas">Ofertas</a><a href="#mas-coleccion">Más para tu colección</a><a href="#proximamente">Próximamente</a><a href="#ayuda" data-open-help>Ayuda</a></nav><div class="headActions"><button id="interestListButton" class="interestListButton" type="button" aria-label="Abrir mi lista"><span class="interestListIcon" aria-hidden="true"><span class="interestClipboard"><i></i><i></i><i></i></span></span><span class="interestListText">Mi lista</span><span class="interestCount" data-interest-count hidden>0</span></button><button id="searchToggle" class="headerSearchTrigger" aria-label="Buscar" aria-expanded="false"><span class="headerSearchTriggerIcon">${icon('search')}</span><span class="headerSearchTriggerText">Buscar</span></button><button class="menu" id="mobileMenuButton" aria-label="Abrir menú" aria-expanded="false">${icon('menu')}</button></div><div class="headerSearch" id="headerSearch" aria-hidden="true"><span class="searchIcon">${icon('search')}</span><input id="publicSearchInput" type="search" autocomplete="off" placeholder="Buscar figura, personaje, anime, SKU o fabricante…" aria-label="Buscar en el catálogo"><button id="searchClose" type="button" aria-label="Cerrar búsqueda">×</button></div><div class="mobileNav" id="mobileNav" aria-hidden="true"><a href="#catalogo">Figuras</a><a href="#ofertas">Ofertas</a><a href="#mas-coleccion">Más para tu colección</a><a href="#proximamente">Próximamente</a><a href="#ayuda" data-open-help>Ayuda</a></div></header>
-<main><section class="hero"><div class="heroContent"><span class="eyebrow">${icon('sparkle')} <span id="homePortadaEtiqueta">DIRECTO DESDE JAPÓN</span></span><h1 id="homePortadaTitulo">Tu mundo de<br><em>figuras y coleccionables.</em></h1><p id="homePortadaDescripcion">Encuentra esa pieza que falta en tu colección. Figuras seleccionadas, disponibilidad real y atención directa por WhatsApp.</p><div class="heroBtns"><a href="#catalogo" class="primary">Explorar figuras ${icon('arrow')}</a><a href="#ofertas" class="secondary">${icon('fire')} Ver ofertas</a></div></div><div class="japan">日本<br><span>の世界</span></div></section>
+<main><section class="hero heroEntering"><div class="heroContent"><span class="eyebrow">${icon('sparkle')} <span id="homePortadaEtiqueta">DIRECTO DESDE JAPÓN</span></span><h1 id="homePortadaTitulo">Tu mundo de<br><em>figuras y coleccionables.</em></h1><p id="homePortadaDescripcion">Encuentra esa pieza que falta en tu colección. Figuras seleccionadas, disponibilidad real y atención directa por WhatsApp.</p><div class="heroBtns"><a href="#catalogo" class="primary">Explorar figuras ${icon('arrow')}</a><a href="#ofertas" class="secondary">${icon('fire')} Ver ofertas</a></div></div><div class="japan">日本<br><span>の世界</span></div></section>
 <section class="benefits"><div><span class="featureIcon">${icon('truck')}</span><span><b id="homeBeneficio1Titulo">Importadas de Japón</b><small id="homeBeneficio1Descripcion">Piezas seleccionadas</small></span></div><div><span class="featureIcon">${icon('shield')}</span><span><b id="homeBeneficio2Titulo">Compra con confianza</b><small id="homeBeneficio2Descripcion">Atención directa</small></span></div><div><span class="featureIcon">${icon('chat')}</span><span><b id="homeBeneficio3Titulo">Apártala por WhatsApp</b><small id="homeBeneficio3Descripcion">Rápido y sencillo</small></span></div></section>
 <section id="universos" class="section universeSection" hidden><div class="sectionHead"><div><span class="kicker">EXPLORA POR UNIVERSO</span><h2>Encuentra tu franquicia favorita</h2><p class="catalogIntro">Ve directo a las figuras del anime que estás buscando.</p></div></div><div id="featuredFranchises" class="universeGrid"></div></section>
 <section id="ofertas" class="section"><div class="sectionHead"><div><span class="kicker">🔥 PRECIOS ESPECIALES</span><h2 id="homeTituloOfertas">Ofertas del Sekai</h2></div><button id="viewAllOffers" class="sectionLinkButton" type="button">Ver todas ${icon('arrow')}</button></div><div id="offersGrid" class="grid"><p class="catalogMessage">Cargando ofertas…</p></div></section>
@@ -171,10 +171,23 @@ function applySiteVisuals(c){
  document.querySelectorAll('.brand').forEach(el=>el.classList.toggle('logoOnly',!!logo&&!showText));
  document.querySelectorAll('.brandText').forEach(el=>el.hidden=!!logo&&!showText);
  const hero=document.querySelector('.hero');
- if(hero){
-   if(c?.portada_url){hero.style.setProperty('--hero-image',`url('${String(c.portada_url).replace(/[\']/g,'')}')`);hero.style.setProperty('--hero-x',`${Number.isFinite(Number(c.portada_posicion_x))?Number(c.portada_posicion_x):50}%`);hero.style.setProperty('--hero-y',`${Number.isFinite(Number(c.portada_posicion_y))?Number(c.portada_posicion_y):50}%`);if(c?.portada_movil_url){hero.style.setProperty('--hero-mobile-image',`url('${String(c.portada_movil_url).replace(/[\']/g,'')}')`)}else hero.style.removeProperty('--hero-mobile-image');hero.style.setProperty('--hero-mobile-x',`${Number.isFinite(Number(c.portada_movil_posicion_x))?Number(c.portada_movil_posicion_x):50}%`);hero.style.setProperty('--hero-mobile-y',`${Number.isFinite(Number(c.portada_movil_posicion_y))?Number(c.portada_movil_posicion_y):50}%`);hero.classList.add('hasHeroImage')}
-   else {hero.style.removeProperty('--hero-image');hero.style.removeProperty('--hero-mobile-image');hero.style.removeProperty('--hero-x');hero.style.removeProperty('--hero-y');hero.style.removeProperty('--hero-mobile-x');hero.style.removeProperty('--hero-mobile-y');hero.classList.remove('hasHeroImage')}
+ if(!hero)return;
+ const revealHero=()=>requestAnimationFrame(()=>requestAnimationFrame(()=>hero.classList.add('heroReady')));
+ if(!c?.portada_url){
+   hero.style.removeProperty('--hero-image');hero.style.removeProperty('--hero-mobile-image');hero.style.removeProperty('--hero-x');hero.style.removeProperty('--hero-y');hero.style.removeProperty('--hero-mobile-x');hero.style.removeProperty('--hero-mobile-y');hero.classList.remove('hasHeroImage');revealHero();return;
  }
+ const applyHero=()=>{
+   hero.style.setProperty('--hero-image',`url('${String(c.portada_url).replace(/[\']/g,'')}')`);
+   hero.style.setProperty('--hero-x',`${Number.isFinite(Number(c.portada_posicion_x))?Number(c.portada_posicion_x):50}%`);
+   hero.style.setProperty('--hero-y',`${Number.isFinite(Number(c.portada_posicion_y))?Number(c.portada_posicion_y):50}%`);
+   if(c?.portada_movil_url)hero.style.setProperty('--hero-mobile-image',`url('${String(c.portada_movil_url).replace(/[\']/g,'')}')`);else hero.style.removeProperty('--hero-mobile-image');
+   hero.style.setProperty('--hero-mobile-x',`${Number.isFinite(Number(c.portada_movil_posicion_x))?Number(c.portada_movil_posicion_x):50}%`);
+   hero.style.setProperty('--hero-mobile-y',`${Number.isFinite(Number(c.portada_movil_posicion_y))?Number(c.portada_movil_posicion_y):50}%`);
+   hero.classList.add('hasHeroImage');revealHero();
+ };
+ const currentHeroUrl=(window.matchMedia?.('(max-width:560px)').matches&&c?.portada_movil_url)?c.portada_movil_url:c.portada_url;
+ const preload=new Image();preload.onload=applyHero;preload.onerror=applyHero;preload.src=currentHeroUrl;
+ if(preload.complete)applyHero();
 }
 
 async function loadFeaturedFranchises(){
@@ -188,20 +201,18 @@ async function loadFeaturedFranchises(){
 }
 
 function animateRenderedCards(container){
- if(!container||window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)return;
+ if(!container)return;
  const cards=[...container.querySelectorAll(':scope > .card')];
+ if(!cards.length||window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)return;
  cards.forEach((card,index)=>{
-   card.classList.remove('cardEntering','cardEntered');
-   card.style.setProperty('--card-enter-delay',`${Math.min(index,7)*75}ms`);
-   card.classList.add('cardEntering');
+   card.getAnimations?.().forEach(animation=>animation.cancel());
+   card.animate([
+     {opacity:0,transform:'translateY(28px) scale(.97)'},
+     {opacity:1,transform:'translateY(0) scale(1)'}
+   ],{duration:760,delay:Math.min(index,7)*95,easing:'cubic-bezier(.16,.84,.24,1)',fill:'both'}).finished
+     .then(()=>{card.getAnimations?.().forEach(animation=>animation.cancel())})
+     .catch(()=>{});
  });
- if(!cards.length)return;
- void container.offsetWidth;
- requestAnimationFrame(()=>requestAnimationFrame(()=>{
-   cards.forEach(card=>card.classList.add('cardEntered'));
-   const cleanup=()=>cards.forEach(card=>{card.classList.remove('cardEntering','cardEntered');card.style.removeProperty('--card-enter-delay')});
-   setTimeout(cleanup,1250);
- }));
 }
 function prepareDetailMainImage(detail){
  const img=detail?.querySelector('#detailMainImage');if(!img)return;
