@@ -640,3 +640,14 @@ header{position:sticky}
 /* La entrada de cards ahora la controla Web Animations API en app.js; el hover queda independiente. */
 .cardEntering,.cardEntering.cardEntered{opacity:1;transform:none;transition:border-color .26s ease,box-shadow .26s ease}
 @media (prefers-reduced-motion:reduce){.hero.heroEntering,.hero.heroEntering.heroReady{opacity:1!important;transform:none!important;transition:none!important}}
+
+/* V7.9.1 — Iconografía de beneficios: Japón, ubicación y WhatsApp */
+.benefits .featureIcon{flex:0 0 30px;width:30px;height:30px;display:grid;place-items:center}
+.benefits .featureIcon svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.benefits .featureIconWhatsapp{color:#25D366}
+.benefits .featureIconWhatsapp svg{width:27px;height:27px}
+.benefits .featureIconWhatsapp svg path:first-child{fill:#25D366;stroke:#25D366}
+.benefits .featureIconWhatsapp svg path:last-child{fill:none;stroke:#fff;stroke-width:1.55}
+.benefits .featureIconLocation{color:#A78BFA}
+.japanFlag{width:28px;height:19px;border-radius:3px;background:#fff;border:1px solid rgba(255,255,255,.28);position:relative;display:block;box-shadow:0 2px 8px rgba(0,0,0,.28)}
+.japanFlag::after{content:'';position:absolute;width:9px;height:9px;border-radius:50%;background:#bc002d;left:50%;top:50%;transform:translate(-50%,-50%)}
