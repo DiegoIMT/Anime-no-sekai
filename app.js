@@ -183,7 +183,8 @@ async function loadFeaturedFranchises(){
  if(error){console.error(error);section.hidden=true;return}
  const rows=data||[];section.hidden=!rows.length;if(!rows.length)return;
  box.innerHTML=rows.map(x=>`<button class="universeCard" type="button" data-universe="${attr(x.nombre)}"><span class="universeLogo">${x.logo_url?`<img src="${attr(x.logo_url)}" alt="Logo de ${attr(x.nombre)}">`:'<span class="universeMark">界</span>'}</span><b>${escapeHtml(x.nombre)}</b></button>`).join('');
- box.querySelectorAll('[data-universe]').forEach(b=>b.onclick=()=>{const name=b.dataset.universe;publicCatalogPage=1;publicQuickFilter='todas';publicCatalogFilters.franquicia=name;publicCatalogFilters.personaje='';const f=document.getElementById('filterFranchise'),c=document.getElementById('filterCharacter');if(f)f.value=name;if(c)c.value='';document.querySelectorAll('#catalogQuickFilters button').forEach(x=>x.classList.toggle('active',x.dataset.quick==='todas'));updateCharacterOptions();updateMobileCatalogFilterState();loadCatalogPage();document.getElementById('catalogo')?.scrollIntoView({behavior:'smooth',block:'start'});});
+ syncUniverseActiveState();
+ box.querySelectorAll('[data-universe]').forEach(b=>b.onclick=()=>{const name=b.dataset.universe;publicCatalogPage=1;publicQuickFilter='todas';publicCatalogFilters.franquicia=name;publicCatalogFilters.personaje='';const f=document.getElementById('filterFranchise'),c=document.getElementById('filterCharacter');if(f)f.value=name;if(c)c.value='';syncUniverseActiveState();document.querySelectorAll('#catalogQuickFilters button').forEach(x=>x.classList.toggle('active',x.dataset.quick==='todas'));updateCharacterOptions();updateMobileCatalogFilterState();loadCatalogPage();document.getElementById('catalogo')?.scrollIntoView({behavior:'smooth',block:'start'});});
 }
 
 async function loadPublicCatalog(){
@@ -323,6 +324,10 @@ function renderCatalogPagination(totalPages){
  for(const n of pages){if(last&&n-last>1)html+='<span>…</span>'; html+=`<button type="button" data-page="${n}" class="${n===current?'active':''}" ${n===current?'aria-current="page"':''}>${n}</button>`;last=n}
  html+=`<button type="button" data-page="${current+1}" ${current===totalPages?'disabled':''}>Siguiente ›</button>`; nav.innerHTML=html;
 }
+function syncUniverseActiveState(){
+ const active=(publicCatalogFilters.franquicia||'').trim().toLowerCase();
+ document.querySelectorAll('#featuredFranchises [data-universe]').forEach(b=>{const selected=!!active&&(b.dataset.universe||'').trim().toLowerCase()===active;b.classList.toggle('active',selected);b.setAttribute('aria-pressed',String(selected))});
+}
 function updateMobileCatalogFilterState(){
  const count=[publicCatalogFilters.franquicia,publicCatalogFilters.personaje,publicCatalogFilters.fabricante].filter(Boolean).length+(publicCatalogFilters.orden!=='recientes'?1:0)+(publicQuickFilter!=='todas'?1:0);
  const badge=document.getElementById('mobileCatalogFilterCount');if(badge){badge.textContent=count;badge.hidden=count===0}
@@ -332,7 +337,7 @@ function setMobileCatalogFiltersOpen(open){
 }
 function initPublicCatalogFilters(){
  let timer;const refresh=()=>{clearTimeout(timer);timer=setTimeout(loadCatalogPage,220)};
- const bind=(id,key)=>document.getElementById(id)?.addEventListener('input',e=>{publicCatalogPage=1;publicCatalogFilters[key]=e.target.value;clearTimeout(e.target.__analyticsTimer);e.target.__analyticsTimer=setTimeout(()=>{const valor=e.target.value.trim();if(valor){if(key==='busqueda')trackCatalogSearch(valor);else registerAnalyticsEvent('filtro',{contexto:{tipo:key,valor}})}},650);if(key==='franquicia'){publicCatalogFilters.personaje='';const c=document.getElementById('filterCharacter');if(c)c.value='';updateCharacterOptions()}updateMobileCatalogFilterState();refresh()});
+ const bind=(id,key)=>document.getElementById(id)?.addEventListener('input',e=>{publicCatalogPage=1;publicCatalogFilters[key]=e.target.value;clearTimeout(e.target.__analyticsTimer);e.target.__analyticsTimer=setTimeout(()=>{const valor=e.target.value.trim();if(valor){if(key==='busqueda')trackCatalogSearch(valor);else registerAnalyticsEvent('filtro',{contexto:{tipo:key,valor}})}},650);if(key==='franquicia'){publicCatalogFilters.personaje='';const c=document.getElementById('filterCharacter');if(c)c.value='';updateCharacterOptions();syncUniverseActiveState()}updateMobileCatalogFilterState();refresh()});
  bind('catalogSearch','busqueda');bind('filterFranchise','franquicia');bind('filterCharacter','personaje');bind('filterManufacturer','fabricante');
  document.getElementById('catalogSort')?.addEventListener('change',e=>{publicCatalogPage=1;publicCatalogFilters.orden=e.target.value;updateMobileCatalogFilterState();loadCatalogPage()});
  document.querySelectorAll('#catalogQuickFilters [data-quick]').forEach(b=>b.addEventListener('click',()=>{publicCatalogPage=1;publicQuickFilter=b.dataset.quick;if(publicQuickFilter!=='todas')registerAnalyticsEvent('filtro',{contexto:{tipo:'rapido',valor:publicQuickFilter}});updateMobileCatalogFilterState();loadCatalogPage()}));
@@ -346,7 +351,7 @@ function initPublicCatalogFilters(){
 }
 function clearPublicCatalogFilters(){
  publicQuickFilter='todas';publicSearchQuery='';publicCatalogPage=1;publicCatalogFilters={busqueda:'',franquicia:'',personaje:'',fabricante:'',orden:'recientes'};
- [['catalogSearch',''],['filterFranchise',''],['filterCharacter',''],['filterManufacturer',''],['catalogSort','recientes'],['publicSearchInput','']].forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.value=v});updateCharacterOptions();updateMobileCatalogFilterState();setMobileCatalogFiltersOpen(false);loadCatalogPage();
+ [['catalogSearch',''],['filterFranchise',''],['filterCharacter',''],['filterManufacturer',''],['catalogSort','recientes'],['publicSearchInput','']].forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.value=v});updateCharacterOptions();syncUniverseActiveState();updateMobileCatalogFilterState();setMobileCatalogFiltersOpen(false);loadCatalogPage();
 }
 
 async function openFigureCollection(kind){
