@@ -615,3 +615,21 @@ header{position:sticky}
 .imageLightboxPrev{left:22px}.imageLightboxNext{right:22px}
 @media(max-width:560px){.imageLightboxArrow{width:46px;height:46px;font-size:32px}.imageLightboxPrev{left:8px}.imageLightboxNext{right:8px}.imageLightboxStage img{max-width:96vw;max-height:86vh}.imageLightboxCounter{bottom:8px}}
 @media(prefers-reduced-motion:reduce){.hero .heroContent>*,.grid>.card,.detailView,.helpView,.interestListView,.interestListPanel,.galleryImageChanging,.imageLightbox img.is-changing{animation:none!important}.publicProductCard:hover,.publicAdditionalCard:hover{transform:none}.publicProductCard:hover .photo img,.publicAdditionalCard:hover .photo img{transform:none}}
+
+
+/* V7.9.1 — corrección final de dinamismo: entrada real + hover conservado */
+.grid>.card{animation:none!important}
+.cardEntering{opacity:0;transform:translateY(24px) scale(.975);transition:opacity .62s cubic-bezier(.2,.8,.2,1),transform .62s cubic-bezier(.2,.8,.2,1),border-color .26s ease,box-shadow .26s ease;transition-delay:var(--card-enter-delay,0ms),var(--card-enter-delay,0ms),0ms,0ms}
+.cardEntering.cardEntered{opacity:1;transform:translateY(0) scale(1)}
+@media (hover:hover) and (pointer:fine){
+ .publicProductCard:hover,.publicAdditionalCard:hover{transform:translateY(-8px) scale(1.006)!important;border-color:rgba(167,139,250,.72)!important;box-shadow:0 22px 48px rgba(0,0,0,.42),0 0 18px rgba(139,92,246,.34),0 0 42px rgba(139,92,246,.24),0 0 72px rgba(139,92,246,.11)!important}
+ .publicProductCard:hover .photo img,.publicAdditionalCard:hover .photo img{transform:scale(1.055)!important;opacity:.96}
+ .detailMainPhoto{transition:border-color .28s ease,box-shadow .28s ease,transform .28s ease}
+ .detailMainPhoto:hover{border-color:rgba(167,139,250,.72);box-shadow:0 0 18px rgba(139,92,246,.34),0 0 42px rgba(139,92,246,.23),0 18px 42px rgba(0,0,0,.30);transform:translateY(-2px)}
+}
+.detailMainPhoto img.detailImageEnter{opacity:0;transform:scale(.97);transition:opacity .68s cubic-bezier(.2,.8,.2,1),transform .68s cubic-bezier(.2,.8,.2,1)}
+.detailMainPhoto img.detailImageEnter.detailImageReady{opacity:1;transform:scale(1)}
+@media (prefers-reduced-motion:reduce){
+ .cardEntering,.cardEntering.cardEntered{opacity:1!important;transform:none!important;transition:none!important}
+ .detailMainPhoto img.detailImageEnter,.detailMainPhoto img.detailImageEnter.detailImageReady{opacity:1!important;transform:none!important;transition:none!important}
+}
