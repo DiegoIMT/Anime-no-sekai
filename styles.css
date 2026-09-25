@@ -1147,3 +1147,42 @@ html[data-theme="light"] .hero .eyebrow{color:color-mix(in srgb,var(--brand-prim
 @media(max-width:560px){
   .hero.hasHeroImage .heroContent,html[data-theme="light"] .hero.hasHeroImage .heroContent{padding:0!important}
 }
+
+/* V7.10.5 — contraste Light del hero + universos sin tarjetas */
+html[data-theme="light"] .hero.hasHeroImage::before{
+  background:linear-gradient(90deg,rgba(255,255,255,.78) 0%,rgba(255,255,255,.62) 36%,rgba(255,255,255,.18) 64%,rgba(255,255,255,.03) 100%)!important;
+}
+html[data-theme="light"] .heroContent{color:#0d0b10!important;text-shadow:0 1px 2px rgba(255,255,255,.92)!important}
+html[data-theme="light"] .hero h1{color:#0d0b10!important;text-shadow:0 1px 2px rgba(255,255,255,.94)!important}
+html[data-theme="light"] .hero p{color:#26212b!important;font-weight:550!important;text-shadow:0 1px 2px rgba(255,255,255,.96)!important}
+html[data-theme="light"] .hero .eyebrow,
+html[data-theme="light"] .universeSection .eyebrow,
+html[data-theme="light"] .universeSection .kicker{
+  color:color-mix(in srgb,var(--brand-primary) 88%,#3a1267)!important;
+  font-weight:900!important;
+}
+html[data-theme="light"] .universeCard,
+html[data-theme="light"] .universeCard:hover,
+html[data-theme="light"] .universeCard.active{
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+html[data-theme="light"] .universeLogo{
+  background:transparent!important;
+}
+html[data-theme="light"] .universeCard>b,
+html[data-theme="light"] .universeCard .universeName{
+  color:#1b1720!important;
+  font-weight:800!important;
+}
+html[data-theme="light"] .universeCard:hover>b,
+html[data-theme="light"] .universeCard.active>b{
+  color:color-mix(in srgb,var(--brand-primary) 72%,#24152f)!important;
+}
+@media(max-width:560px){
+  html[data-theme="light"] .hero.hasHeroImage::before{
+    background:linear-gradient(90deg,rgba(255,255,255,.66) 0%,rgba(255,255,255,.48) 58%,rgba(255,255,255,.14) 100%)!important;
+  }
+  html[data-theme="light"] .hero p{color:#211d26!important;font-weight:600!important}
+}
