@@ -170,7 +170,7 @@ function applySiteConfig(c){
  root.style.setProperty('--ami-primary',c.ami_color_primario||'#ff78b2');root.style.setProperty('--ami-secondary',c.ami_color_secundario||'#b88cff');
  set('amiHomeName',c.ami_nombre||'Ami no Sekai');set('amiHomeText',c.ami_texto_inicio||c.ami_descripcion||'Tejiendo pequeños mundos. Amigurumis y creaciones artesanales hechas con cariño.');
  const amiHomeLogo=document.getElementById('amiHomeLogo');if(amiHomeLogo)amiHomeLogo.src=c.ami_logo_url||'/assets/ami-no-sekai-logo.webp';
- const amiSection=document.getElementById('mas-coleccion');if(amiSection)amiSection.hidden=c.ami_mostrar_inicio===false||c.ami_visible===false;
+ const amiSection=document.getElementById('mas-coleccion');if(amiSection)amiSection.hidden=routeName(location.pathname)!=='home'||c.ami_mostrar_inicio===false||c.ami_visible===false;
  document.querySelectorAll('a[href="/ami-no-sekai"]').forEach(a=>a.hidden=c.ami_visible===false);
  applySiteVisuals(c);
 }
@@ -299,7 +299,7 @@ async function loadPublicAdditionalCatalog(){
  const grid=document.getElementById('additionalGrid'), section=document.getElementById('mas-coleccion');
  if(error){if(grid)grid.innerHTML='<p class="catalogMessage error">No fue posible cargar Más para tu colección.</p>';console.error(error);return}
  additionalProducts=(data||[]).map(mapAdditionalProduct);
- if(section)section.hidden=!additionalProducts.length;
+ if(section)section.hidden=routeName(location.pathname)!=='home'||!additionalProducts.length;
  if(grid)grid.innerHTML=additionalProducts.length?additionalProducts.map(additionalProductCard).join(''):'<p class="catalogMessage">Próximamente tendremos más productos para tu colección.</p>';
  animateRenderedCards(grid);
  const skuFromHash=location.hash.startsWith('#producto=')?decodeURIComponent(location.hash.slice(10)):null;
@@ -474,20 +474,31 @@ function setRouteVisibility(name){
  if(page)page.hidden=name==='home';
  document.querySelectorAll('[data-route-link]').forEach(a=>{try{a.classList.toggle('activeRoute',new URL(a.href,location.origin).pathname===location.pathname)}catch{}});
 }
+function parkPublicCatalog(){
+ const catalog=document.getElementById('catalogo'),parking=document.getElementById('routeParking');
+ if(catalog&&parking&&catalog.parentElement!==parking)parking.appendChild(catalog);
+ if(catalog)catalog.hidden=true;
+}
 async function renderRoutePage(name){
  const page=document.getElementById('routePage');
  if(!page)return;
+ // El catálogo completo pertenece exclusivamente a /figuras. Antes de reconstruir
+ // cualquier otra vista lo estacionamos para que page.innerHTML nunca lo destruya.
+ parkPublicCatalog();
  if(name==='home'){
   const hero=document.querySelector('.hero');
   if(hero){hero.classList.remove('heroReady');requestAnimationFrame(()=>requestAnimationFrame(()=>hero.classList.add('heroReady')))}
   await Promise.all([loadFeaturedFranchises(),loadPublicCatalog(),loadPublicAdditionalCatalog()]);
   return;
- }const catalog=document.getElementById('catalogo');if(catalog&&catalog.parentElement===page)document.getElementById('routeParking')?.appendChild(catalog);
+ }
  page.className=`routePage route-${name}`;
  if(name==='figuras'){
   page.innerHTML=`<div class="routeHero"><span class="kicker">CATÁLOGO</span><h1>Figuras</h1><p>Explora todas nuestras figuras disponibles, filtra por franquicia, personaje o fabricante y encuentra tu próxima pieza.</p></div><div id="routeFiguresMount"></div>`;
-  const catalog=document.getElementById('catalogo');if(catalog){catalog.hidden=false;page.querySelector('#routeFiguresMount').appendChild(catalog)}
-  await Promise.all([loadPublicFilterOptions(),loadCatalogPage()]);return;
+  const catalog=document.getElementById('catalogo'),mount=page.querySelector('#routeFiguresMount');
+  if(catalog&&mount){mount.appendChild(catalog);catalog.hidden=false}
+  await loadPublicFilterOptions();
+  await loadCatalogPage();
+  return;
  }
  if(name==='ami'){
   const types=await loadAdditionalTypes();const ac=siteConfig||{};page.innerHTML=`<div class="amiRouteHero"><div class="amiLogoWrap"><img src="${attr(ac.ami_logo_url||'/assets/ami-no-sekai-logo.webp')}" alt="${attr(ac.ami_nombre||'Ami no Sekai')}"></div><div class="amiHeroCopy"><h1>${escapeHtml(ac.ami_nombre||'Ami no Sekai')}</h1><p><strong>${escapeHtml(ac.ami_eslogan||'Tejiendo pequeños mundos')}</strong>. ${escapeHtml(ac.ami_descripcion||'Creaciones artesanales con personalidad propia, hechas para acompañar tu colección.')}</p></div></div><div class="amiCatalog"><div class="sectionHead"><div><span class="kicker">COLECCIÓN ARTESANAL</span><h2>Descubre Ami no Sekai</h2></div><span id="amiCatalogCount" class="catalogCount"></span></div><div class="additionalCatalogTools"><input id="amiSearch" type="search" autocomplete="off" placeholder="Buscar producto, SKU o descripción…"><select id="amiType"><option value="">Todos los tipos</option>${types.map(x=>`<option value="${attr(x.id)}">${escapeHtml(x.nombre)}</option>`).join('')}</select></div><div id="amiGrid" class="grid"><p class="catalogMessage">Cargando productos…</p></div></div>`;
