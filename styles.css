@@ -1186,3 +1186,153 @@ html[data-theme="light"] .universeCard.active>b{
   }
   html[data-theme="light"] .hero p{color:#211d26!important;font-weight:600!important}
 }
+
+/* =========================================================
+   V7.10.6 — Estados interactivos consistentes + detalle Light
+   ========================================================= */
+
+/* Todos los controles tipo botón deben comunicar que son interactivos. */
+button:not(:disabled),
+.primary,
+.secondary,
+.details,
+.whatsapp,
+.sectionCta,
+.shareProductButton,
+.interestToggle,
+.catalogPagination button,
+.chips button,
+.helpQuick a,
+.footerShare,
+.footerHelp,
+.backBtn,
+.detailClose,
+.detailThumb,
+.galleryArrow,
+.lightboxArrow,
+.lightboxClose,
+.shareMenuActions a,
+.shareMenuActions button {
+  cursor:pointer;
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease,
+             background-color .18s ease, color .18s ease, opacity .18s ease, filter .18s ease;
+}
+
+@media (hover:hover) and (pointer:fine){
+  button:not(:disabled):hover,
+  .primary:hover,
+  .secondary:hover,
+  .details:hover,
+  .whatsapp:hover,
+  .sectionCta:hover,
+  .shareProductButton:hover,
+  .catalogPagination button:hover,
+  .chips button:hover,
+  .helpQuick a:hover,
+  .footerShare:hover,
+  .detailClose:hover,
+  .detailThumb:hover,
+  .galleryArrow:hover,
+  .lightboxArrow:hover,
+  .lightboxClose:hover,
+  .shareMenuActions a:hover,
+  .shareMenuActions button:hover {
+    filter:brightness(1.08);
+    box-shadow:0 7px 20px rgba(0,0,0,.16);
+  }
+
+  .primary:hover,
+  .whatsapp:hover,
+  .sectionCta:hover,
+  .details:hover,
+  .secondary:hover,
+  .shareProductButton:hover,
+  .helpQuick a:hover,
+  .footerShare:hover {
+    transform:translateY(-2px);
+  }
+
+  .backBtn:hover,
+  .footerHelp:hover,
+  .interestToggle:hover {
+    opacity:.82;
+  }
+}
+
+button:not(:disabled):active,
+.primary:active,
+.secondary:active,
+.details:active,
+.whatsapp:active,
+.sectionCta:active,
+.shareProductButton:active,
+.interestToggle:active,
+.catalogPagination button:active,
+.chips button:active,
+.helpQuick a:active,
+.footerShare:active,
+.footerHelp:active,
+.backBtn:active,
+.detailClose:active,
+.detailThumb:active,
+.galleryArrow:active,
+.lightboxArrow:active,
+.lightboxClose:active,
+.shareMenuActions a:active,
+.shareMenuActions button:active {
+  transform:scale(.975);
+  filter:brightness(.96);
+}
+
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible {
+  outline:3px solid color-mix(in srgb,var(--brand-primary) 58%,transparent);
+  outline-offset:3px;
+}
+
+button:disabled,
+button[aria-disabled="true"],
+.disabled {
+  cursor:not-allowed;
+}
+
+/* En móvil el bloque sticky de acciones heredaba el degradado negro del tema Dark. */
+@media(max-width:560px){
+  html[data-theme="light"] .detailActions{
+    background:linear-gradient(180deg,rgba(250,249,252,0),rgba(250,249,252,.94) 16%,rgba(250,249,252,.99) 34%,rgba(250,249,252,1));
+  }
+  html[data-theme="light"] .detailNote{
+    color:#6d6674!important;
+  }
+}
+
+/* Superficies de acciones del detalle en Light: ninguna franja Dark aislada. */
+html[data-theme="light"] .detailActions{
+  color:var(--text);
+}
+html[data-theme="light"] .detailUtilityActions{
+  background:transparent;
+}
+html[data-theme="light"] .detailUtilityActions .interestToggle,
+html[data-theme="light"] .shareProductButton{
+  box-shadow:none;
+}
+@media (hover:hover) and (pointer:fine){
+  html[data-theme="light"] .detailUtilityActions .interestToggle:hover,
+  html[data-theme="light"] .shareProductButton:hover{
+    background:#e9e3ef!important;
+    border-color:color-mix(in srgb,var(--brand-primary) 48%,var(--line))!important;
+    color:#241d2a!important;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  button,
+  .primary,.secondary,.details,.whatsapp,.sectionCta,.shareProductButton,.interestToggle,
+  .catalogPagination button,.chips button,.helpQuick a,.footerShare,.footerHelp,.backBtn,
+  .detailClose,.detailThumb,.galleryArrow,.lightboxArrow,.lightboxClose,.shareMenuActions a,
+  .shareMenuActions button{
+    transition:none!important;
+  }
+}
