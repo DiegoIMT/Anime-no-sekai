@@ -19,6 +19,15 @@
   <meta name="twitter:title" content="Anime no Sekai | Figuras & Coleccionables">
   <meta name="twitter:description" content="Figuras de anime y coleccionables en Mérida, Yucatán. Entrega local y atención directa por WhatsApp.">
   <title>Anime no Sekai | Figuras & Coleccionables</title>
+  <script>
+    (()=>{
+      try{
+        const saved=localStorage.getItem('animeNoSekaiTheme');
+        const theme=saved==='light'||saved==='dark'?saved:(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');
+        document.documentElement.dataset.theme=theme;
+      }catch{document.documentElement.dataset.theme='dark'}
+    })();
+  </script>
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
