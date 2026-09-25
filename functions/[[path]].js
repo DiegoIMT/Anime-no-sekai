@@ -85,13 +85,26 @@ export async function onRequest(context) {
     if (heroImage) {
       const html = injectMeta(await indexHtml(request,env), {
         title:'Anime no Sekai | Figuras & Coleccionables',
-        description:'Figuras de anime, coleccionables, ofertas y próximos lanzamientos.',
+        description:'Figuras de anime y coleccionables en Mérida, Yucatán. Entrega local y atención directa por WhatsApp.',
         url:`${url.origin}/`,
         image:heroImage
       });
       return new Response(html,{headers:{'Content-Type':'text/html; charset=UTF-8','Cache-Control':'public, max-age=300'}});
     }
     return env.ASSETS.fetch(request);
+  }
+  const publicPages = {
+    '/figuras': {title:'Figuras | Anime no Sekai', description:'Explora el catálogo de figuras de anime disponibles en Anime no Sekai, Mérida, Yucatán.'},
+    '/ofertas': {title:'Ofertas | Anime no Sekai', description:'Consulta las figuras con precio especial disponibles en Anime no Sekai.'},
+    '/proximamente': {title:'Próximamente | Anime no Sekai', description:'Descubre las figuras que vienen en camino a Anime no Sekai.'},
+    '/ami-no-sekai': {title:'Ami no Sekai | Tejiendo pequeños mundos', description:'Ami no Sekai, submarca artesanal de Anime no Sekai: amigurumis y creaciones hechas para acompañar tu colección.'},
+    '/ayuda': {title:'Centro de ayuda | Anime no Sekai', description:'Conoce cómo comprar, apartar y coordinar entregas locales con Anime no Sekai en Mérida, Yucatán.'}
+  };
+  if (publicPages[path.replace(/\/$/,'')]) {
+    const key=path.replace(/\/$/,''); const info=publicPages[key]; const heroImage=await siteShareImage();
+    const image=key==='/ami-no-sekai'?`${url.origin}/assets/ami-no-sekai-og.jpg`:(heroImage||`${url.origin}/assets/ami-no-sekai-og.jpg`);
+    const html=injectMeta(await indexHtml(request,env),{...info,url:`${url.origin}${key}`,image});
+    return new Response(html,{headers:{'Content-Type':'text/html; charset=UTF-8','Cache-Control':'public, max-age=300'}});
   }
   m = path.match(/^\/(figura|producto)\/([^/]+)\/?$/i);
   if (m) {
