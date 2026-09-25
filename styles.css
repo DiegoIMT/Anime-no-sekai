@@ -897,3 +897,87 @@ html[data-theme="light"] .detailThumb{background:#fff}
 html[data-theme="light"] .detailUtilityActions .interestToggle,html[data-theme="light"] .shareProductButton{background:#f3f0f6;border-color:var(--line);color:#302a37}
 html[data-theme="light"] .detailUtilityActions .interestToggle.active{background:#eaf7f0;border-color:#9bcab0;color:#185c39!important}
 html[data-theme="light"] .detailSku,html[data-theme="light"] .detailMeta small{color:#706978}
+
+/* V7.10.2 — Hero visible en Light + estados claros de navegación */
+/* En tema claro se conserva la imagen configurada del hero; antes el shorthand de .hero la reemplazaba. */
+html[data-theme="light"] .hero.hasHeroImage{
+  background-image:
+    linear-gradient(90deg,rgba(247,245,250,.86) 0%,rgba(247,245,250,.66) 34%,rgba(247,245,250,.18) 62%,rgba(247,245,250,.03) 82%),
+    radial-gradient(circle at 78% 50%,color-mix(in srgb,var(--brand-primary) 13%,transparent) 0,transparent 46%),
+    var(--hero-image);
+  background-size:cover;
+  background-position:var(--hero-x,50%) var(--hero-y,50%);
+  background-repeat:no-repeat;
+}
+html[data-theme="light"] .hero.hasHeroImage::before{
+  background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.08));
+  filter:none;
+}
+html[data-theme="light"] .hero.hasHeroImage::after{
+  background-image:linear-gradient(rgba(71,54,88,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(71,54,88,.025) 1px,transparent 1px);
+  opacity:.22;
+}
+
+/* Navegación: hover perceptible y ruta actual persistente en Light/Dark. */
+header nav a{
+  position:relative;
+  padding:10px 2px;
+  transition:color .2s ease,text-shadow .2s ease;
+}
+header nav a::after{
+  content:'';
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:3px;
+  height:2px;
+  border-radius:999px;
+  background:var(--brand-primary);
+  transform:scaleX(0);
+  transform-origin:center;
+  opacity:.85;
+  transition:transform .22s ease,box-shadow .22s ease,opacity .22s ease;
+}
+header nav a:hover::after,header nav a.activeRoute::after{
+  transform:scaleX(1);
+  box-shadow:0 0 12px color-mix(in srgb,var(--brand-primary) 48%,transparent);
+}
+header nav a.activeRoute{font-weight:800;color:var(--text)}
+header nav a[href="/ami-no-sekai"]::after{background:var(--ami-primary)}
+header nav a[href="/ami-no-sekai"]:hover::after,header nav a[href="/ami-no-sekai"].activeRoute::after{
+  box-shadow:0 0 12px color-mix(in srgb,var(--ami-primary) 50%,transparent);
+}
+
+.mobileNav a{
+  position:relative;
+  border-radius:9px;
+  transition:background-color .2s ease,color .2s ease,box-shadow .2s ease;
+}
+.mobileNav a:hover,.mobileNav a.activeRoute{
+  background:color-mix(in srgb,var(--brand-primary) 12%,transparent);
+  color:var(--text);
+  box-shadow:inset 3px 0 0 var(--brand-primary);
+}
+.mobileNav a[href="/ami-no-sekai"]:hover,.mobileNav a[href="/ami-no-sekai"].activeRoute{
+  background:color-mix(in srgb,var(--ami-primary) 12%,transparent);
+  box-shadow:inset 3px 0 0 var(--ami-primary);
+}
+
+@media(max-width:760px){
+  html[data-theme="light"] .hero.hasHeroImage{
+    background-image:
+      linear-gradient(90deg,rgba(247,245,250,.82) 0%,rgba(247,245,250,.58) 54%,rgba(247,245,250,.12) 82%),
+      radial-gradient(circle at 72% 42%,color-mix(in srgb,var(--brand-primary) 12%,transparent),transparent 55%),
+      var(--hero-image);
+  }
+}
+@media(max-width:560px){
+  html[data-theme="light"] .hero.hasHeroImage{
+    background-image:
+      linear-gradient(90deg,rgba(247,245,250,.80) 0%,rgba(247,245,250,.58) 55%,rgba(247,245,250,.14) 100%),
+      radial-gradient(circle at 68% 35%,color-mix(in srgb,var(--brand-primary) 10%,transparent),transparent 58%),
+      var(--hero-mobile-image,var(--hero-image));
+    background-position:var(--hero-mobile-x,50%) var(--hero-mobile-y,50%);
+  }
+}
+@media(prefers-reduced-motion:reduce){header nav a,header nav a::after,.mobileNav a{transition:none!important}}
