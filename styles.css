@@ -670,6 +670,9 @@ header{position:sticky}
 #generalWhatsapp,.interestShare,.shareMenuActions a{gap:7px}
 #generalWhatsapp .whatsappIcon,.interestShare .whatsappIcon,.shareMenuActions .whatsappIcon{width:19px;height:19px;flex-basis:19px}
 
+/* Estado hidden debe prevalecer sobre layouts grid/flex de las secciones. */
+[hidden]{display:none!important}
+
 /* V7.11.0 — páginas públicas + identidad Ami no Sekai */
 body[data-route="home"] #catalogo{display:none!important}
 .routePage{max-width:1280px;margin:0 auto;padding:44px 24px 76px;min-height:70vh}

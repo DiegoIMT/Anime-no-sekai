@@ -487,7 +487,7 @@ async function renderRoutePage(name){
  if(name==='figuras'){
   page.innerHTML=`<div class="routeHero"><span class="kicker">CATÁLOGO</span><h1>Figuras</h1><p>Explora todas nuestras figuras disponibles, filtra por franquicia, personaje o fabricante y encuentra tu próxima pieza.</p></div><div id="routeFiguresMount"></div>`;
   const catalog=document.getElementById('catalogo');if(catalog){catalog.hidden=false;page.querySelector('#routeFiguresMount').appendChild(catalog)}
-  await loadCatalogPage();return;
+  await Promise.all([loadPublicFilterOptions(),loadCatalogPage()]);return;
  }
  if(name==='ami'){
   const types=await loadAdditionalTypes();const ac=siteConfig||{};page.innerHTML=`<div class="amiRouteHero"><div class="amiLogoWrap"><img src="${attr(ac.ami_logo_url||'/assets/ami-no-sekai-logo.webp')}" alt="${attr(ac.ami_nombre||'Ami no Sekai')}"></div><div class="amiHeroCopy"><h1>${escapeHtml(ac.ami_nombre||'Ami no Sekai')}</h1><p><strong>${escapeHtml(ac.ami_eslogan||'Tejiendo pequeños mundos')}</strong>. ${escapeHtml(ac.ami_descripcion||'Creaciones artesanales con personalidad propia, hechas para acompañar tu colección.')}</p></div></div><div class="amiCatalog"><div class="sectionHead"><div><span class="kicker">COLECCIÓN ARTESANAL</span><h2>Descubre Ami no Sekai</h2></div><span id="amiCatalogCount" class="catalogCount"></span></div><div class="additionalCatalogTools"><input id="amiSearch" type="search" autocomplete="off" placeholder="Buscar producto, SKU o descripción…"><select id="amiType"><option value="">Todos los tipos</option>${types.map(x=>`<option value="${attr(x.id)}">${escapeHtml(x.nombre)}</option>`).join('')}</select></div><div id="amiGrid" class="grid"><p class="catalogMessage">Cargando productos…</p></div></div>`;
@@ -530,9 +530,13 @@ publicSearchInput?.addEventListener('keydown',e=>{if(e.key==='Escape')closePubli
 
 loadSiteConfig();
 initPublicCatalogFilters();
-loadFeaturedFranchises();
-loadPublicCatalog();
-loadPublicAdditionalCatalog();
+// Las rutas públicas cargan únicamente los datos que necesitan desde renderRoutePage.
+// Evita carreras entre la carga inicial de Home y el montaje de /figuras, /ofertas, etc.
+if(!PUBLIC_ROUTES.has(location.pathname)){
+ loadFeaturedFranchises();
+ loadPublicCatalog();
+ loadPublicAdditionalCatalog();
+}
 document.getElementById('viewAllAdditional')?.addEventListener('click',openAdditionalCatalog);
 
 // =========================================================
