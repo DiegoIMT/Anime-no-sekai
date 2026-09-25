@@ -669,3 +669,21 @@ header{position:sticky}
 .whatsapp .whatsappIcon{margin-right:1px}
 #generalWhatsapp,.interestShare,.shareMenuActions a{gap:7px}
 #generalWhatsapp .whatsappIcon,.interestShare .whatsappIcon,.shareMenuActions .whatsappIcon{width:19px;height:19px;flex-basis:19px}
+
+/* V7.11.0 — páginas públicas + identidad Ami no Sekai */
+body[data-route="home"] #catalogo{display:none!important}
+.routePage{max-width:1280px;margin:0 auto;padding:44px 24px 76px;min-height:70vh}
+.routeHero{padding:34px 0 30px;border-bottom:1px solid #20232b;margin-bottom:28px}
+.routeHero h1{font:600 clamp(42px,6vw,68px)/1 Oswald,sans-serif;text-transform:uppercase;margin:8px 0 12px}
+.routeHero p{max-width:720px;color:#9b9eaa;font-size:15px;line-height:1.7;margin:0}
+.routeSearch{display:flex;gap:16px;align-items:center;margin:0 0 22px}.routeSearch input{flex:1;height:48px;border:1px solid #30333b;border-radius:10px;background:#111318;color:#fff;padding:0 14px;font:inherit}.routeSearch .catalogCount{white-space:nowrap}
+header nav a.activeRoute,.mobileNav a.activeRoute{color:#fff}header nav a.activeRoute:after{transform:scaleX(1)}
+.amiHomeSection{position:relative;background:linear-gradient(135deg,rgba(255,91,165,.045),rgba(153,105,255,.055));border-top:1px solid rgba(255,132,190,.16);border-bottom:1px solid rgba(164,116,255,.14)}
+.amiHomeIdentity{display:grid;grid-template-columns:112px 1fr auto;gap:24px;align-items:center;margin-bottom:28px}.amiHomeIdentity>img{width:112px;height:112px;object-fit:cover;border-radius:50%;box-shadow:0 0 0 1px rgba(255,255,255,.1),0 0 28px rgba(255,91,165,.12)}.amiHomeIdentity h2{margin:5px 0 5px}.amiHomeIdentity .kicker{color:#ff7db6}
+.amiRouteHero{display:grid;grid-template-columns:minmax(260px,390px) 1fr;gap:56px;align-items:center;padding:20px 0 48px;border-bottom:1px solid rgba(255,132,190,.18);margin-bottom:38px;background:radial-gradient(circle at 18% 48%,rgba(255,96,170,.09),transparent 35%),radial-gradient(circle at 75% 40%,rgba(154,108,255,.07),transparent 38%)}
+.amiLogoWrap{display:grid;place-items:center}.amiLogoWrap img{width:min(100%,360px);aspect-ratio:1;object-fit:cover;border-radius:50%;box-shadow:0 0 0 1px rgba(255,255,255,.12),0 22px 60px rgba(0,0,0,.28),0 0 42px rgba(255,95,169,.12)}
+.amiHeroCopy .kicker,.route-ami .sectionHead .kicker{color:#ff7db6}.amiHeroCopy h1{font:600 clamp(48px,7vw,82px)/.95 Oswald,sans-serif;margin:10px 0 18px;background:linear-gradient(90deg,#ff78b2,#b88cff);-webkit-background-clip:text;background-clip:text;color:transparent}.amiHeroCopy p{max-width:620px;color:#b8b3c1;font-size:16px;line-height:1.75}.amiByline{display:inline-flex;margin-top:18px;border:1px solid rgba(255,128,187,.24);background:rgba(255,111,177,.07);color:#ffd1e5;border-radius:999px;padding:8px 12px;font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase}
+.amiCatalog{padding-top:6px}.route-ami .additionalCatalogTools input,.route-ami .additionalCatalogTools select{border-color:#493143;background:#151018}.route-ami .catalogPagination button:hover,.route-ami .catalogPagination button.active{background:#e85a9c;border-color:#e85a9c}
+#helpRouteMount .helpView{position:static;inset:auto;z-index:auto;min-height:auto;background:transparent;padding:0;overflow:visible}#helpRouteMount .helpTop{display:none}#helpRouteMount .helpShell{padding:0;max-width:none}#helpRouteMount .helpHero{display:none}
+@media(max-width:800px){.amiHomeIdentity{grid-template-columns:82px 1fr}.amiHomeIdentity>img{width:82px;height:82px}.amiHomeIdentity>.sectionLinkButton{grid-column:1/-1;justify-self:start}.amiRouteHero{grid-template-columns:1fr;gap:24px;text-align:center}.amiLogoWrap img{width:min(72vw,300px)}.amiHeroCopy p{margin-left:auto;margin-right:auto}.routePage{padding:28px 18px 60px}}
+@media(max-width:560px){.routeSearch{display:grid}.routeSearch .catalogCount{text-align:left}.amiHomeIdentity{grid-template-columns:68px 1fr;gap:14px}.amiHomeIdentity>img{width:68px;height:68px}.amiHomeIdentity h2{font-size:28px}.routeHero{padding-top:16px}.routeHero h1{font-size:40px}}
