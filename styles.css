@@ -981,3 +981,115 @@ header nav a[href="/ami-no-sekai"]:hover::after,header nav a[href="/ami-no-sekai
   }
 }
 @media(prefers-reduced-motion:reduce){header nav a,header nav a::after,.mobileNav a{transition:none!important}}
+
+/* V7.10.3 — auditoría integral Light/Dark (público + responsive)
+   Regla: superficies públicas siguen el tema; overlays fotográficos/lightbox conservan contraste propio. */
+
+/* Navegación móvil: panel realmente opaco y texto legible en ambos temas. */
+.mobileNav{background:#0d0f13;border-color:#292c33;box-shadow:0 18px 36px rgba(0,0,0,.28)}
+.mobileNav a{color:#e7e8eb;border-top-color:#22252b;background:#0d0f13}
+.mobileNav a:hover,.mobileNav a.activeRoute{color:#fff;background:color-mix(in srgb,var(--brand-primary) 13%,#0d0f13)}
+html[data-theme="light"] .mobileNav{background:#fbfafc!important;border-color:var(--line)!important;box-shadow:0 18px 36px rgba(41,31,51,.14)}
+html[data-theme="light"] .mobileNav a{color:#342f3b!important;background:#fbfafc;border-top-color:var(--line)}
+html[data-theme="light"] .mobileNav a:hover,html[data-theme="light"] .mobileNav a.activeRoute{color:#1c1822!important;background:color-mix(in srgb,var(--brand-primary) 11%,#fff)!important;box-shadow:inset 3px 0 0 var(--brand-primary)}
+html[data-theme="light"] .mobileNav a[href="/ami-no-sekai"]{color:color-mix(in srgb,var(--ami-primary) 78%,#5a2740)!important}
+html[data-theme="light"] .mobileNav a[href="/ami-no-sekai"]:hover,html[data-theme="light"] .mobileNav a[href="/ami-no-sekai"].activeRoute{background:color-mix(in srgb,var(--ami-primary) 11%,#fff)!important;box-shadow:inset 3px 0 0 var(--ami-primary)}
+
+/* Hero Light: conservar la fotografía, pero reservar una zona de lectura sólida a la izquierda. */
+html[data-theme="light"] .hero.hasHeroImage{
+  background-image:var(--hero-image)!important;
+  background-size:cover!important;
+  background-position:var(--hero-x,50%) var(--hero-y,50%)!important;
+  background-repeat:no-repeat!important;
+}
+html[data-theme="light"] .hero.hasHeroImage::before{
+  content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:linear-gradient(90deg,rgba(248,247,250,.96) 0%,rgba(248,247,250,.90) 27%,rgba(248,247,250,.70) 43%,rgba(248,247,250,.30) 59%,rgba(248,247,250,.06) 76%);
+  filter:none!important;opacity:1!important;
+}
+html[data-theme="light"] .hero.hasHeroImage::after{opacity:.10}
+html[data-theme="light"] .heroContent{color:#17131d;text-shadow:0 1px 0 rgba(255,255,255,.55)}
+html[data-theme="light"] .hero h1{color:#17131d}
+html[data-theme="light"] .hero p{color:#514b59;font-weight:500}
+
+/* Formularios y herramientas públicas: contraste consistente. */
+html[data-theme="light"] .catalogToolbar,
+html[data-theme="light"] .additionalCatalogTools,
+html[data-theme="light"] .routeSearch,
+html[data-theme="light"] .headerSearch{color:var(--text)}
+html[data-theme="light"] input:not([type="color"]):not([type="checkbox"]):not([type="radio"]),
+html[data-theme="light"] select,
+html[data-theme="light"] textarea{color:var(--text);border-color:var(--line);background:#fff}
+html[data-theme="light"] input::placeholder,html[data-theme="light"] textarea::placeholder{color:#88818f;opacity:1}
+html[data-theme="light"] select option{color:#1c1822;background:#fff}
+
+/* Cards, secciones y controles secundarios. */
+html[data-theme="light"] .card,html[data-theme="light"] .publicProductCard,html[data-theme="light"] .publicAdditionalCard{background:#fff;border-color:var(--line);color:var(--text)}
+html[data-theme="light"] .card h3,html[data-theme="light"] .cardBody h3{color:#211d27}
+html[data-theme="light"] .cardBody>p:not(.series),html[data-theme="light"] .productCharacter{color:var(--muted)}
+html[data-theme="light"] .details{background:#f3f0f6;color:#28222f;border-color:#d9d2e1}
+html[data-theme="light"] .details:hover{background:#ebe5f1;border-color:color-mix(in srgb,var(--brand-primary) 45%,var(--line))}
+html[data-theme="light"] .sectionHead>a{color:#403948}
+html[data-theme="light"] .catalogCount{color:#625b69}
+html[data-theme="light"] .catalogPagination button{background:#fff;color:#332d39;border-color:var(--line)}
+html[data-theme="light"] .catalogPagination button:hover,html[data-theme="light"] .catalogPagination button.active{color:#fff;background:var(--brand-primary);border-color:var(--brand-primary)}
+
+/* Universos: el nombre nunca hereda blanco del tema oscuro. */
+html[data-theme="light"] .universeCard,html[data-theme="light"] .universeCard *{text-shadow:none}
+html[data-theme="light"] .universeCard>b,html[data-theme="light"] .universeCard .universeName{color:#211b28!important}
+html[data-theme="light"] .universeCard:hover>b,html[data-theme="light"] .universeCard.active>b{color:#211b28!important}
+
+/* Ami no Sekai conserva identidad rosa/lila sin perder contraste. */
+html[data-theme="light"] .amiHomeIdentity h2{color:#211d27}
+html[data-theme="light"] .amiHomeIdentity p{color:#665e6c}
+html[data-theme="light"] .amiHeroCopy p{color:#625a69}
+html[data-theme="light"] .route-ami .series{color:color-mix(in srgb,var(--ami-primary) 72%,#5a2740)}
+
+/* Mi lista y compartir: no dejar controles oscuros aislados dentro del tema claro. */
+html[data-theme="light"] .shareMenu{background:#fff;color:var(--text);border-color:var(--line);box-shadow:0 25px 70px rgba(41,31,51,.18)}
+html[data-theme="light"] .shareMenuHead small,html[data-theme="light"] .shareMenu>p{color:var(--muted)}
+html[data-theme="light"] .shareMenuHead>button{background:#f0edf4;color:var(--text);border-color:var(--line)}
+html[data-theme="light"] .shareMenuActions button{background:#f3f0f6;color:#2d2733;border-color:var(--line)}
+html[data-theme="light"] .footerShare{background:#f3f0f6;color:#51336d;border-color:#d5c6e3}
+html[data-theme="light"] .footerShare:hover{background:#ebe3f2;color:#352142;border-color:var(--brand-primary)}
+html[data-theme="light"] .publicToast{background:#fff;color:#2d2733;border-color:#d5c6e3;box-shadow:0 12px 32px rgba(41,31,51,.16)}
+
+/* Ayuda: pestañas y acordeones claros completos. */
+html[data-theme="light"] .helpQuick a{background:#fff!important;color:#302a37!important;border-color:var(--line)!important}
+html[data-theme="light"] .helpFaq details{background:#fff!important;color:var(--text)!important;border-color:var(--line)!important}
+html[data-theme="light"] .helpFaq summary{background:#fff;color:var(--text)}
+html[data-theme="light"] .helpFaq summary:after{color:#6e6877}
+html[data-theme="light"] .helpFaq details[open] summary:after{color:var(--brand-primary)}
+
+/* Detalle: tipografía, precios y superficies. */
+html[data-theme="light"] .detailInfo h1{color:#1c1822}
+html[data-theme="light"] .detailPrice{border-color:var(--line)}
+html[data-theme="light"] .detailPrice strong{color:color-mix(in srgb,var(--brand-primary) 56%,#24172f 44%)!important}
+html[data-theme="light"] .detailMeta b{color:#211d27}
+html[data-theme="light"] .detailUtilityActions .interestToggle,html[data-theme="light"] .shareProductButton{background:#f3f0f6!important;color:#302a37!important;border-color:var(--line)!important}
+
+/* Header y acciones: iconos/texto siempre contrastados. */
+html[data-theme="light"] .headActions button{background:#f1eef5!important;color:#1f1a25!important;border-color:#ddd7e5!important}
+html[data-theme="light"] .headActions button:hover{background:#e9e4ef!important;border-color:#c9c0d3!important}
+html[data-theme="light"] header nav a{color:#514a58}
+html[data-theme="light"] header nav a:hover,html[data-theme="light"] header nav a.activeRoute{color:#1c1822}
+
+/* Responsive: el hero móvil prioriza legibilidad sin ocultar la fotografía. */
+@media(max-width:760px){
+  html[data-theme="light"] .hero.hasHeroImage{
+    background-image:var(--hero-mobile-image,var(--hero-image))!important;
+    background-position:var(--hero-mobile-x,50%) var(--hero-mobile-y,50%)!important;
+  }
+  html[data-theme="light"] .hero.hasHeroImage::before{
+    background:linear-gradient(180deg,rgba(248,247,250,.76) 0%,rgba(248,247,250,.66) 52%,rgba(248,247,250,.52) 100%);
+  }
+  html[data-theme="light"] .hero.hasHeroImage .heroContent{
+    background:rgba(250,249,252,.74);border:1px solid rgba(215,208,223,.78);border-radius:14px;
+    padding:20px;backdrop-filter:blur(3px);box-shadow:0 14px 34px rgba(41,31,51,.10);
+  }
+}
+@media(max-width:560px){
+  html[data-theme="light"] .hero.hasHeroImage .heroContent{padding:17px}
+  html[data-theme="light"] .hero h1{font-size:clamp(36px,10vw,43px)}
+  html[data-theme="light"] .mobileNav.open{border-bottom-color:var(--line)!important}
+}
