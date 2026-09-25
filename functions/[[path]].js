@@ -97,7 +97,7 @@ export async function onRequest(context) {
     '/figuras': {title:'Figuras | Anime no Sekai', description:'Explora el catálogo de figuras de anime disponibles en Anime no Sekai, Mérida, Yucatán.'},
     '/ofertas': {title:'Ofertas | Anime no Sekai', description:'Consulta las figuras con precio especial disponibles en Anime no Sekai.'},
     '/proximamente': {title:'Próximamente | Anime no Sekai', description:'Descubre las figuras que vienen en camino a Anime no Sekai.'},
-    '/ami-no-sekai': {title:'Ami no Sekai | Tejiendo pequeños mundos', description:'Ami no Sekai, submarca artesanal de Anime no Sekai: amigurumis y creaciones hechas para acompañar tu colección.'},
+    '/ami-no-sekai': {title:'Ami no Sekai | Tejiendo pequeños mundos', description:'Ami no Sekai: amigurumis y creaciones artesanales hechas con cariño.'},
     '/ayuda': {title:'Centro de ayuda | Anime no Sekai', description:'Conoce cómo comprar, apartar y coordinar entregas locales con Anime no Sekai en Mérida, Yucatán.'}
   };
   if (publicPages[path.replace(/\/$/,'')]) {
