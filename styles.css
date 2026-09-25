@@ -1093,3 +1093,57 @@ html[data-theme="light"] header nav a:hover,html[data-theme="light"] header nav 
   html[data-theme="light"] .hero h1{font-size:clamp(36px,10vw,43px)}
   html[data-theme="light"] .mobileNav.open{border-bottom-color:var(--line)!important}
 }
+
+/* V7.10.4 — Hero unificado: misma composición fotográfica en Light/Dark.
+   El tema solo cambia el overlay de contraste; no crea tarjetas ni altera la estructura. */
+.hero.hasHeroImage{
+  background-image:var(--hero-image)!important;
+  background-size:cover!important;
+  background-position:var(--hero-x,50%) var(--hero-y,50%)!important;
+  background-repeat:no-repeat!important;
+}
+.hero.hasHeroImage::before{
+  content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:linear-gradient(90deg,rgba(9,10,13,.82) 0%,rgba(9,10,13,.67) 30%,rgba(9,10,13,.30) 58%,rgba(9,10,13,.08) 78%,rgba(9,10,13,.03) 100%)!important;
+  filter:none!important;opacity:1!important;
+}
+.hero.hasHeroImage::after{opacity:.18!important}
+.hero.hasHeroImage .heroContent{background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;backdrop-filter:none!important;padding:0!important}
+
+html[data-theme="light"] .hero.hasHeroImage{
+  background-image:var(--hero-image)!important;
+  background-size:cover!important;
+  background-position:var(--hero-x,50%) var(--hero-y,50%)!important;
+}
+html[data-theme="light"] .hero.hasHeroImage::before{
+  background:linear-gradient(90deg,rgba(248,247,250,.76) 0%,rgba(248,247,250,.62) 30%,rgba(248,247,250,.29) 56%,rgba(248,247,250,.08) 77%,rgba(248,247,250,.02) 100%)!important;
+}
+html[data-theme="light"] .hero.hasHeroImage::after{opacity:.08!important}
+html[data-theme="light"] .heroContent{color:#17131d;text-shadow:0 1px 1px rgba(255,255,255,.78)}
+html[data-theme="light"] .hero h1{color:#17131d;text-shadow:0 1px 2px rgba(255,255,255,.72)}
+html[data-theme="light"] .hero p{color:#403a47;font-weight:500;text-shadow:0 1px 1px rgba(255,255,255,.82)}
+html[data-theme="light"] .hero .eyebrow{color:color-mix(in srgb,var(--brand-primary) 82%,#321a4c);text-shadow:0 1px 1px rgba(255,255,255,.86)}
+
+@media(max-width:760px){
+  .hero.hasHeroImage{
+    background-image:var(--hero-mobile-image,var(--hero-image))!important;
+    background-position:var(--hero-mobile-x,50%) var(--hero-mobile-y,50%)!important;
+  }
+  .hero.hasHeroImage::before{
+    background:linear-gradient(180deg,rgba(9,10,13,.32) 0%,rgba(9,10,13,.48) 34%,rgba(9,10,13,.63) 68%,rgba(9,10,13,.42) 100%)!important;
+  }
+  html[data-theme="light"] .hero.hasHeroImage{
+    background-image:var(--hero-mobile-image,var(--hero-image))!important;
+    background-position:var(--hero-mobile-x,50%) var(--hero-mobile-y,50%)!important;
+  }
+  html[data-theme="light"] .hero.hasHeroImage::before{
+    background:linear-gradient(180deg,rgba(248,247,250,.25) 0%,rgba(248,247,250,.43) 34%,rgba(248,247,250,.58) 68%,rgba(248,247,250,.36) 100%)!important;
+  }
+  html[data-theme="light"] .hero.hasHeroImage .heroContent{
+    background:transparent!important;border:0!important;border-radius:0!important;padding:0!important;
+    backdrop-filter:none!important;box-shadow:none!important;
+  }
+}
+@media(max-width:560px){
+  .hero.hasHeroImage .heroContent,html[data-theme="light"] .hero.hasHeroImage .heroContent{padding:0!important}
+}
