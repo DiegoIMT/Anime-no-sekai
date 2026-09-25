@@ -698,3 +698,12 @@ header nav a.activeRoute,.mobileNav a.activeRoute{color:#fff}header nav a.active
 .route-ami .catalogPagination button:hover,.route-ami .catalogPagination button.active{background:var(--ami-primary);border-color:var(--ami-primary)}
 .brandColorGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-content:start}.colorField{display:flex;align-items:center;gap:12px;margin-top:8px;padding:10px 12px;border:1px solid #30333b;background:#0d0f13;border-radius:9px}.colorField input[type=color]{width:48px!important;height:38px!important;padding:2px!important;border:0!important;background:transparent!important;cursor:pointer}.colorField code{color:#c9cbd0;font-size:12px}.amiAdminSection{border-color:rgba(255,120,178,.22)!important}.amiLogoPreview{height:230px;padding:16px}.amiLogoPreview img{max-width:210px;max-height:210px;border-radius:50%;object-fit:contain}.amiVisualAdmin{margin-top:20px}.amiVisualAdmin>.brandColorGrid{grid-template-columns:1fr}
 @media(max-width:680px){.brandColorGrid{grid-template-columns:1fr}.amiVisualAdmin{grid-template-columns:1fr}}
+
+/* V7.11.0 — navegación entre páginas más calmada y sin desplazamiento acelerado */
+@keyframes ansRouteEnterCalm{
+ from{opacity:0;transform:translateY(18px)}
+ to{opacity:1;transform:translateY(0)}
+}
+.routePage.routeEntering{animation:ansRouteEnterCalm .62s cubic-bezier(.16,.84,.24,1) both}
+body[data-route="home"] .hero.routeEntering{animation:ansRouteEnterCalm .72s cubic-bezier(.16,.84,.24,1) both}
+@media(prefers-reduced-motion:reduce){.routePage.routeEntering,body[data-route="home"] .hero.routeEntering{animation:none!important}}
