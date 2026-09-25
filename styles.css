@@ -687,3 +687,14 @@ header nav a.activeRoute,.mobileNav a.activeRoute{color:#fff}header nav a.active
 #helpRouteMount .helpView{position:static;inset:auto;z-index:auto;min-height:auto;background:transparent;padding:0;overflow:visible}#helpRouteMount .helpTop{display:none}#helpRouteMount .helpShell{padding:0;max-width:none}#helpRouteMount .helpHero{display:none}
 @media(max-width:800px){.amiHomeIdentity{grid-template-columns:82px 1fr}.amiHomeIdentity>img{width:82px;height:82px}.amiHomeIdentity>.sectionLinkButton{grid-column:1/-1;justify-self:start}.amiRouteHero{grid-template-columns:1fr;gap:24px;text-align:center}.amiLogoWrap img{width:min(72vw,300px)}.amiHeroCopy p{margin-left:auto;margin-right:auto}.routePage{padding:28px 18px 60px}}
 @media(max-width:560px){.routeSearch{display:grid}.routeSearch .catalogCount{text-align:left}.amiHomeIdentity{grid-template-columns:68px 1fr;gap:14px}.amiHomeIdentity>img{width:68px;height:68px}.amiHomeIdentity h2{font-size:28px}.routeHero{padding-top:16px}.routeHero h1{font-size:40px}}
+
+/* V7.11.0 — identidad configurable Anime no Sekai + Ami no Sekai */
+:root{--brand-primary:#8B5CF6;--brand-secondary:#A78BFA;--ami-primary:#ff78b2;--ami-secondary:#b88cff}
+.hero h1 em,.benefits .featureIcon,.series,.prices strong,.universeArrow,.visualFallback b{color:var(--brand-primary)}
+.primary,.chips .active{background:var(--brand-primary)}.primary:hover{filter:brightness(.92)}
+.universeCard:hover{border-color:var(--brand-primary)}
+.amiHomeIdentity .kicker,.amiHeroCopy .kicker,.route-ami .sectionHead .kicker{color:var(--ami-primary)}
+.amiHeroCopy h1{background:linear-gradient(90deg,var(--ami-primary),var(--ami-secondary));-webkit-background-clip:text;background-clip:text;color:transparent}
+.route-ami .catalogPagination button:hover,.route-ami .catalogPagination button.active{background:var(--ami-primary);border-color:var(--ami-primary)}
+.brandColorGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-content:start}.colorField{display:flex;align-items:center;gap:12px;margin-top:8px;padding:10px 12px;border:1px solid #30333b;background:#0d0f13;border-radius:9px}.colorField input[type=color]{width:48px!important;height:38px!important;padding:2px!important;border:0!important;background:transparent!important;cursor:pointer}.colorField code{color:#c9cbd0;font-size:12px}.amiAdminSection{border-color:rgba(255,120,178,.22)!important}.amiLogoPreview{height:230px;padding:16px}.amiLogoPreview img{max-width:210px;max-height:210px;border-radius:50%;object-fit:contain}.amiVisualAdmin{margin-top:20px}.amiVisualAdmin>.brandColorGrid{grid-template-columns:1fr}
+@media(max-width:680px){.brandColorGrid{grid-template-columns:1fr}.amiVisualAdmin{grid-template-columns:1fr}}
