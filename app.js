@@ -521,16 +521,10 @@ function closeReviewsDrawer(){const d=document.getElementById('reviewsDrawer'),b
 function openReviewImage(url){const lb=document.getElementById('reviewLightbox'),img=document.getElementById('reviewLightboxImage');if(!lb||!img)return;img.src=url;lb.hidden=false;document.body.classList.add('detail-open')}
 function closeReviewImage(){const lb=document.getElementById('reviewLightbox'),img=document.getElementById('reviewLightboxImage');if(lb)lb.hidden=true;if(img)img.src='';document.body.classList.remove('detail-open')}
 async function openReviewProduct(sku){
- if(/^ANS-/i.test(sku)){
-  let p=products.find(x=>x.sku===sku)||catalogProducts.find(x=>x.sku===sku);
-  if(!p){const {data}=await supabaseClient.from('productos').select('*, producto_imagenes(*)').eq('sku',sku).maybeSingle();if(data){p=mapProduct(data);products.push(p)}}
-  if(p)openDetail(p.id||p.sku);return;
- }
- if(/^ANX-/i.test(sku)){
-  let p=additionalProducts.find(x=>x.sku===sku);
-  if(!p){const {data}=await supabaseClient.from('productos_adicionales').select('*, tipos_producto(nombre), franquicias(nombre), personajes(nombre), producto_adicional_imagenes(*)').eq('sku',sku).maybeSingle();if(data){p=mapAdditionalProduct(data);additionalProducts.push(p)}}
-  if(p)openAdditionalDetail(p.id||p.sku);
- }
+ // Los visores públicos reciben el SKU, no el UUID interno.
+ // Ellos mismos cargan el producto desde Supabase si aún no está en memoria.
+ if(/^ANS-/i.test(sku)){await openDetail(sku);return}
+ if(/^ANX-/i.test(sku)){await openAdditionalDetail(sku)}
 }
 
 const PUBLIC_ROUTES=new Set(['/','/figuras','/ofertas','/proximamente','/ami-no-sekai','/ayuda']);
