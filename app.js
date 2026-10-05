@@ -605,9 +605,10 @@ async function verifyAdminAndRender(){
  renderAdminPanel();
 }
 function renderAdminPanel(){
- document.getElementById('adminContent').innerHTML=`<div class="adminNav"><button class="active" id="adminProductsTab" type="button">Productos</button><button id="adminCatalogsTab" type="button">Catálogos</button><button id="adminContentTab" type="button">Contenido del sitio</button><button id="adminAnalyticsTab" type="button">Estadísticas</button></div><div id="adminPanelBody"></div>`;
+ document.getElementById('adminContent').innerHTML=`<div class="adminNav"><button class="active" id="adminProductsTab" type="button">Productos</button><button id="adminCatalogsTab" type="button">Catálogos</button><button id="adminReviewsTab" type="button">Reseñas</button><button id="adminContentTab" type="button">Contenido del sitio</button><button id="adminAnalyticsTab" type="button">Estadísticas</button></div><div id="adminPanelBody"></div>`;
  document.getElementById('adminProductsTab').onclick=()=>showAdminProductsSection();
  document.getElementById('adminCatalogsTab').onclick=()=>showAdminCatalogsSection();
+ document.getElementById('adminReviewsTab').onclick=()=>showAdminReviewsSection();
  document.getElementById('adminContentTab').onclick=()=>showSiteContentForm();
  document.getElementById('adminAnalyticsTab').onclick=()=>showAdminAnalytics();
  showAdminProductsSection();
@@ -632,6 +633,140 @@ function showAdminProductsSection(section='figuras'){
    document.getElementById('adminSearch').addEventListener('input',e=>filterAdminProducts(e.target.value));
    loadAdminProducts();
  }
+}
+
+
+/* =========================================================
+   V7.11.0 — Administración de reseñas de clientes
+   Bloque 1: SQL + Admin + evidencias. La vista pública se conecta
+   después de validar este bloque.
+   ========================================================= */
+let adminReviewsCache=[];
+let reviewNewImages=[];
+let reviewExistingImages=[];
+
+async function showAdminReviewsSection(){
+ setAdminTab('adminReviewsTab');
+ const body=document.getElementById('adminPanelBody');
+ body.innerHTML=`<div class="adminHeader"><div><span class="kicker">ANIME NO SEKAI</span><h1>Reseñas</h1><p>Administra testimonios y evidencias reales de clientes. Solo las reseñas visibles se mostrarán públicamente.</p></div></div>
+ <div class="adminSubHeader"><div><h2>Reseñas de clientes</h2><p>El producto relacionado es opcional.</p></div><button id="newReview" class="primary" type="button">+ Nueva reseña</button></div>
+ <div class="adminToolbar"><input id="adminReviewSearch" type="search" placeholder="Buscar por cliente, comentario o SKU…"></div>
+ <div id="adminReviewsList" class="adminProducts"><p class="adminLoading">Cargando reseñas…</p></div>`;
+ document.getElementById('newReview').onclick=()=>openReviewForm();
+ document.getElementById('adminReviewSearch').oninput=e=>renderAdminReviews(e.target.value);
+ await loadAdminReviews();
+}
+async function loadAdminReviews(){
+ const box=document.getElementById('adminReviewsList');if(!box)return;
+ const {data,error}=await supabaseClient.from('resenas').select('*, resena_imagenes(*)').order('fecha_resena',{ascending:false}).order('fecha_creacion',{ascending:false});
+ if(error){box.innerHTML=`<p class="formMessage error">No fue posible cargar las reseñas: ${escapeHtml(error.message)}</p>`;return}
+ adminReviewsCache=data||[];renderAdminReviews(document.getElementById('adminReviewSearch')?.value||'');
+}
+function renderAdminReviews(search=''){
+ const box=document.getElementById('adminReviewsList');if(!box)return;
+ const q=normalizeSearch(search);
+ const rows=adminReviewsCache.filter(r=>!q||normalizeSearch(`${r.cliente||''} ${r.comentario||''} ${r.producto_sku||''}`).includes(q));
+ if(!rows.length){box.innerHTML='<div class="adminEmpty"><b>No hay reseñas.</b><span>Agrega la primera evidencia de un cliente.</span></div>';return}
+ box.innerHTML=rows.map(r=>`<article class="adminProduct adminReviewRow">
+   <div><span class="adminSku">${escapeHtml(r.producto_sku||'SIN PRODUCTO')}</span><h3>${escapeHtml(r.cliente)}</h3><p class="reviewStars">${'★'.repeat(r.calificacion)}${'☆'.repeat(5-r.calificacion)}</p><p>${escapeHtml((r.comentario||'').slice(0,125))}${(r.comentario||'').length>125?'…':''}</p></div>
+   <div class="adminProductPrice"><strong>${r.fecha_resena?new Date(r.fecha_resena+'T00:00:00').toLocaleDateString('es-MX'):'Sin fecha'}</strong><small>${(r.resena_imagenes||[]).length} evidencia(s)</small></div>
+   <div class="adminBadges"><span class="adminVisibility ${r.visible?'is-visible':'is-hidden'}">${r.visible?'Visible':'Oculta'}</span></div>
+   <div class="adminRowActions"><button type="button" data-review-edit="${r.id}">Editar</button><button type="button" data-review-toggle="${r.id}">${r.visible?'Ocultar':'Mostrar'}</button><button type="button" class="danger" data-review-delete="${r.id}">Eliminar</button></div>
+ </article>`).join('');
+ box.querySelectorAll('[data-review-edit]').forEach(b=>b.onclick=()=>openReviewForm(b.dataset.reviewEdit));
+ box.querySelectorAll('[data-review-toggle]').forEach(b=>b.onclick=()=>toggleReviewVisibility(b.dataset.reviewToggle));
+ box.querySelectorAll('[data-review-delete]').forEach(b=>b.onclick=()=>deleteReview(b.dataset.reviewDelete));
+}
+async function openReviewForm(id=null){
+ setAdminTab('adminReviewsTab');
+ const r=id?adminReviewsCache.find(x=>String(x.id)===String(id)):null;
+ reviewNewImages=[];reviewExistingImages=(r?.resena_imagenes||[]).slice().sort((a,b)=>(a.orden??0)-(b.orden??0)).map(x=>({...x,removed:false}));
+ const body=document.getElementById('adminPanelBody');
+ body.innerHTML=`<div class="adminFormHead"><button id="backReviews" class="backBtn" type="button">← Volver a reseñas</button><span class="kicker">RESEÑAS</span><h1>${r?'Editar reseña':'Nueva reseña'}</h1><p>Publica únicamente testimonios y evidencias para los que tengas autorización de uso.</p></div>
+ <form id="reviewForm" class="productForm">
+  <div class="formGrid">
+   <label>Cliente o alias *<input name="cliente" maxlength="100" required value="${attr(r?.cliente||'')}"></label>
+   <label>Calificación *<select name="calificacion" required>${[5,4,3,2,1].map(n=>`<option value="${n}" ${Number(r?.calificacion||5)===n?'selected':''}>${n} ${n===1?'estrella':'estrellas'}</option>`).join('')}</select></label>
+   <label>Fecha de la reseña<input name="fecha_resena" type="date" value="${attr(r?.fecha_resena||new Date().toISOString().slice(0,10))}"></label>
+   <label>Producto relacionado<select name="producto_tipo"><option value="">Sin producto relacionado</option><option value="figura" ${r?.producto_tipo==='figura'?'selected':''}>Figura</option><option value="adicional" ${r?.producto_tipo==='adicional'?'selected':''}>Ami no Sekai / producto adicional</option></select></label>
+   <label class="full">SKU relacionado<input name="producto_sku" maxlength="30" placeholder="Ej. ANS-00015 o ANX-00002" value="${attr(r?.producto_sku||'')}"></label>
+   <label class="full">Comentario *<textarea name="comentario" maxlength="1200" rows="6" required>${escapeHtml(r?.comentario||'')}</textarea></label>
+  </div>
+  <div class="formChecks"><label class="switchLabel"><input name="visible" type="checkbox" ${r?.visible===false?'':'checked'}><span>Visible públicamente</span></label></div>
+  <section class="reviewEvidenceSection"><div class="formSectionTitle"><span>01</span><div><h2>Evidencias</h2><p>Hasta 6 fotografías. JPG, PNG o WebP; se optimizan antes de subir.</p></div></div>
+   <input id="reviewPhotos" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden>
+   <button id="selectReviewPhotos" class="uploadButton" type="button"><span>＋</span><b>Agregar evidencias</b><small>Capturas, fotografías de entrega o del producto recibido</small></button>
+   <div id="reviewPhotoPreview" class="photoPreview"></div>
+  </section>
+  <p id="reviewMessage" class="formMessage"></p>
+  <div class="formActions"><button id="saveReviewButton" class="primary" type="submit">${r?'Guardar cambios':'Crear reseña'}</button></div>
+ </form>`;
+ document.getElementById('backReviews').onclick=()=>{cleanupReviewPreviews();showAdminReviewsSection()};
+ document.getElementById('selectReviewPhotos').onclick=()=>document.getElementById('reviewPhotos').click();
+ document.getElementById('reviewPhotos').onchange=handleReviewPhotos;
+ document.getElementById('reviewForm').onsubmit=e=>saveReview(e,id);
+ renderReviewPhotoPreview();
+}
+function handleReviewPhotos(e){
+ const allowed=['image/jpeg','image/png','image/webp'];
+ for(const file of [...e.target.files]){
+  if(!allowed.includes(file.type)||file.size>10*1024*1024)continue;
+  if(reviewNewImages.length+reviewExistingImages.filter(x=>!x.removed).length>=6)break;
+  reviewNewImages.push({id:crypto.randomUUID(),file,preview:URL.createObjectURL(file)});
+ }
+ e.target.value='';renderReviewPhotoPreview();
+}
+function renderReviewPhotoPreview(){
+ const box=document.getElementById('reviewPhotoPreview');if(!box)return;
+ const old=reviewExistingImages.filter(x=>!x.removed).map(x=>({kind:'old',id:x.id,src:x.url}));
+ const fresh=reviewNewImages.map(x=>({kind:'new',id:x.id,src:x.preview}));
+ const all=[...old,...fresh];
+ box.innerHTML=all.length?all.map((x,i)=>`<article class="photoItem"><img src="${attr(x.src)}" alt="Evidencia ${i+1}"><button type="button" class="photoRemove" data-review-remove-kind="${x.kind}" data-review-remove-id="${x.id}" aria-label="Quitar evidencia">×</button></article>`).join(''):'<p class="photoEmpty">Todavía no has agregado evidencias.</p>';
+ box.querySelectorAll('[data-review-remove-id]').forEach(b=>b.onclick=()=>removeReviewPhoto(b.dataset.reviewRemoveKind,b.dataset.reviewRemoveId));
+}
+function removeReviewPhoto(kind,id){
+ if(kind==='old'){const x=reviewExistingImages.find(i=>String(i.id)===String(id));if(x)x.removed=true}
+ else{const i=reviewNewImages.findIndex(x=>x.id===id);if(i>=0){URL.revokeObjectURL(reviewNewImages[i].preview);reviewNewImages.splice(i,1)}}
+ renderReviewPhotoPreview();
+}
+function cleanupReviewPreviews(){reviewNewImages.forEach(x=>URL.revokeObjectURL(x.preview));reviewNewImages=[];reviewExistingImages=[]}
+function reviewStoragePath(url){const marker='/storage/v1/object/public/resenas/';const i=(url||'').indexOf(marker);return i>=0?decodeURIComponent(url.slice(i+marker.length)):null}
+async function syncReviewImages(reviewId){
+ const removed=reviewExistingImages.filter(x=>x.removed);
+ for(const img of removed){const path=reviewStoragePath(img.url);if(path)await supabaseClient.storage.from('resenas').remove([path]);await supabaseClient.from('resena_imagenes').delete().eq('id',img.id)}
+ const kept=reviewExistingImages.filter(x=>!x.removed);
+ for(let i=0;i<kept.length;i++)await supabaseClient.from('resena_imagenes').update({orden:i}).eq('id',kept[i].id);
+ let order=kept.length;
+ for(const img of reviewNewImages){
+  const blob=await compressImage(img.file),path=`${reviewId}/${String(order+1).padStart(2,'0')}-${crypto.randomUUID()}.webp`;
+  const {error:upErr}=await supabaseClient.storage.from('resenas').upload(path,blob,{contentType:'image/webp',upsert:false,cacheControl:'3600'});if(upErr)throw upErr;
+  const {data:pub}=supabaseClient.storage.from('resenas').getPublicUrl(path);
+  const {error:dbErr}=await supabaseClient.from('resena_imagenes').insert({resena_id:reviewId,url:pub.publicUrl,orden:order});
+  if(dbErr){await supabaseClient.storage.from('resenas').remove([path]);throw dbErr}order++;
+ }
+}
+async function saveReview(e,id){
+ e.preventDefault();const f=new FormData(e.currentTarget),msg=document.getElementById('reviewMessage'),btn=document.getElementById('saveReviewButton');
+ const obj={cliente:f.get('cliente').trim(),calificacion:Number(f.get('calificacion')),fecha_resena:f.get('fecha_resena')||null,producto_tipo:f.get('producto_tipo')||null,producto_sku:(f.get('producto_sku')||'').trim().toUpperCase()||null,comentario:f.get('comentario').trim(),visible:f.get('visible')==='on'};
+ if(!obj.cliente||!obj.comentario){msg.textContent='Completa cliente y comentario.';msg.className='formMessage error';return}
+ if(obj.producto_sku&&!/^(ANS|ANX)-\d{5}$/i.test(obj.producto_sku)){msg.textContent='El SKU relacionado debe tener formato ANS-00000 o ANX-00000.';msg.className='formMessage error';return}
+ btn.disabled=true;msg.textContent='Guardando reseña…';msg.className='formMessage';
+ try{
+  let reviewId=id;
+  if(id){const {error}=await supabaseClient.from('resenas').update(obj).eq('id',id);if(error)throw error}
+  else{const {data,error}=await supabaseClient.from('resenas').insert(obj).select('id').single();if(error)throw error;reviewId=data.id}
+  await syncReviewImages(reviewId);cleanupReviewPreviews();await showAdminReviewsSection();
+ }catch(error){msg.textContent='No se pudo guardar: '+(error?.message||'Error inesperado.');msg.className='formMessage error';btn.disabled=false}
+}
+async function toggleReviewVisibility(id){
+ const r=adminReviewsCache.find(x=>String(x.id)===String(id));if(!r)return;
+ const {error}=await supabaseClient.from('resenas').update({visible:!r.visible}).eq('id',id);if(error){alert('No se pudo cambiar la visibilidad: '+error.message);return}await loadAdminReviews();
+}
+async function deleteReview(id){
+ const r=adminReviewsCache.find(x=>String(x.id)===String(id));if(!confirm(`¿Eliminar la reseña de ${r?.cliente||'este cliente'}? Esta acción no se puede deshacer.`))return;
+ const imgs=r?.resena_imagenes||[];const paths=imgs.map(x=>reviewStoragePath(x.url)).filter(Boolean);
+ if(paths.length){const {error}=await supabaseClient.storage.from('resenas').remove(paths);if(error){alert('No se pudieron eliminar las evidencias: '+error.message);return}}
+ const {error}=await supabaseClient.from('resenas').delete().eq('id',id);if(error){alert('No se pudo eliminar: '+error.message);return}await loadAdminReviews();
 }
 
 let adminCatalogKind='franquicias';

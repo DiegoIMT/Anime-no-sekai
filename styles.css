@@ -1712,3 +1712,13 @@ html[data-theme="light"] .shareProductButton{
   }
 }
 
+
+/* V7.11.0 — Admin de reseñas */
+.adminReviewRow{grid-template-columns:minmax(280px,1fr) 150px 110px auto}
+.adminReviewRow .reviewStars{color:#A78BFA;font-size:16px;letter-spacing:2px;margin:4px 0}
+.reviewEvidenceSection{margin:26px 0 20px;padding-top:22px;border-top:1px solid #292c33}
+.reviewEvidenceSection .formSectionTitle{margin-bottom:16px}
+@media(max-width:760px){
+ .adminReviewRow{grid-template-columns:1fr}
+ .adminReviewRow .adminRowActions{display:grid;grid-template-columns:repeat(3,1fr)}
+}
