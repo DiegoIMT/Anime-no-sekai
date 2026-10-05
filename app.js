@@ -151,7 +151,12 @@ function renderStoreShell(){
 <section id="catalogo" class="section catalogSection"><div class="sectionHead catalogHeading"><div><span class="kicker">CATÁLOGO</span><h2>Explora nuestras figuras</h2><p class="catalogIntro">Encuentra personajes de tus animes favoritos y descubre nuevas piezas para tu colección.</p></div><span id="catalogCount" class="catalogCount"></span></div><div id="catalogQuickFilters" class="chips quickFilters"><button class="active" data-quick="todas">Todas</button><button data-quick="ofertas">🔥 Ofertas</button><button data-quick="proximamente">Próximamente</button></div><button id="mobileCatalogFilterToggle" class="mobileCatalogFilterToggle" type="button" aria-expanded="false">⚙ Filtros <span id="mobileCatalogFilterCount" hidden>0</span></button><div class="catalogToolbar" id="catalogToolbar"><label class="catalogSearchField"><span>Buscar</span><input id="catalogSearch" type="search" autocomplete="off" placeholder="Nombre, SKU, personaje, anime…"></label><label><span>Franquicia</span><input id="filterFranchise" list="franchiseOptions" type="search" autocomplete="off" placeholder="Todas las franquicias"><datalist id="franchiseOptions"></datalist></label><label><span>Personaje</span><input id="filterCharacter" list="characterOptions" type="search" autocomplete="off" placeholder="Todos los personajes"><datalist id="characterOptions"></datalist></label><label><span>Fabricante</span><input id="filterManufacturer" list="manufacturerOptions" type="search" autocomplete="off" placeholder="Todos los fabricantes"><datalist id="manufacturerOptions"></datalist></label><label class="sortField"><span>Ordenar por</span><select id="catalogSort"><option value="recientes">Más recientes</option><option value="precio-asc">Precio: menor a mayor</option><option value="precio-desc">Precio: mayor a menor</option><option value="nombre">Nombre A–Z</option></select></label><button id="clearCatalogFilters" class="clearCatalogFilters" type="button">Limpiar filtros</button><button id="applyMobileCatalogFilters" class="applyMobileCatalogFilters" type="button">Ver resultados</button></div><div id="catalogChips" class="chips legacyChips" hidden></div><div id="catalogGrid" class="grid"><p class="catalogMessage">Cargando catálogo…</p></div><nav id="catalogPagination" class="catalogPagination" aria-label="Paginación del catálogo"></nav></section>
 <section id="mas-coleccion" class="section additionalSection amiHomeSection"><div class="amiHomeIdentity"><img id="amiHomeLogo" src="/assets/ami-no-sekai-logo.webp" alt="Ami no Sekai"><div><h2 id="amiHomeName">Ami no Sekai</h2><p id="amiHomeText" class="catalogIntro">Tejiendo pequeños mundos. Amigurumis y creaciones artesanales hechas con cariño.</p></div><a href="/ami-no-sekai" data-route-link class="sectionLinkButton">Descubrir Ami no Sekai ${icon('arrow')}</a></div><div id="additionalGrid" class="grid"><p class="catalogMessage">Cargando productos…</p></div></section>
 <section id="proximamente" class="section upcomingSection"><div class="sectionHead"><div><span class="kicker">PRÓXIMAMENTE 🇯🇵</span><h2 id="homeTituloProximamente">Próximamente</h2><p class="catalogIntro">Descubre las figuras que vienen en camino antes de que lleguen.</p></div></div><div id="upcomingGrid" class="grid"><p class="catalogMessage">Cargando próximas figuras…</p></div><div class="arrival upcomingCta"><div><span class="kicker">¿BUSCAS OTRA FIGURA?</span><h2>Pregunta por tu próxima pieza</h2><p>Si buscas alguna figura que todavía no tenemos publicada, pregúntanos y revisamos disponibilidad.</p></div><a id="generalWhatsapp" class="primary" href="#" target="_blank" rel="noopener">${whatsappIcon()} Preguntar por WhatsApp</a></div></section>
+<section id="homeReviews" class="section homeReviewsSection" hidden><div class="sectionHead"><div><span class="kicker">EXPERIENCIAS REALES</span><h2>Lo que dicen nuestros coleccionistas</h2><p class="catalogIntro">Compras y experiencias compartidas por clientes de Anime no Sekai.</p></div><button id="homeAllReviews" class="sectionLinkButton" type="button">Ver todas las reseñas →</button></div><div id="homeReviewsGrid" class="reviewsHomeGrid"></div></section>
 <div id="routeParking" hidden></div><section id="routePage" class="routePage" hidden></section></main>
+<button id="reviewsTab" class="reviewsTab" type="button" aria-label="Abrir reseñas" aria-expanded="false"><span>★</span> Reseñas</button>
+<div id="reviewsBackdrop" class="reviewsBackdrop" hidden></div>
+<aside id="reviewsDrawer" class="reviewsDrawer" aria-hidden="true"><div class="reviewsDrawerHead"><div><span class="kicker">CLIENTES ANIME NO SEKAI</span><h2>Reseñas</h2><p id="reviewsSummary">Experiencias de nuestros coleccionistas.</p></div><button id="reviewsClose" type="button" aria-label="Cerrar reseñas">×</button></div><div id="reviewsDrawerList" class="reviewsDrawerList"><p class="catalogMessage">Cargando reseñas…</p></div></aside>
+<div id="reviewLightbox" class="reviewLightbox" hidden><button id="reviewLightboxClose" type="button" aria-label="Cerrar imagen">×</button><img id="reviewLightboxImage" alt="Evidencia de reseña"></div>
 <footer><div class="brand"><span class="brandIcon"><span class="mark brandMark">界</span><img class="brandLogo footerLogo" id="footerLogo" alt="Logo Anime no Sekai" hidden></span><span class="brandText">ANIME NO <b>SEKAI</b></span></div><p>Tu mundo de figuras y coleccionables.</p><button class="footerHelp" type="button" data-open-help>? Centro de ayuda</button><button id="shareStoreButton" class="footerShare" type="button">↗ Compartir Anime no Sekai</button><small>© 2026 Anime no Sekai</small></footer>`;
 }
 
@@ -486,6 +491,48 @@ document.addEventListener('click',e=>{const routeLink=e.target.closest('[data-ro
 document.addEventListener('keydown',e=>{const acard=e.target.closest?.('.publicAdditionalCard[data-additional-product]');if(acard&&(e.key==='Enter'||e.key===' ')){e.preventDefault();openAdditionalDetail(acard.dataset.additionalProduct);return}const card=e.target.closest?.('.publicProductCard[data-card-product]');if(card&&(e.key==='Enter'||e.key===' ')){e.preventDefault();openDetail(card.dataset.cardProduct)}});
 window.addEventListener('popstate',()=>{if(PUBLIC_ROUTES.has(location.pathname)){navigatePublic(location.pathname,false);return}if(!location.pathname.startsWith('/figura/')&&!location.pathname.startsWith('/producto/')&&!location.hash.startsWith('#figura=')&&!location.hash.startsWith('#producto=')){document.getElementById('detailView')?.remove();document.body.classList.remove('detail-open')}});
 
+
+/* V7.11.1 — Reseñas públicas */
+let publicReviewsCache=null;
+async function loadPublicReviews(force=false){
+ if(publicReviewsCache&&!force)return publicReviewsCache;
+ const {data,error}=await supabaseClient.from('resenas').select('*, resena_imagenes(*)').eq('visible',true).order('fecha_resena',{ascending:false}).order('fecha_creacion',{ascending:false});
+ publicReviewsCache=error?[]:(data||[]);
+ return publicReviewsCache;
+}
+function publicReviewCard(r,compact=false){
+ const imgs=(r.resena_imagenes||[]).slice().sort((a,b)=>(a.orden??0)-(b.orden??0));
+ return `<article class="publicReviewCard ${compact?'compact':''}"><div class="publicReviewTop"><div><b>${escapeHtml(r.cliente)}</b><div class="publicReviewStars" aria-label="${r.calificacion} de 5 estrellas">${'★'.repeat(r.calificacion)}${'☆'.repeat(5-r.calificacion)}</div></div>${r.fecha_resena?`<time>${new Date(r.fecha_resena+'T00:00:00').toLocaleDateString('es-MX',{year:'numeric',month:'short',day:'numeric'})}</time>`:''}</div><p>${escapeHtml(r.comentario)}</p>${r.producto_sku?`<button class="reviewProductLink" type="button" data-review-product-link="${attr(r.producto_sku)}">${escapeHtml(r.producto_sku)} · Ver producto</button>`:''}${imgs.length?`<div class="reviewEvidenceStrip">${imgs.slice(0,compact?2:6).map((x,i)=>`<button type="button" data-review-image="${attr(x.url)}" aria-label="Ver evidencia ${i+1}"><img src="${attr(x.url)}" alt="Evidencia de ${attr(r.cliente)}" loading="lazy"></button>`).join('')}</div>`:''}</article>`;
+}
+async function renderHomeReviews(){
+ const section=document.getElementById('homeReviews'),grid=document.getElementById('homeReviewsGrid');if(!section||!grid)return;
+ const rows=await loadPublicReviews();section.hidden=!rows.length;if(!rows.length)return;
+ grid.innerHTML=rows.slice(0,3).map(r=>publicReviewCard(r,true)).join('');
+}
+async function openReviewsDrawer(){
+ const drawer=document.getElementById('reviewsDrawer'),back=document.getElementById('reviewsBackdrop'),tab=document.getElementById('reviewsTab'),list=document.getElementById('reviewsDrawerList');
+ drawer.classList.add('open');drawer.setAttribute('aria-hidden','false');back.hidden=false;tab.setAttribute('aria-expanded','true');document.body.classList.add('reviews-open');
+ const rows=await loadPublicReviews();
+ const avg=rows.length?(rows.reduce((s,r)=>s+Number(r.calificacion||0),0)/rows.length).toFixed(1):'—';
+ document.getElementById('reviewsSummary').textContent=rows.length?`${rows.length} ${rows.length===1?'reseña':'reseñas'} · ★ ${avg}`:'Todavía no hay reseñas publicadas.';
+ list.innerHTML=rows.length?rows.map(r=>publicReviewCard(r)).join(''):'<div class="catalogEmpty"><b>Aún no hay reseñas.</b><span>Pronto compartiremos experiencias de nuestros clientes.</span></div>';
+}
+function closeReviewsDrawer(){const d=document.getElementById('reviewsDrawer'),b=document.getElementById('reviewsBackdrop'),t=document.getElementById('reviewsTab');d?.classList.remove('open');d?.setAttribute('aria-hidden','true');if(b)b.hidden=true;t?.setAttribute('aria-expanded','false');document.body.classList.remove('reviews-open')}
+function openReviewImage(url){const lb=document.getElementById('reviewLightbox'),img=document.getElementById('reviewLightboxImage');if(!lb||!img)return;img.src=url;lb.hidden=false;document.body.classList.add('detail-open')}
+function closeReviewImage(){const lb=document.getElementById('reviewLightbox'),img=document.getElementById('reviewLightboxImage');if(lb)lb.hidden=true;if(img)img.src='';document.body.classList.remove('detail-open')}
+async function openReviewProduct(sku){
+ if(/^ANS-/i.test(sku)){
+  let p=products.find(x=>x.sku===sku)||catalogProducts.find(x=>x.sku===sku);
+  if(!p){const {data}=await supabaseClient.from('productos').select('*, producto_imagenes(*)').eq('sku',sku).maybeSingle();if(data){p=mapProduct(data);products.push(p)}}
+  if(p)openDetail(p.id||p.sku);return;
+ }
+ if(/^ANX-/i.test(sku)){
+  let p=additionalProducts.find(x=>x.sku===sku);
+  if(!p){const {data}=await supabaseClient.from('productos_adicionales').select('*, tipos_producto(nombre), franquicias(nombre), personajes(nombre), producto_adicional_imagenes(*)').eq('sku',sku).maybeSingle();if(data){p=mapAdditionalProduct(data);additionalProducts.push(p)}}
+  if(p)openAdditionalDetail(p.id||p.sku);
+ }
+}
+
 const PUBLIC_ROUTES=new Set(['/','/figuras','/ofertas','/proximamente','/ami-no-sekai','/ayuda']);
 function routeName(path=location.pathname){if(path==='/figuras')return'figuras';if(path==='/ofertas')return'ofertas';if(path==='/proximamente')return'proximamente';if(path==='/ami-no-sekai')return'ami';if(path==='/ayuda')return'ayuda';return'home'}
 function setRouteVisibility(name){
@@ -508,7 +555,7 @@ async function renderRoutePage(name){
  if(name==='home'){
   const hero=document.querySelector('.hero');
   if(hero){hero.classList.remove('heroReady');requestAnimationFrame(()=>requestAnimationFrame(()=>hero.classList.add('heroReady')))}
-  await Promise.all([loadFeaturedFranchises(),loadPublicCatalog(),loadPublicAdditionalCatalog()]);
+  await Promise.all([loadFeaturedFranchises(),loadPublicCatalog(),loadPublicAdditionalCatalog(),renderHomeReviews()]);
   return;
  }
  page.className=`routePage route-${name}`;
@@ -532,6 +579,14 @@ async function loadRouteFigures(name){const grid=document.getElementById('routeF
 async function loadAmiRoute(){const grid=document.getElementById('amiGrid');if(!grid)return;const {data,error}=await supabaseClient.from('productos_adicionales').select('*, tipos_producto(nombre), franquicias(nombre), personajes(nombre), producto_adicional_imagenes(*)').eq('activo',true).order('destacado',{ascending:false}).order('fecha_creacion',{ascending:false});const source=error?[]:(data||[]).map(mapAdditionalProduct);additionalProducts=[...additionalProducts.filter(x=>!source.some(y=>y.id===x.id)),...source];const search=document.getElementById('amiSearch'),type=document.getElementById('amiType');const render=()=>{const term=normalizeSearch(search?.value||'');const typeId=type?.value||'';const list=source.filter(p=>(!term||normalizeSearch(`${p.name} ${p.sku} ${p.description}`).includes(term))&&(!typeId||String(p.typeId||p.tipo_producto_id||'')===String(typeId)));document.getElementById('amiCatalogCount').textContent=`${list.length} ${list.length===1?'producto':'productos'}`;grid.innerHTML=list.length?list.map(additionalProductCard).join(''):'<div class="catalogEmpty"><b>No encontramos productos.</b><span>Prueba con otra búsqueda o tipo.</span></div>';animateRenderedCards(grid)};search?.addEventListener('input',render);type?.addEventListener('change',render);render()}
 async function navigatePublic(path,push=true){if(!PUBLIC_ROUTES.has(path))return;if(!siteConfig)await siteConfigReady;const titles={'/':'Anime no Sekai | Figuras & Coleccionables','/figuras':'Figuras | Anime no Sekai','/ofertas':'Ofertas | Anime no Sekai','/proximamente':'Próximamente | Anime no Sekai','/ami-no-sekai':'Ami no Sekai | Tejiendo pequeños mundos','/ayuda':'Centro de ayuda | Anime no Sekai'};document.title=titles[path]||titles['/'];if(push)history.pushState({route:path},'',path);document.getElementById('helpView')?.remove();document.getElementById('detailView')?.remove();document.body.classList.remove('detail-open');window.scrollTo({top:0,behavior:'auto'});const name=routeName(path);setRouteVisibility(name);await renderRoutePage(name);const page=name==='home'?document.querySelector('.hero'):document.getElementById('routePage');if(page&&!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches){page.classList.remove('routeEntering');void page.offsetWidth;page.classList.add('routeEntering')}}
 renderStoreShell();
+document.getElementById('reviewsTab')?.addEventListener('click',openReviewsDrawer);
+document.getElementById('reviewsClose')?.addEventListener('click',closeReviewsDrawer);
+document.getElementById('reviewsBackdrop')?.addEventListener('click',closeReviewsDrawer);
+document.getElementById('homeAllReviews')?.addEventListener('click',openReviewsDrawer);
+document.getElementById('reviewLightboxClose')?.addEventListener('click',closeReviewImage);
+document.addEventListener('click',e=>{const img=e.target.closest?.('[data-review-image]');if(img){openReviewImage(img.dataset.reviewImage);return}const p=e.target.closest?.('[data-review-product-link]');if(p){closeReviewsDrawer();openReviewProduct(p.dataset.reviewProductLink)}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!document.getElementById('reviewLightbox')?.hidden)closeReviewImage();else if(document.getElementById('reviewsDrawer')?.classList.contains('open'))closeReviewsDrawer()}});
+
 if(PUBLIC_ROUTES.has(location.pathname))setTimeout(()=>navigatePublic(location.pathname,false),0);
 updateInterestListUI();
 document.getElementById('interestListButton')?.addEventListener('click',openInterestList);
@@ -677,10 +732,21 @@ function renderAdminReviews(search=''){
  box.querySelectorAll('[data-review-toggle]').forEach(b=>b.onclick=()=>toggleReviewVisibility(b.dataset.reviewToggle));
  box.querySelectorAll('[data-review-delete]').forEach(b=>b.onclick=()=>deleteReview(b.dataset.reviewDelete));
 }
+async function loadReviewProductOptions(){
+ const [{data:figs},{data:adds}]=await Promise.all([
+  supabaseClient.from('productos').select('sku,nombre,personaje,franquicia').order('nombre'),
+  supabaseClient.from('productos_adicionales').select('sku,nombre').order('nombre')
+ ]);
+ return {figuras:figs||[],adicionales:adds||[]};
+}
+function reviewProductOptionText(p){return `${p.sku} · ${p.nombre}${p.personaje?` · ${p.personaje}`:''}${p.franquicia?` · ${p.franquicia}`:''}`}
 async function openReviewForm(id=null){
  setAdminTab('adminReviewsTab');
  const r=id?adminReviewsCache.find(x=>String(x.id)===String(id)):null;
  reviewNewImages=[];reviewExistingImages=(r?.resena_imagenes||[]).slice().sort((a,b)=>(a.orden??0)-(b.orden??0)).map(x=>({...x,removed:false}));
+ const opts=await loadReviewProductOptions();
+ const all=[...opts.figuras.map(p=>({...p,tipo:'figura'})),...opts.adicionales.map(p=>({...p,tipo:'adicional'}))];
+ const selected=all.find(p=>p.sku===r?.producto_sku);
  const body=document.getElementById('adminPanelBody');
  body.innerHTML=`<div class="adminFormHead"><button id="backReviews" class="backBtn" type="button">← Volver a reseñas</button><span class="kicker">RESEÑAS</span><h1>${r?'Editar reseña':'Nueva reseña'}</h1><p>Publica únicamente testimonios y evidencias para los que tengas autorización de uso.</p></div>
  <form id="reviewForm" class="productForm">
@@ -688,9 +754,13 @@ async function openReviewForm(id=null){
    <label>Cliente o alias *<input name="cliente" maxlength="100" required value="${attr(r?.cliente||'')}"></label>
    <label>Calificación *<select name="calificacion" required>${[5,4,3,2,1].map(n=>`<option value="${n}" ${Number(r?.calificacion||5)===n?'selected':''}>${n} ${n===1?'estrella':'estrellas'}</option>`).join('')}</select></label>
    <label>Fecha de la reseña<input name="fecha_resena" type="date" value="${attr(r?.fecha_resena||new Date().toISOString().slice(0,10))}"></label>
-   <label>Producto relacionado<select name="producto_tipo"><option value="">Sin producto relacionado</option><option value="figura" ${r?.producto_tipo==='figura'?'selected':''}>Figura</option><option value="adicional" ${r?.producto_tipo==='adicional'?'selected':''}>Ami no Sekai / producto adicional</option></select></label>
-   <label class="full">SKU relacionado<input name="producto_sku" maxlength="30" placeholder="Ej. ANS-00015 o ANX-00002" value="${attr(r?.producto_sku||'')}"></label>
-   <label class="full">Comentario *<textarea name="comentario" maxlength="1200" rows="6" required>${escapeHtml(r?.comentario||'')}</textarea></label>
+   <label>Tipo de producto<select name="producto_tipo" id="reviewProductType"><option value="">Sin producto relacionado</option><option value="figura" ${r?.producto_tipo==='figura'?'selected':''}>Figura</option><option value="adicional" ${r?.producto_tipo==='adicional'?'selected':''}>Ami no Sekai / producto adicional</option></select></label>
+   <label class="full reviewProductPicker" id="reviewProductPicker" ${r?.producto_tipo?'':'hidden'}>Producto relacionado
+    <input id="reviewProductSearch" type="search" autocomplete="off" placeholder="Busca por nombre, personaje, anime o SKU…" value="${attr(selected?reviewProductOptionText(selected):(r?.producto_sku||''))}">
+    <input name="producto_sku" id="reviewProductSku" type="hidden" value="${attr(r?.producto_sku||'')}">
+    <div id="reviewProductResults" class="reviewProductResults" hidden></div>
+   </label>
+   <label class="full">Comentario *<textarea id="reviewComment" name="comentario" maxlength="1200" rows="6" required>${escapeHtml(r?.comentario||'')}</textarea><small class="fieldCounter" id="reviewCommentCounter">${(r?.comentario||'').length} / 1200</small></label>
   </div>
   <div class="formChecks"><label class="switchLabel"><input name="visible" type="checkbox" ${r?.visible===false?'':'checked'}><span>Visible públicamente</span></label></div>
   <section class="reviewEvidenceSection"><div class="formSectionTitle"><span>01</span><div><h2>Evidencias</h2><p>Hasta 6 fotografías. JPG, PNG o WebP; se optimizan antes de subir.</p></div></div>
@@ -701,6 +771,19 @@ async function openReviewForm(id=null){
   <p id="reviewMessage" class="formMessage"></p>
   <div class="formActions"><button id="saveReviewButton" class="primary" type="submit">${r?'Guardar cambios':'Crear reseña'}</button></div>
  </form>`;
+ const type=document.getElementById('reviewProductType'),picker=document.getElementById('reviewProductPicker'),search=document.getElementById('reviewProductSearch'),sku=document.getElementById('reviewProductSku'),results=document.getElementById('reviewProductResults');
+ const renderChoices=()=>{
+  const kind=type.value,q=normalizeSearch(search.value||'');
+  const source=kind==='figura'?opts.figuras:kind==='adicional'?opts.adicionales:[];
+  const matches=source.filter(p=>!q||normalizeSearch(reviewProductOptionText(p)).includes(q)).slice(0,10);
+  results.innerHTML=matches.length?matches.map(p=>`<button type="button" data-review-product="${attr(p.sku)}">${escapeHtml(reviewProductOptionText(p))}</button>`).join(''):'<span>No encontramos productos con esa búsqueda.</span>';
+  results.hidden=false;
+  results.querySelectorAll('[data-review-product]').forEach(b=>b.onclick=()=>{const p=source.find(x=>x.sku===b.dataset.reviewProduct);sku.value=p.sku;search.value=reviewProductOptionText(p);results.hidden=true});
+ };
+ type.onchange=()=>{picker.hidden=!type.value;sku.value='';search.value='';results.hidden=true;if(type.value)search.focus()};
+ search.oninput=()=>{sku.value='';renderChoices()};search.onfocus=renderChoices;
+ document.addEventListener('click',function closeReviewChoices(e){if(!picker.contains(e.target))results.hidden=true},{once:true,capture:true});
+ const comment=document.getElementById('reviewComment'),counter=document.getElementById('reviewCommentCounter');comment.oninput=()=>counter.textContent=`${comment.value.length} / 1200`;
  document.getElementById('backReviews').onclick=()=>{cleanupReviewPreviews();showAdminReviewsSection()};
  document.getElementById('selectReviewPhotos').onclick=()=>document.getElementById('reviewPhotos').click();
  document.getElementById('reviewPhotos').onchange=handleReviewPhotos;
@@ -749,6 +832,7 @@ async function saveReview(e,id){
  e.preventDefault();const f=new FormData(e.currentTarget),msg=document.getElementById('reviewMessage'),btn=document.getElementById('saveReviewButton');
  const obj={cliente:f.get('cliente').trim(),calificacion:Number(f.get('calificacion')),fecha_resena:f.get('fecha_resena')||null,producto_tipo:f.get('producto_tipo')||null,producto_sku:(f.get('producto_sku')||'').trim().toUpperCase()||null,comentario:f.get('comentario').trim(),visible:f.get('visible')==='on'};
  if(!obj.cliente||!obj.comentario){msg.textContent='Completa cliente y comentario.';msg.className='formMessage error';return}
+ if(obj.producto_tipo&&!obj.producto_sku){msg.textContent='Selecciona un producto de los resultados de búsqueda o elige “Sin producto relacionado”.';msg.className='formMessage error';return}
  if(obj.producto_sku&&!/^(ANS|ANX)-\d{5}$/i.test(obj.producto_sku)){msg.textContent='El SKU relacionado debe tener formato ANS-00000 o ANX-00000.';msg.className='formMessage error';return}
  btn.disabled=true;msg.textContent='Guardando reseña…';msg.className='formMessage';
  try{
