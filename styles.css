@@ -1434,3 +1434,17 @@ html[data-theme="light"] .shareProductButton{
     opacity:.92;
   }
 }
+
+/* =========================================================
+   V7.10.9 — Marca de agua en cards + hitbox estable de galería
+   ========================================================= */
+.publicProductCard .photo > .productWatermark,
+.publicAdditionalCard .photo > .productWatermark{top:auto;right:12px;bottom:12px;width:min(34%,132px);max-height:24%;padding:5px 7px;opacity:.86}
+.detailMainPhoto > .productWatermark{top:16px;right:16px;bottom:auto}
+.imageLightboxStage > .productWatermark{top:18px;right:18px;bottom:auto}
+.galleryArrow,.imageLightboxArrow{transform:translateY(-50%);transform-origin:center}
+.galleryArrow:active,.imageLightboxArrow:active{transform:translateY(-50%) scale(.94)}
+@media (hover:hover) and (pointer:fine){.galleryArrow:hover,.imageLightboxArrow:hover{transform:translateY(-50%) scale(1.04)}}
+.galleryArrow{z-index:6}.imageLightboxArrow{z-index:1003}
+@media(max-width:560px){.publicProductCard .photo > .productWatermark,.publicAdditionalCard .photo > .productWatermark{top:auto;right:8px;bottom:8px;width:min(34%,104px);padding:4px 5px}.detailMainPhoto > .productWatermark{top:10px;right:10px;bottom:auto}.imageLightboxStage > .productWatermark{top:12px;right:12px;bottom:auto}}
+@media(prefers-reduced-motion:reduce){.galleryArrow,.galleryArrow:hover,.galleryArrow:active,.imageLightboxArrow,.imageLightboxArrow:hover,.imageLightboxArrow:active{transform:translateY(-50%)}}
