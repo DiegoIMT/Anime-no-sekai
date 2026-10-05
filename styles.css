@@ -1336,3 +1336,17 @@ html[data-theme="light"] .shareProductButton{
     transition:none!important;
   }
 }
+
+/* V7.10.7 — marca de agua dinámica de productos */
+.photo,.detailMainPhoto,.detailThumb,.imageLightboxStage{position:relative}
+.productWatermark{position:absolute;z-index:4;right:12px;bottom:12px;width:min(31%,118px);max-height:25%;display:flex;align-items:flex-end;justify-content:flex-end;pointer-events:none;user-select:none;opacity:.48;filter:drop-shadow(0 2px 5px rgba(0,0,0,.48));transition:opacity .2s ease}
+.productWatermark img{display:block!important;width:100%!important;height:auto!important;max-height:100%!important;object-fit:contain!important;background:transparent!important;opacity:1!important;transform:none!important}
+.publicProductCard:hover .productWatermark,.publicAdditionalCard:hover .productWatermark{opacity:.62}
+.detailMainPhoto>.productWatermark{right:16px;bottom:16px;width:min(25%,150px);max-height:20%;z-index:3}
+.detailThumb>.productWatermark{right:5px;bottom:5px;width:34%;max-height:24%;opacity:.48;filter:drop-shadow(0 1px 3px rgba(0,0,0,.55));z-index:2}
+.imageLightboxStage>.productWatermark{right:18px;bottom:18px;width:min(20%,180px);max-height:18%;opacity:.5;z-index:3}
+.amiWatermark{width:min(25%,105px)}
+.detailMainPhoto>.amiWatermark{width:min(20%,130px)}
+.imageLightboxStage>.amiWatermark{width:min(17%,150px)}
+@media(max-width:560px){.productWatermark{right:8px;bottom:8px;width:min(34%,92px);opacity:.5}.detailMainPhoto>.productWatermark{right:10px;bottom:10px;width:min(27%,110px)}.detailThumb>.productWatermark{right:4px;bottom:4px;width:38%}.imageLightboxStage>.productWatermark{right:12px;bottom:12px;width:min(24%,125px)}}
+@media(prefers-reduced-motion:reduce){.productWatermark{transition:none}}
