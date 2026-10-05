@@ -1663,3 +1663,52 @@ html[data-theme="light"] .shareProductButton{
   }
 }
 
+/* =========================================================
+   V7.10.12 — Escala equilibrada marca Anime no Sekai
+   Ami no Sekai conserva exactamente su escala de V7.10.11.
+   ========================================================= */
+
+/* Cards ANS: menor presencia para no competir con estado/producto. */
+.publicProductCard .photo > .productWatermark:not(.amiWatermark){
+  width:min(25%,96px);
+  max-height:20%;
+}
+
+/* Detalle ANS: reducción aproximada del 28% respecto a V7.10.11. */
+.detailMainPhoto > .productWatermark:not(.amiWatermark){
+  width:min(21%,155px);
+  max-height:17%;
+  padding:6px 8px;
+}
+
+/* Miniaturas ANS. */
+.detailThumb > .productWatermark:not(.amiWatermark){
+  width:27%;
+  max-height:20%;
+  padding:3px 4px;
+}
+
+/* Visor completo ANS: presencia equivalente al logo circular de Ami. */
+.imageLightboxStage > .productWatermark:not(.amiWatermark){
+  width:min(19%,165px);
+  max-height:16%;
+  padding:6px 8px;
+}
+
+@media(max-width:560px){
+  .publicProductCard .photo > .productWatermark:not(.amiWatermark){
+    width:min(24%,82px);
+  }
+  .detailMainPhoto > .productWatermark:not(.amiWatermark){
+    width:min(22%,132px);
+    max-height:16%;
+  }
+  .detailThumb > .productWatermark:not(.amiWatermark){
+    width:25%;
+  }
+  .imageLightboxStage > .productWatermark:not(.amiWatermark){
+    width:min(20%,142px);
+    max-height:15%;
+  }
+}
+
