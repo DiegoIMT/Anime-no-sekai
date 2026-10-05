@@ -1596,3 +1596,70 @@ html[data-theme="light"] .shareProductButton{
   }
 }
 
+/* =========================================================
+   V7.10.11 — Zonas de interacción de galería
+   ========================================================= */
+
+/* La hitbox deja de ocupar toda la altura. Sigue siendo generosa,
+   pero queda confinada a la zona central y no invade los controles
+   inferiores ("Ver imagen completa" / contador). */
+.galleryArrow,
+.imageLightboxArrow{
+  top:50%;
+  bottom:auto;
+  width:82px;
+  height:148px;
+  transform:translateY(-50%) !important;
+  z-index:6;
+}
+
+/* En fullscreen también reservamos las zonas de cerrar/controles. */
+.imageLightboxArrow{
+  height:168px;
+  z-index:1003;
+}
+
+/* Los controles funcionales tienen prioridad de interacción. */
+.detailFullscreenBtn,
+.detailImageCount{
+  position:absolute;
+  z-index:8;
+}
+.imageLightboxClose,
+.imageLightboxCounter{
+  z-index:1005;
+}
+
+@media (hover:hover) and (pointer:fine){
+  .galleryArrow:hover,
+  .imageLightboxArrow:hover{
+    transform:translateY(-50%) !important;
+  }
+}
+.galleryArrow:active,
+.imageLightboxArrow:active{
+  transform:translateY(-50%) !important;
+}
+
+@media(max-width:560px){
+  .galleryArrow,
+  .imageLightboxArrow{
+    width:70px;
+    height:132px;
+  }
+  .imageLightboxArrow{
+    height:144px;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .galleryArrow,
+  .galleryArrow:hover,
+  .galleryArrow:active,
+  .imageLightboxArrow,
+  .imageLightboxArrow:hover,
+  .imageLightboxArrow:active{
+    transform:translateY(-50%) !important;
+  }
+}
+
