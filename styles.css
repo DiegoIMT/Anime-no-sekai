@@ -1448,3 +1448,151 @@ html[data-theme="light"] .shareProductButton{
 .galleryArrow{z-index:6}.imageLightboxArrow{z-index:1003}
 @media(max-width:560px){.publicProductCard .photo > .productWatermark,.publicAdditionalCard .photo > .productWatermark{top:auto;right:8px;bottom:8px;width:min(34%,104px);padding:4px 5px}.detailMainPhoto > .productWatermark{top:10px;right:10px;bottom:auto}.imageLightboxStage > .productWatermark{top:12px;right:12px;bottom:auto}}
 @media(prefers-reduced-motion:reduce){.galleryArrow,.galleryArrow:hover,.galleryArrow:active,.imageLightboxArrow,.imageLightboxArrow:hover,.imageLightboxArrow:active{transform:translateY(-50%)}}
+
+/* =========================================================
+   V7.10.10 — Hitbox real de galería + escala Ami no Sekai
+   ========================================================= */
+
+/* Ami no Sekai es un logo circular y necesita una escala menor que
+   el logo horizontal de Anime no Sekai para ocupar un peso visual equivalente. */
+.publicAdditionalCard .photo > .amiWatermark{
+  width:min(24%,92px);
+}
+.detailMainPhoto > .amiWatermark{
+  width:min(18%,120px);
+  max-height:19%;
+}
+.detailThumb > .amiWatermark{
+  width:29%;
+  max-height:23%;
+}
+.imageLightboxStage > .amiWatermark{
+  width:min(16%,130px);
+  max-height:18%;
+}
+
+/* La zona clicable de las flechas ya no depende del círculo visible.
+   El botón ocupa una franja lateral amplia y estable; el círculo se dibuja
+   con ::before. Así el puntero/clic funciona igual en detalle y fullscreen. */
+.galleryArrow,
+.imageLightboxArrow{
+  top:0;
+  bottom:0;
+  height:auto;
+  width:76px;
+  transform:none !important;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:0;
+  padding:0;
+}
+
+.galleryArrow::before,
+.imageLightboxArrow::before{
+  content:'';
+  width:50px;
+  height:50px;
+  flex:0 0 50px;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,.25);
+  background:rgba(20,20,24,.78);
+  box-shadow:0 3px 14px rgba(0,0,0,.22);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  transition:transform .18s ease,background-color .18s ease,border-color .18s ease,box-shadow .18s ease;
+}
+
+.galleryPrev::after,
+.imageLightboxPrev::after{
+  content:'‹';
+}
+.galleryNext::after,
+.imageLightboxNext::after{
+  content:'›';
+}
+.galleryArrow::after,
+.imageLightboxArrow::after{
+  position:absolute;
+  color:#fff;
+  font-size:38px;
+  line-height:1;
+  font-weight:400;
+  pointer-events:none;
+}
+
+.galleryPrev{left:0}
+.galleryNext{right:0}
+.imageLightboxPrev{left:0}
+.imageLightboxNext{right:0}
+
+@media (hover:hover) and (pointer:fine){
+  .galleryArrow:hover,
+  .imageLightboxArrow:hover{
+    transform:none !important;
+    filter:none;
+    box-shadow:none;
+    background:transparent;
+  }
+  .galleryArrow:hover::before,
+  .imageLightboxArrow:hover::before{
+    transform:scale(1.06);
+    background:rgba(124,58,237,.94);
+    border-color:#a78bfa;
+    box-shadow:0 0 28px rgba(139,92,246,.35);
+  }
+}
+
+.galleryArrow:active,
+.imageLightboxArrow:active{
+  transform:none !important;
+  filter:none;
+}
+.galleryArrow:active::before,
+.imageLightboxArrow:active::before{
+  transform:scale(.92);
+  background:rgba(124,58,237,.88);
+}
+
+@media(max-width:560px){
+  .galleryArrow,
+  .imageLightboxArrow{
+    width:62px;
+  }
+  .galleryArrow::before,
+  .imageLightboxArrow::before{
+    width:44px;
+    height:44px;
+    flex-basis:44px;
+  }
+  .galleryArrow::after,
+  .imageLightboxArrow::after{
+    font-size:33px;
+  }
+  .publicAdditionalCard .photo > .amiWatermark{
+    width:min(23%,78px);
+  }
+  .detailMainPhoto > .amiWatermark{
+    width:min(18%,105px);
+  }
+  .detailThumb > .amiWatermark{
+    width:27%;
+  }
+  .imageLightboxStage > .amiWatermark{
+    width:min(17%,112px);
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .galleryArrow::before,
+  .imageLightboxArrow::before{
+    transition:none;
+  }
+}
+
