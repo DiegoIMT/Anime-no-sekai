@@ -1763,4 +1763,4 @@ html[data-theme="light"] .shareProductButton{
 [data-theme="light"] .reviewsDrawer{background:#f7f7f9}
 [data-theme="light"] .publicReviewCard{background:#fff}
 @media(max-width:900px){.reviewsHomeGrid{grid-template-columns:1fr}.reviewsHomeGrid .publicReviewCard:nth-child(n+3){display:none}}
-@media(max-width:560px){.reviewsTab{top:auto;bottom:92px;left:10px;transform:none;rotate:0;writing-mode:horizontal-tb;border:1px solid rgba(155,108,255,.45);border-radius:999px;padding:10px 13px}.reviewsDrawer{width:100%;top:8%;border-radius:18px 18px 0 0;transform:translateY(105%);left:0}.reviewsDrawer.open{transform:translateY(0)}}
+@media(max-width:560px){.reviewsTab{top:auto;bottom:92px;left:10px;transform:none !important;rotate:none !important;writing-mode:horizontal-tb;direction:ltr;text-orientation:mixed;border:1px solid rgba(155,108,255,.45);border-radius:999px;padding:10px 13px}.reviewsDrawer{width:100%;top:8%;border-radius:18px 18px 0 0;transform:translateY(105%);left:0}.reviewsDrawer.open{transform:translateY(0)}}
