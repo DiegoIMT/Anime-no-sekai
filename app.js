@@ -1654,8 +1654,8 @@ function ansThemeParticles(overlay,c){
   const dot=document.createElement('span');
   dot.className='ansThemeParticle ansThemeParticle-'+effect;
   // La niebla debe ser vapor, aunque haya un icono temático seleccionado.
-  if(selected&&effect!=='niebla')dot.classList.add('ansThemeParticle-custom');
-  dot.textContent=effect==='niebla'?'':(selected||defaults[effect]);
+  if(selected)dot.classList.add('ansThemeParticle-custom');
+  dot.textContent=selected||defaults[effect];
   const cell=cells[i],col=cell%cols,row=Math.floor(cell/cols);
   const x=clamp((col+rand(.20,.80))/cols*100,7,91);
   const y=clamp((row+rand(.20,.80))/rows*100,8,87);
@@ -1682,7 +1682,7 @@ function ansThemeParticles(overlay,c){
    '--p-end-x':dx.toFixed(1)+'px','--p-end-y':dy.toFixed(1)+'px',
    '--p-orbit-x':midX.toFixed(1)+'px','--p-orbit-y':midY.toFixed(1)+'px',
    '--p-delay':delay.toFixed(3)+'s','--p-duration':duration.toFixed(3)+'s',
-   '--p-size':rand(11,19).toFixed(1)+'px','--p-spin':rand(-135,135).toFixed(1)+'deg'};
+   '--p-size':rand(19,27).toFixed(1)+'px','--p-spin':rand(-135,135).toFixed(1)+'deg'};
   for(const [key,value] of Object.entries(vars))dot.style.setProperty(key,value);
   overlay.appendChild(dot);
  }
