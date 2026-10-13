@@ -1879,3 +1879,25 @@ a.whatsapp:active{transform:scale(.96)}a.whatsapp:active .whatsappIcon{transform
 @keyframes ansVLeft{from{transform:rotateY(0)}to{transform:rotateY(-108deg)}}
 @keyframes ansVRight{from{transform:rotateY(0)}to{transform:rotateY(108deg)}}
 @media(prefers-reduced-motion:reduce){.ansVitrine{display:none!important}}
+
+/* V7.14.2 — Vitrina sobre toda la tarjeta, sin alterar sus acciones. */
+.publicProductCard,.publicAdditionalCard{position:relative;isolation:isolate}
+.publicProductCard>.ansVitrine,.publicAdditionalCard>.ansVitrine{inset:0;border-radius:inherit;z-index:15}
+/* En móviles las tarjetas son compactas, pero mantienen las dos columnas y las acciones. */
+@media(max-width:560px){
+ .publicProductCard .photo,.publicAdditionalCard .photo{height:clamp(145px,42vw,190px)}
+ .publicProductCard .cardBody,.publicAdditionalCard .cardBody{min-height:0!important;padding:10px 10px 11px;display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:6px;row-gap:5px;align-content:start;align-items:center}
+ .publicProductCard .series,.publicAdditionalCard .series{grid-column:1/-1;margin:0;font-size:9px;line-height:1.25;min-height:0}
+ .publicProductCard h3,.publicAdditionalCard h3{grid-column:1/-1;margin:0;min-height:0;line-height:1.25;font-size:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+ .publicProductCard .cardCharacter,.publicAdditionalCard .cardCharacter{grid-column:1/-1;margin:0;min-height:0;font-size:10px;line-height:1.2;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+ .publicAdditionalCard .additionalTags{grid-column:1/-1;margin:0;gap:3px}
+ .publicAdditionalCard .additionalTags span{padding:3px 5px;font-size:8px}
+ .publicProductCard .prices,.publicAdditionalCard .prices{grid-column:1;grid-row:auto;margin:3px 0 2px;padding:0;min-height:0;display:flex;flex-direction:column;gap:2px;align-items:flex-start}
+ .publicProductCard .prices strong,.publicAdditionalCard .prices strong{font-size:18px;line-height:1.1}
+ .publicProductCard .prices .old,.publicAdditionalCard .prices .old{font-size:10px;margin:0}
+ .publicProductCard .interestToggle,.publicAdditionalCard .interestToggle{grid-column:2;margin:0;min-height:34px;max-width:84px;line-height:1.2;font-size:9px;text-align:left;justify-content:flex-end}
+ .publicProductCard .details,.publicAdditionalCard .details{grid-column:1/-1;margin:2px 0 0;min-height:35px;height:35px}
+ .publicProductCard .whatsapp,.publicAdditionalCard .whatsapp{grid-column:1/-1;min-height:38px;height:38px;font-size:10px}
+ .reviewsTab{position:static!important;inset:auto!important;transform:none!important;rotate:none!important;writing-mode:horizontal-tb!important;display:inline-flex;align-items:center;justify-content:center;gap:6px;width:max-content;margin:0 auto 18px;padding:10px 20px;box-shadow:none;backdrop-filter:none}
+ footer{display:flex;flex-direction:column;align-items:center}
+}

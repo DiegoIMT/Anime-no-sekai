@@ -23,16 +23,15 @@ async function ansOpenProductFromCard(target, open){
  if(!card){await open();return}
  if(card.dataset.ansOpening==='1')return;
  card.dataset.ansOpening='1';
- const photo=card.querySelector('.photo');
  const button=card.querySelector('.details');
  let overlay=null;
  try{
-  if(photo&&!ansMotionReduced()){
+  if(!ansMotionReduced()){
    overlay=document.createElement('div');
    overlay.className='ansVitrine';
    overlay.setAttribute('aria-hidden','true');
    overlay.innerHTML='<div class="ansVitrineLeft"></div><div class="ansVitrineRight"></div><div class="ansVitrineSeam"></div><div class="ansVitrineLock"><span></span></div>';
-   photo.appendChild(overlay);
+   card.appendChild(overlay);
    // Una única secuencia, sin ampliar ni desplazar la imagen de la tarjeta.
    overlay.classList.add('ansVitrineOpen');
    button?.classList.add('ansVitrineButtonBusy');
@@ -201,11 +200,11 @@ function renderStoreShell(){
 <section id="proximamente" class="section upcomingSection"><div class="sectionHead"><div><span class="kicker">PRÓXIMAMENTE 🇯🇵</span><h2 id="homeTituloProximamente">Próximamente</h2><p class="catalogIntro">Descubre las figuras que vienen en camino antes de que lleguen.</p></div></div><div id="upcomingGrid" class="grid"><p class="catalogMessage">Cargando próximas figuras…</p></div><div class="arrival upcomingCta"><div><span class="kicker">¿BUSCAS OTRA FIGURA?</span><h2>Pregunta por tu próxima pieza</h2><p>Si buscas alguna figura que todavía no tenemos publicada, pregúntanos y revisamos disponibilidad.</p></div><a id="generalWhatsapp" class="primary" href="#" target="_blank" rel="noopener">${whatsappIcon()} Preguntar por WhatsApp</a></div></section>
 <section id="homeReviews" class="section homeReviewsSection" hidden><div class="sectionHead"><div><span class="kicker">EXPERIENCIAS REALES</span><h2>Lo que dicen nuestros coleccionistas</h2><p class="catalogIntro">Compras y experiencias compartidas por clientes de Anime no Sekai.</p></div><button id="homeAllReviews" class="sectionLinkButton" type="button">Ver todas las reseñas →</button></div><div id="homeReviewsGrid" class="reviewsHomeGrid"></div></section>
 <div id="routeParking" hidden></div><section id="routePage" class="routePage" hidden></section></main>
-<button id="reviewsTab" class="reviewsTab" type="button" aria-label="Abrir reseñas" aria-expanded="false"><span>★</span> Reseñas</button>
+
 <div id="reviewsBackdrop" class="reviewsBackdrop" hidden></div>
 <aside id="reviewsDrawer" class="reviewsDrawer" aria-hidden="true"><div class="reviewsDrawerHead"><div><span class="kicker">CLIENTES ANIME NO SEKAI</span><h2>Reseñas</h2><p id="reviewsSummary">Experiencias de nuestros coleccionistas.</p></div><button id="reviewsClose" type="button" aria-label="Cerrar reseñas">×</button></div><div id="reviewsDrawerList" class="reviewsDrawerList"><p class="catalogMessage">Cargando reseñas…</p></div></aside>
 <div id="reviewLightbox" class="reviewLightbox" hidden><button id="reviewLightboxClose" type="button" aria-label="Cerrar imagen">×</button><img id="reviewLightboxImage" alt="Evidencia de reseña"></div>
-<footer><div class="brand"><span class="brandIcon"><span class="mark brandMark">界</span><img class="brandLogo footerLogo" id="footerLogo" alt="Logo Anime no Sekai" hidden></span><span class="brandText">ANIME NO <b>SEKAI</b></span></div><p>Tu mundo de figuras y coleccionables.</p><button class="footerHelp" type="button" data-open-help>? Centro de ayuda</button><button id="shareStoreButton" class="footerShare" type="button">↗ Compartir Anime no Sekai</button><small>© 2026 Anime no Sekai</small></footer>`;
+<footer><button id="reviewsTab" class="reviewsTab" type="button" aria-label="Abrir reseñas" aria-expanded="false"><span>★</span> Reseñas</button><div class="brand"><span class="brandIcon"><span class="mark brandMark">界</span><img class="brandLogo footerLogo" id="footerLogo" alt="Logo Anime no Sekai" hidden></span><span class="brandText">ANIME NO <b>SEKAI</b></span></div><p>Tu mundo de figuras y coleccionables.</p><button class="footerHelp" type="button" data-open-help>? Centro de ayuda</button><button id="shareStoreButton" class="footerShare" type="button">↗ Compartir Anime no Sekai</button><small>© 2026 Anime no Sekai</small></footer>`;
 }
 
 const THEME_STORAGE_KEY='animeNoSekaiTheme';
