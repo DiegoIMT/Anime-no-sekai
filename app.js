@@ -425,23 +425,80 @@ async function openAdditionalCatalog(){
 }
 function openGalleryLightbox(gallery,startIndex,altText,onChange,kind='figura'){
  if(!gallery?.length)return;
- let index=(startIndex+gallery.length)%gallery.length,touchStartX=null;
+ let index=(startIndex+gallery.length)%gallery.length, busy=false, zoom=1, panX=0, panY=0;
+ let gesture=null,lastTap=0;
  const viewer=document.createElement('div');viewer.className='imageLightbox';viewer.setAttribute('role','dialog');viewer.setAttribute('aria-modal','true');viewer.setAttribute('aria-label',`Galería de ${altText}`);
- viewer.innerHTML=`<button class="imageLightboxClose" type="button" aria-label="Cerrar imagen">×</button><button class="imageLightboxArrow imageLightboxPrev" type="button" aria-label="Imagen anterior">‹</button><div class="imageLightboxStage"><img src="${attr(gallery[index])}" alt="${attr(altText)}">${productWatermark(kind)}<span class="imageLightboxCounter">${index+1} / ${gallery.length}</span></div><button class="imageLightboxArrow imageLightboxNext" type="button" aria-label="Imagen siguiente">›</button>`;
+ viewer.innerHTML=`<button class="imageLightboxClose" type="button" aria-label="Cerrar imagen">×</button><button class="imageLightboxArrow imageLightboxPrev" type="button" aria-label="Imagen anterior">‹</button><div class="imageLightboxStage"><div class="ansFullTrack"><div class="ansFullPage"><img src="${attr(gallery[index])}" alt="${attr(altText)}" draggable="false"></div></div>${productWatermark(kind)}<span class="imageLightboxCounter">${index+1} / ${gallery.length}</span><div class="ansZoomControls"><button type="button" class="ansZoomOut" aria-label="Alejar">−</button><button type="button" class="ansZoomIn" aria-label="Acercar">+</button></div></div><button class="imageLightboxArrow imageLightboxNext" type="button" aria-label="Imagen siguiente">›</button>`;
  document.body.appendChild(viewer);
- const img=viewer.querySelector('img'),counter=viewer.querySelector('.imageLightboxCounter');
- const show=next=>{if(viewer.querySelector('.imageLightboxStage')?.dataset.albumBusy==='1')return;const previous=index;index=(next+gallery.length)%gallery.length;if(previous===index)return;ansAlbumSwap(img,gallery[index],next>previous?1:-1);counter.textContent=`${index+1} / ${gallery.length}`;onChange?.(index)};
+ const stage=viewer.querySelector('.imageLightboxStage'),track=viewer.querySelector('.ansFullTrack'),counter=viewer.querySelector('.imageLightboxCounter');
+ const activeImg=()=>track.querySelector('.ansFullPage img');
+ const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+ const applyZoom=()=>{const img=activeImg();if(!img)return;const limitX=stage.clientWidth*(zoom-1)/2,limitY=stage.clientHeight*(zoom-1)/2;panX=clamp(panX,-limitX,limitX);panY=clamp(panY,-limitY,limitY);img.style.transform=`translate(${panX}px,${panY}px) scale(${zoom})`;stage.classList.toggle('ansZoomed',zoom>1)};
+ const setZoom=(value)=>{zoom=clamp(value,1,4);if(zoom===1){panX=0;panY=0}applyZoom()};
+ const show=next=>{
+  if(busy||zoom>1)return;
+  const target=(next+gallery.length)%gallery.length;if(target===index)return;
+  busy=true;
+  const direction=(next===index-1||next===index+gallery.length-1)?-1:1;
+  const pre=new Image();pre.decoding='async';pre.src=gallery[target];
+  const release=()=>{busy=false};
+  const start=()=>{
+   if(!viewer.isConnected){release();return}
+   const page=document.createElement('div');page.className='ansFullPage';
+   const newImg=document.createElement('img');newImg.src=gallery[target];newImg.alt=altText;newImg.draggable=false;page.appendChild(newImg);
+   const oldPage=track.querySelector('.ansFullPage');
+   if(direction>0)track.appendChild(page);else track.insertBefore(page,oldPage);
+   track.style.transition='none';track.style.transform=direction>0?'translateX(0)':'translateX(-50%)';
+   const finish=()=>{track.style.transition='none';track.style.transform='translateX(0)';oldPage.remove();index=target;counter.textContent=`${index+1} / ${gallery.length}`;setZoom(1);onChange?.(index);release()};
+   if(ansAlbumReduced()){finish();return}
+   // Layout flush, then slide the two full-width pages together.
+   void track.offsetWidth;
+   track.style.transition='transform 680ms cubic-bezier(.45,0,.2,1)';
+   track.style.transform=direction>0?'translateX(-50%)':'translateX(0)';
+   const timer=setTimeout(()=>{track.removeEventListener('transitionend',end);finish()},800);
+   const end=e=>{if(e.target!==track||e.propertyName!=='transform')return;clearTimeout(timer);track.removeEventListener('transitionend',end);finish()};
+   track.addEventListener('transitionend',end);
+  };
+  if(pre.complete&&pre.naturalWidth)start();else{pre.addEventListener('load',start,{once:true});pre.addEventListener('error',release,{once:true})}
+ };
  const close=()=>{document.removeEventListener('keydown',onKey);viewer.remove()};
- const onKey=e=>{if(e.key==='Escape')close();else if(e.key==='ArrowLeft'&&gallery.length>1)show(index-1);else if(e.key==='ArrowRight'&&gallery.length>1)show(index+1)};
+ const onKey=e=>{if(e.key==='Escape')close();else if(e.key==='ArrowLeft'&&gallery.length>1)show(index-1);else if(e.key==='ArrowRight'&&gallery.length>1)show(index+1);else if(e.key==='+'||e.key==='=')setZoom(zoom+.5);else if(e.key==='-')setZoom(zoom-.5)};
  viewer.querySelector('.imageLightboxClose').addEventListener('click',close);
  viewer.querySelector('.imageLightboxPrev').addEventListener('click',()=>show(index-1));
  viewer.querySelector('.imageLightboxNext').addEventListener('click',()=>show(index+1));
+ viewer.querySelector('.ansZoomIn').addEventListener('click',()=>setZoom(zoom+.5));
+ viewer.querySelector('.ansZoomOut').addEventListener('click',()=>setZoom(zoom-.5));
  if(gallery.length<2)viewer.querySelectorAll('.imageLightboxArrow').forEach(x=>x.hidden=true);
  viewer.addEventListener('click',e=>{if(e.target===viewer)close()});
- viewer.addEventListener('touchstart',e=>{touchStartX=e.changedTouches[0]?.clientX??null},{passive:true});
- viewer.addEventListener('touchend',e=>{if(touchStartX==null||gallery.length<2)return;const dx=(e.changedTouches[0]?.clientX??touchStartX)-touchStartX;touchStartX=null;if(Math.abs(dx)>45)show(index+(dx<0?1:-1))},{passive:true});
+ // Mobile: two-finger pinch zooms, one finger pans while zoomed; swipe navigates only at 1x.
+ const distance=touches=>Math.hypot(touches[0].clientX-touches[1].clientX,touches[0].clientY-touches[1].clientY);
+ stage.addEventListener('touchstart',e=>{
+  if(busy)return;
+  if(e.touches.length>=2){gesture={type:'pinch',distance:distance(e.touches),zoom};return}
+  const t=e.touches[0];gesture={type:zoom>1?'pan':'swipe',x:t.clientX,y:t.clientY,panX,panY};
+ },{passive:true});
+ stage.addEventListener('touchmove',e=>{
+  if(!gesture||busy)return;
+  if(e.touches.length>=2){
+   if(gesture.type!=='pinch')gesture={type:'pinch',distance:distance(e.touches),zoom};
+   e.preventDefault();setZoom(gesture.zoom*distance(e.touches)/Math.max(1,gesture.distance));return;
+  }
+  if(gesture.type==='pan'&&zoom>1){e.preventDefault();panX=gesture.panX+e.touches[0].clientX-gesture.x;panY=gesture.panY+e.touches[0].clientY-gesture.y;applyZoom()}
+ },{passive:false});
+ stage.addEventListener('touchend',e=>{
+  if(!gesture)return;
+  if(gesture.type==='pinch'){if(e.touches.length<2)gesture=null;return}
+  if(e.touches.length)return;
+  const dx=(e.changedTouches[0]?.clientX??gesture.x)-gesture.x;
+  const dy=(e.changedTouches[0]?.clientY??gesture.y)-gesture.y;
+  if(gesture.type==='swipe'&&zoom===1&&!busy&&Math.abs(dx)>65&&Math.abs(dx)>Math.abs(dy)*1.3)show(index+(dx<0?1:-1));
+  else if(gesture.type==='swipe'&&Math.abs(dx)<12&&Math.abs(dy)<12){const now=Date.now();if(now-lastTap<320){setZoom(zoom===1?2:1);lastTap=0}else lastTap=now}
+  gesture=null;
+ },{passive:true});
+ stage.addEventListener('wheel',e=>{if(!e.ctrlKey)return;e.preventDefault();setZoom(zoom+(e.deltaY<0?.25:-.25))},{passive:false});
  document.addEventListener('keydown',onKey);viewer.querySelector('.imageLightboxClose').focus();
 }
+
 function animateGalleryImage(img){if(!img)return;img.classList.remove('galleryImageChanging');void img.offsetWidth;img.classList.add('galleryImageChanging')}
 async function openAdditionalDetail(sku,push=true){
  let p=additionalProducts.find(x=>x.sku===sku);if(!p){const {data,error}=await supabaseClient.from('productos_adicionales').select('*, tipos_producto(nombre), franquicias(nombre), personajes(nombre), producto_adicional_imagenes(*)').eq('activo',true).eq('sku',sku).maybeSingle();if(error||!data)return;p=mapAdditionalProduct(data);additionalProducts.push(p)}
