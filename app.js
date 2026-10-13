@@ -288,38 +288,46 @@ function prepareDetailMainImage(detail){
  img.classList.add('detailImageEnter');
  if(img.complete&&img.naturalWidth)reveal();else img.addEventListener('load',reveal,{once:true});
 }
-// Crossfade local: no mueve la tarjeta ni la galería; conserva la foto anterior hasta cargar la siguiente.
+// V7.13.1 revisada: transición direccional local, sin mover la tarjeta.
 const ansGalleryRequests=new WeakMap();
-function ansSwapGalleryImage(img,src){
+function ansSwapGalleryImage(img,src,direction=1){
  if(!img||!src||img.getAttribute('src')===src)return;
  const request=(ansGalleryRequests.get(img)||0)+1;ansGalleryRequests.set(img,request);
  const parent=img.parentElement;if(!parent)return;
  parent.querySelectorAll('.ansGalleryPrevious').forEach(el=>el.remove());
- const previous=img.cloneNode(false);previous.removeAttribute('id');previous.className='ansGalleryPrevious';previous.removeAttribute('style');previous.setAttribute('aria-hidden','true');
- parent.insertBefore(previous,img);
- const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ const reduce=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
  const next=new Image();next.decoding='async';
- const finish=()=>{
-  if(ansGalleryRequests.get(img)!==request||!img.isConnected){previous.remove();return}
+ next.onload=()=>{
+  if(ansGalleryRequests.get(img)!==request||!img.isConnected)return;
+  const previous=img.cloneNode(false);previous.removeAttribute('id');previous.className='ansGalleryPrevious';previous.removeAttribute('style');previous.setAttribute('aria-hidden','true');
+  parent.insertBefore(previous,img);
   img.classList.remove('detailImageEnter','detailImageReady','galleryImageChanging');img.src=src;
-  if(reduce){previous.remove();return}
-  previous.classList.add('ansGalleryPreviousExit');
-  previous.addEventListener('transitionend',()=>previous.remove(),{once:true});
-  setTimeout(()=>previous.remove(),340);
+  if(reduce||!img.animate){previous.remove();return}
+  const distance=direction>=0?1:-1;
+  const config={duration:310,easing:'cubic-bezier(.22,.72,.2,1)',fill:'none'};
+  const outgoing=previous.animate([{opacity:1,transform:'translateX(0)'},{opacity:0,transform:`translateX(${-distance*24}px)`}],config);
+  const incoming=img.animate([{opacity:.32,transform:`translateX(${distance*24}px)`},{opacity:1,transform:'translateX(0)'}],config);
+  Promise.allSettled([outgoing.finished,incoming.finished]).then(()=>previous.remove());
  };
- next.onload=finish;
- next.onerror=()=>{if(ansGalleryRequests.get(img)===request)previous.remove()};
+ next.onerror=()=>{};
  next.src=src;
- if(next.complete&&next.naturalWidth)finish();
+ if(next.complete&&next.naturalWidth)next.onload();
 }
-function swapDetailMainImage(img,src){ansSwapGalleryImage(img,src)}
+function swapDetailMainImage(img,src,direction=1){ansSwapGalleryImage(img,src,direction)}
 function ansTapFeedback(event){
- if(event.target.closest('button,a,input,select,textarea,[data-interest-toggle]'))return;
- const card=event.target.closest('.publicProductCard,.publicAdditionalCard');if(!card)return;
- card.classList.remove('ansTapFeedback');void card.offsetWidth;card.classList.add('ansTapFeedback');
- setTimeout(()=>card.classList.remove('ansTapFeedback'),240);
+ if(event.pointerType==='mouse'&&event.button!==0)return;
+ const target=event.target;
+ const card=target.closest('.publicProductCard,.publicAdditionalCard');
+ const button=target.closest('.publicProductCard .details,.publicAdditionalCard .details,.detailThumb,.galleryArrow,.imageLightboxArrow');
+ if(!card&&!button)return;
+ if(card){card.classList.remove('ansTapFeedback');void card.offsetWidth;card.classList.add('ansTapFeedback');}
+ if(button){button.classList.remove('ansControlPressed');void button.offsetWidth;button.classList.add('ansControlPressed');}
 }
 document.addEventListener('pointerdown',ansTapFeedback,{passive:true});
+document.addEventListener('animationend',event=>{
+ if(event.animationName==='ansTapCard')event.target.classList.remove('ansTapFeedback');
+ if(event.animationName==='ansPressControl')event.target.classList.remove('ansControlPressed');
+});
 
 async function loadPublicCatalog(){
  const [offersRes,featuredRes,upcomingRes]=await Promise.all([
@@ -429,7 +437,7 @@ function openGalleryLightbox(gallery,startIndex,altText,onChange,kind='figura'){
  viewer.innerHTML=`<button class="imageLightboxClose" type="button" aria-label="Cerrar imagen">×</button><button class="imageLightboxArrow imageLightboxPrev" type="button" aria-label="Imagen anterior">‹</button><div class="imageLightboxStage"><img src="${attr(gallery[index])}" alt="${attr(altText)}">${productWatermark(kind)}<span class="imageLightboxCounter">${index+1} / ${gallery.length}</span></div><button class="imageLightboxArrow imageLightboxNext" type="button" aria-label="Imagen siguiente">›</button>`;
  document.body.appendChild(viewer);
  const img=viewer.querySelector('img'),counter=viewer.querySelector('.imageLightboxCounter');
- const show=next=>{const target=(next+gallery.length)%gallery.length;if(target===index)return;index=target;ansSwapGalleryImage(img,gallery[index]);counter.textContent=`${index+1} / ${gallery.length}`;onChange?.(index)};
+ const show=next=>{const target=(next+gallery.length)%gallery.length;if(target===index)return;index=target;ansSwapGalleryImage(img,gallery[index],next>index?1:-1);counter.textContent=`${index+1} / ${gallery.length}`;onChange?.(index)};
  const close=()=>{document.removeEventListener('keydown',onKey);viewer.remove()};
  const onKey=e=>{if(e.key==='Escape')close();else if(e.key==='ArrowLeft'&&gallery.length>1)show(index-1);else if(e.key==='ArrowRight'&&gallery.length>1)show(index+1)};
  viewer.querySelector('.imageLightboxClose').addEventListener('click',close);
@@ -453,7 +461,7 @@ async function openAdditionalDetail(sku,push=true){
  detail.innerHTML=`<div class="detailTop"><button class="backBtn" type="button">‹ Volver a Más para tu colección</button><button class="detailClose" type="button" aria-label="Cerrar">×</button></div><div class="detailShell"><div class="detailGallery"><div class="detailMainPhoto">${main?`<img id="detailMainImage" src="${attr(main)}" alt="${attr(p.name)}">${productWatermark('adicional')}<button class="galleryFullscreen" type="button">⛶ <span>Ver imagen completa</span></button>${gallery.length>1?`<button class="galleryArrow galleryPrev" type="button">‹</button><button class="galleryArrow galleryNext" type="button">›</button>`:''}<span class="galleryCounter" id="galleryCounter">${currentIndex+1} / ${gallery.length}</span>`:`<div class="photoPlaceholder large"><span>界</span><small>Fotografía próximamente</small></div>`}</div>${gallery.length?`<div class="detailThumbs">${gallery.map((img,i)=>`<button class="detailThumb ${i===currentIndex?'active':''}" type="button" data-index="${i}"><img src="${attr(img)}" alt="Vista ${i+1} de ${attr(p.name)}">${productWatermark('adicional')}</button>`).join('')}</div>`:''}</div><div class="detailInfo"><p class="series">${escapeHtml(p.type)}</p><h1>${escapeHtml(p.name)}</h1><p class="detailSku">${escapeHtml(p.sku)}</p><div class="detailBadges">${pct?`<span class="detailBadge sale">-${pct}%</span>`:''}<span class="detailBadge ${p.status==='apartada'?'hold':''}">${statusLabel(p.status)}</span>${p.handmade?'<span class="detailBadge craft">Hecho a mano</span>':''}</div><div class="detailPrice">${p.sale?`<span class="old">Antes ${money(p.price)}</span>`:''}<strong>${money(p.sale||p.price)}</strong></div><p>${escapeHtml(p.description)}</p><div class="detailMeta additionalMeta">${meta.map(([k,v])=>`<div><small>${escapeHtml(k)}</small><b>${escapeHtml(v)}</b></div>`).join('')}</div><div class="detailActions"><a class="whatsapp ${action.cls}" data-analytics-whatsapp="${attr(p.sku)}" data-analytics-kind="adicional" href="${attr(wa)}" target="_blank" rel="noopener">${icon('chat')} ${action.text}</a><div class="detailUtilityActions"><button class="interestToggle ${isInInterestList(p.sku,'adicional')?'active':''}" data-interest-toggle="${attr(p.sku)}" data-interest-kind="adicional" type="button" aria-pressed="${isInInterestList(p.sku,'adicional')}"><span class="interestStateIcon">${isInInterestList(p.sku,'adicional')?'✓':'＋'}</span> <span class="interestLabel">${isInInterestList(p.sku,'adicional')?'En mi lista':'Agregar a mi lista'}</span></button><button class="shareProductButton" data-share-product="${attr(p.sku)}" data-share-kind="adicional" type="button">↗ Compartir</button></div><p class="detailNote">Entrega local en Mérida, Yucatán. La compra y los detalles de entrega se acuerdan directamente por WhatsApp.</p></div></div></div>`;
  document.body.appendChild(detail);document.body.classList.add('detail-open');detail.classList.add('ansDetailReveal');updateInterestListUI();prepareDetailMainImage(detail);
  const close=()=>{detail.remove();document.body.classList.remove('detail-open');if(location.pathname.startsWith('/producto/')||location.hash.startsWith('#producto='))history.replaceState({},'','/#mas-coleccion')};detail.querySelectorAll('.backBtn,.detailClose').forEach(b=>b.addEventListener('click',close));
- const show=i=>{currentIndex=(i+gallery.length)%gallery.length;const m=detail.querySelector('#detailMainImage');if(m)swapDetailMainImage(m,gallery[currentIndex]);detail.querySelectorAll('.detailThumb').forEach((x,j)=>x.classList.toggle('active',j===currentIndex));detail.querySelector('#galleryCounter').textContent=`${currentIndex+1} / ${gallery.length}`};detail.querySelectorAll('.detailThumb').forEach(t=>t.onclick=()=>show(Number(t.dataset.index)));detail.querySelector('.galleryPrev')?.addEventListener('click',()=>show(currentIndex-1));detail.querySelector('.galleryNext')?.addEventListener('click',()=>show(currentIndex+1));detail.querySelector('.galleryFullscreen')?.addEventListener('click',()=>openGalleryLightbox(gallery,currentIndex,p.name,show,'adicional'));
+ const show=i=>{const oldIndex=currentIndex;currentIndex=(i+gallery.length)%gallery.length;const m=detail.querySelector('#detailMainImage');if(m)swapDetailMainImage(m,gallery[currentIndex],i<oldIndex?-1:1);detail.querySelectorAll('.detailThumb').forEach((x,j)=>x.classList.toggle('active',j===currentIndex));detail.querySelector('#galleryCounter').textContent=`${currentIndex+1} / ${gallery.length}`};detail.querySelectorAll('.detailThumb').forEach(t=>t.onclick=()=>show(Number(t.dataset.index)));detail.querySelector('.galleryPrev')?.addEventListener('click',()=>show(currentIndex-1));detail.querySelector('.galleryNext')?.addEventListener('click',()=>show(currentIndex+1));detail.querySelector('.galleryFullscreen')?.addEventListener('click',()=>openGalleryLightbox(gallery,currentIndex,p.name,show,'adicional'));
  if(push)history.pushState({additional:sku},'',`/producto/${encodeURIComponent(sku)}`);
 }
 function normalizeSearch(value){return String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim()}
@@ -536,7 +544,7 @@ async function openDetail(sku,push=true){
  detail.innerHTML=`<div class="detailTop"><button class="backBtn" type="button">‹ Volver al catálogo</button><button class="detailClose" type="button" aria-label="Cerrar">×</button></div><div class="detailShell"><div class="detailGallery"><div class="detailMainPhoto">${main?`<img id="detailMainImage" src="${attr(main)}" alt="${attr(p.name)}">${productWatermark('figura')}<button class="galleryFullscreen" type="button" aria-label="Ver figura completa">⛶ <span>Ver figura completa</span></button>${gallery.length>1?`<button class="galleryArrow galleryPrev" type="button" aria-label="Fotografía anterior">‹</button><button class="galleryArrow galleryNext" type="button" aria-label="Fotografía siguiente">›</button>`:''}<span class="galleryCounter" id="galleryCounter">${currentIndex+1} / ${gallery.length}</span>`:`<div class="photoPlaceholder large"><span>界</span><small>Fotografía próximamente</small></div>`}</div>${gallery.length?`<div class="detailThumbs">${gallery.map((img,i)=>`<button class="detailThumb ${i===currentIndex?'active':''}" type="button" data-index="${i}" data-img="${attr(img)}"><img src="${attr(img)}" alt="Vista ${i+1} de ${attr(p.name)}">${productWatermark('figura')}</button>`).join('')}</div>`:''}</div><div class="detailInfo"><p class="series">${escapeHtml(p.series)}</p><h1>${escapeHtml(p.name)}</h1><p class="detailSku">${escapeHtml(p.sku)}</p><div class="detailBadges">${pct?`<span class="detailBadge sale">-${pct}%</span>`:''}<span class="detailBadge ${p.status==='apartada'?'hold':''}">${statusLabel(p.status)}</span></div><div class="detailPrice">${p.sale?`<span class="old">Antes ${money(p.price)}</span>`:''}<strong>${money(p.sale||p.price)}</strong></div><p>${escapeHtml(p.description)}</p><div class="detailMeta"><div><small>Personaje</small><b>${escapeHtml(p.character)}</b></div><div><small>Franquicia</small><b>${escapeHtml(p.series)}</b></div><div><small>Fabricante</small><b>${escapeHtml(p.manufacturer)}</b></div><div><small>Condición figura</small><b>${escapeHtml(p.figureCondition)}</b></div><div><small>Condición caja</small><b>${escapeHtml(p.boxCondition)}</b></div><div><small>Procedencia</small><b>${escapeHtml(p.origin)}</b></div><div><small>Stock</small><b>${p.stock}</b></div><div><small>Entrega</small><b>${escapeHtml(p.delivery)}</b></div></div><div class="detailActions"><a class="whatsapp ${action.cls}" data-analytics-whatsapp="${attr(p.sku)}" data-analytics-kind="figura" href="${attr(wa)}" target="_blank" rel="noopener">${icon('chat')} ${action.text}</a><div class="detailUtilityActions"><button class="interestToggle ${isInInterestList(p.sku,'figura')?'active':''}" data-interest-toggle="${attr(p.sku)}" data-interest-kind="figura" type="button" aria-pressed="${isInInterestList(p.sku,'figura')}"><span class="interestStateIcon">${isInInterestList(p.sku,'figura')?'✓':'＋'}</span> <span class="interestLabel">${isInInterestList(p.sku,'figura')?'En mi lista':'Agregar a mi lista'}</span></button><button class="shareProductButton" data-share-product="${attr(p.sku)}" data-share-kind="figura" type="button">↗ Compartir</button></div><p class="detailNote">Entrega local en Mérida, Yucatán. La compra y los detalles de entrega se acuerdan directamente por WhatsApp.</p></div></div></div>`;
  document.body.appendChild(detail);document.body.classList.add('detail-open');detail.classList.add('ansDetailReveal');updateInterestListUI();prepareDetailMainImage(detail);
  detail.querySelectorAll('.backBtn,.detailClose').forEach(b=>b.addEventListener('click',closeDetail));
- const showImage=index=>{if(!gallery.length)return;currentIndex=(index+gallery.length)%gallery.length;const m=detail.querySelector('#detailMainImage');if(m)swapDetailMainImage(m,gallery[currentIndex]);detail.querySelectorAll('.detailThumb').forEach((x,i)=>x.classList.toggle('active',i===currentIndex));const c=detail.querySelector('#galleryCounter');if(c)c.textContent=`${currentIndex+1} / ${gallery.length}`};
+ const showImage=index=>{if(!gallery.length)return;const oldIndex=currentIndex;currentIndex=(index+gallery.length)%gallery.length;const m=detail.querySelector('#detailMainImage');if(m)swapDetailMainImage(m,gallery[currentIndex],index<oldIndex?-1:1);detail.querySelectorAll('.detailThumb').forEach((x,i)=>x.classList.toggle('active',i===currentIndex));const c=detail.querySelector('#galleryCounter');if(c)c.textContent=`${currentIndex+1} / ${gallery.length}`};
  detail.querySelectorAll('.detailThumb').forEach(t=>t.addEventListener('click',()=>showImage(Number(t.dataset.index))));
  detail.querySelector('.galleryPrev')?.addEventListener('click',()=>showImage(currentIndex-1));
  detail.querySelector('.galleryNext')?.addEventListener('click',()=>showImage(currentIndex+1));

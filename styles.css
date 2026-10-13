@@ -1841,3 +1841,12 @@ a.whatsapp:active{transform:scale(.96)}a.whatsapp:active .whatsappIcon{transform
  .publicProductCard.ansTapFeedback,.publicAdditionalCard.ansTapFeedback{animation:none!important}
  .detailMainPhoto>img.ansGalleryPrevious,.imageLightboxStage>img.ansGalleryPrevious{transition:none!important}
 }
+
+/* V7.13.1 revisión: respuesta táctil visible, sin depender de hover. */
+@keyframes ansTapCard{0%{transform:scale(1);filter:brightness(1)}38%{transform:scale(.965);filter:brightness(1.16)}100%{transform:scale(1);filter:brightness(1)}}
+.publicProductCard.ansTapFeedback,.publicAdditionalCard.ansTapFeedback{animation:ansTapCard .34s cubic-bezier(.2,.8,.2,1) both!important}
+@keyframes ansPressControl{0%{transform:scale(1)}40%{transform:scale(.9);filter:brightness(1.22)}100%{transform:scale(1)}}
+.ansControlPressed{animation:ansPressControl .32s cubic-bezier(.2,.8,.2,1) both!important}
+.detailMainPhoto,.imageLightboxStage{overflow:hidden}
+.detailMainPhoto>img.ansGalleryPrevious,.imageLightboxStage>img.ansGalleryPrevious{transition:none!important}
+@media(prefers-reduced-motion:reduce){.publicProductCard.ansTapFeedback,.publicAdditionalCard.ansTapFeedback,.ansControlPressed{animation:none!important}}
