@@ -2160,3 +2160,33 @@ a.whatsapp:active{transform:scale(.96)}a.whatsapp:active .whatsappIcon{transform
 .ansVitrineOpen .ansVitrineLeft,.ansVitrineOpen .ansVitrineRight{animation-duration:.62s;animation-delay:.14s}
 .ansVitrineOpen .ansVitrineLock,.ansVitrineOpen .ansVitrineSeam{animation-duration:.28s}
 @media(prefers-reduced-motion:reduce){.ansVitrineOpen .ansThemeParticle{animation:none!important;display:none!important}}
+
+/* V7.16.6 — Cobertura bidimensional y evaporación de niebla. */
+.ansVitrine .ansThemeParticle{box-sizing:border-box;transform-origin:center;white-space:nowrap}
+.ansVitrineOpen .ansThemeParticle{
+ animation-name:ansV166Organic!important;
+ animation-duration:var(--p-duration,1.4s)!important;
+ animation-delay:var(--p-delay,0s)!important;
+ animation-timing-function:cubic-bezier(.3,.12,.65,.86)!important;
+}
+@keyframes ansV166Organic{
+ 0%{opacity:0;transform:translate3d(0,0,0) rotate(0deg) scale(.85)}
+ 23%{opacity:.88}
+ 52%{opacity:.92;transform:translate3d(var(--p-orbit-x),var(--p-orbit-y),0) rotate(calc(var(--p-spin) * .35)) scale(1)}
+ 78%{opacity:.7}
+ 100%{opacity:0;transform:translate3d(var(--p-end-x),var(--p-end-y),0) rotate(var(--p-spin)) scale(.92)}
+}
+.ansVitrine .ansThemeParticle-niebla,.ansVitrine .ansThemeParticle-niebla:not(.ansThemeParticle-custom){
+ width:clamp(34px,24%,72px);height:clamp(23px,13%,45px);
+ background:radial-gradient(ellipse at center,rgba(236,230,247,.28) 0%,rgba(223,218,241,.12) 44%,transparent 76%);
+ border-radius:50%;filter:blur(9px)!important;box-shadow:none!important;text-shadow:none!important;color:transparent;opacity:0;
+}
+.ansVitrineOpen .ansThemeParticle-niebla{animation-name:ansV166Mist!important;animation-timing-function:ease-in-out!important}
+@keyframes ansV166Mist{
+ 0%{opacity:0;transform:translate3d(0,7px,0) scale(.65)}
+ 28%{opacity:.42;transform:translate3d(calc(var(--p-orbit-x) * .35),0,0) scale(.94)}
+ 53%{opacity:.34;transform:translate3d(var(--p-orbit-x),var(--p-orbit-y),0) scale(1.13)}
+ 76%{opacity:.18;transform:translate3d(calc(var(--p-end-x) * .8),calc(var(--p-end-y) * .8),0) scale(1.36)}
+ 100%{opacity:0;transform:translate3d(var(--p-end-x),var(--p-end-y),0) scale(1.52)}
+}
+@media(prefers-reduced-motion:reduce){.ansVitrineOpen .ansThemeParticle{animation:none!important;display:none!important}}
