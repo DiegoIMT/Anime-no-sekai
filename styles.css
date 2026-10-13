@@ -1901,3 +1901,14 @@ a.whatsapp:active{transform:scale(.96)}a.whatsapp:active .whatsappIcon{transform
  .reviewsTab{position:static!important;inset:auto!important;transform:none!important;rotate:none!important;writing-mode:horizontal-tb!important;display:inline-flex;align-items:center;justify-content:center;gap:6px;width:max-content;margin:0 auto 18px;padding:10px 20px;box-shadow:none;backdrop-filter:none}
  footer{display:flex;flex-direction:column;align-items:center}
 }
+
+/* V7.14.3 — Reseñas accesibles desde el menú móvil, sin botón flotante ni duplicado. */
+.mobileReviewsButton{display:none}
+@media(max-width:900px){
+  .reviewsTab{display:none!important}
+  .mobileNav .mobileReviewsButton{display:none;width:100%;text-align:left;padding:16px 22px;border:0;border-top:1px solid #22252b;background:#0d0f13;color:#e7e8eb;font:inherit;font-weight:700;cursor:pointer;border-radius:9px}
+  .mobileNav.open .mobileReviewsButton{display:block}
+  .mobileNav .mobileReviewsButton:hover,.mobileNav .mobileReviewsButton:focus-visible{color:#fff;background:color-mix(in srgb,var(--brand-primary) 13%,#0d0f13);box-shadow:inset 3px 0 0 var(--brand-primary);outline:none}
+  html[data-theme="light"] .mobileNav .mobileReviewsButton{background:#fbfafc;color:#342f3b;border-top-color:var(--line)}
+  html[data-theme="light"] .mobileNav .mobileReviewsButton:hover,html[data-theme="light"] .mobileNav .mobileReviewsButton:focus-visible{color:#1c1822;background:color-mix(in srgb,var(--brand-primary) 11%,#fff);box-shadow:inset 3px 0 0 var(--brand-primary)}
+}
