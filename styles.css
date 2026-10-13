@@ -2401,3 +2401,16 @@ html[data-theme="light"] .hero.ansSeasonHero{background-image:linear-gradient(90
   inset:0;width:100%;height:100%;object-fit:cover;object-position:center;
   pointer-events:none;
 }
+
+/* V7.17.13 — Mobile footer panorama: avoid cover zoom on tall footers. */
+@media (max-width:760px) {
+ #app > footer.ansSeasonFooter::before {
+   background-size:var(--ans-decor-mobile-mode,contain) !important;
+   background-position:center center !important;
+   background-repeat:no-repeat !important;
+ }
+}
+.ansMiniHeader img[data-mini-image="encabezado"],
+.ansMiniFooter img[data-mini-image="pie"] {
+ max-width:none !important; width:100% !important; height:100% !important;
+}
