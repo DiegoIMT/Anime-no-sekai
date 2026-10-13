@@ -1974,3 +1974,13 @@ a.whatsapp:active{transform:scale(.96)}a.whatsapp:active .whatsappIcon{transform
 }
 .ansVitrineOpen::after{animation:ansVFrameFade .42s .34s ease forwards}
 @keyframes ansVFrameFade{to{opacity:0}}
+
+/* V7.15.6: partículas más visibles, sin modificar la apertura de las puertas. */
+.ansThemeParticle{font-size:var(--p-size,18px);text-shadow:0 1px 5px #000b;will-change:transform,opacity}
+.ansVitrine[data-intensity="sutil"] .ansThemeParticle{filter:brightness(1.08)}
+.ansVitrine[data-intensity="equilibrada"] .ansThemeParticle{filter:brightness(1.2) drop-shadow(0 0 3px currentColor)}
+.ansVitrine[data-intensity="llamativa"] .ansThemeParticle{font-size:calc(var(--p-size,18px) * 1.25);filter:brightness(1.3) drop-shadow(0 0 5px currentColor)}
+.ansThemeParticle-custom{color:var(--ans-v-secondary,#f97316);font-family:system-ui,sans-serif}
+.ansThemeParticle-niebla.ansThemeParticle-custom{width:auto;height:auto;border-radius:0;background:none;filter:none}
+.ansVitrine[data-intensity="llamativa"] .ansThemeParticle-niebla:not(.ansThemeParticle-custom){width:52px;height:38px}
+@media(prefers-reduced-motion:reduce){.ansThemeParticle{display:none!important}}
