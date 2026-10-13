@@ -2305,3 +2305,55 @@ html[data-theme="light"] .hero.ansSeasonHero{background-image:linear-gradient(90
 .ansMiniMobile .ansMiniHeader{height:37px;padding:0 8px}.ansMiniMobile .ansMiniHeader span{display:none}.ansMiniMobile .ansMiniHero{height:125px}.ansMiniMobile .ansMiniHeroText{padding:12px}.ansMiniMobile .ansMiniHeroText b{font-size:15px}.ansMiniMobile .ansMiniContent{padding:9px}.ansMiniMobile .ansMiniCards{gap:4px}.ansMiniMobile .ansMiniCards>div{height:75px;font-size:8px}.ansMiniMobile .ansMiniCards>div small{font-size:7px}.ansMiniMobile .ansMiniTitle{font-size:11px!important}
 @media(max-width:560px){.ansMiniPreviewWrap{padding:10px}.ansMiniPreviewViewport{padding:6px}}
 @media(prefers-reduced-motion:reduce){.ansMiniAmbient span{animation:none}}
+
+/* V7.17.2 — La temática decora, pero nunca altera el espacio de navegación. */
+header.ansSeasonHeader{isolation:isolate;overflow:visible}
+header.ansSeasonHeader>.ansSeasonDecoration{
+  position:absolute!important;top:2px!important;right:4px!important;bottom:auto!important;
+  width:clamp(36px,4.3vw,64px)!important;height:clamp(36px,4.3vw,64px)!important;
+  max-width:64px!important;max-height:calc(100% - 4px)!important;
+  object-fit:contain;object-position:center;opacity:.72;pointer-events:none;
+  z-index:0!important;filter:drop-shadow(0 2px 5px rgba(0,0,0,.3));
+}
+header.ansSeasonHeader>.brand,header.ansSeasonHeader>nav,header.ansSeasonHeader>.headActions{
+  position:relative;z-index:2;min-width:0;
+}
+/* Mantener los enlaces en una sola línea y evitar que la marca invada el menú. */
+header>.brand{flex:0 0 auto;min-width:0}
+header>nav{flex:0 1 auto;min-width:0;align-items:center;gap:clamp(10px,1.35vw,23px)}
+header>nav>a{white-space:nowrap;flex:0 0 auto}
+header>.headActions{flex:0 0 auto;align-items:center}
+@media(min-width:1321px){
+  header.ansSeasonHeader{padding-left:clamp(22px,3vw,64px);padding-right:clamp(76px,6vw,120px)}
+}
+/* A partir de este ancho no caben seis enlaces, logo y acciones completos.
+   Reutilizar el menú móvil existente en vez de comprimir o partir los textos. */
+@media(min-width:901px) and (max-width:1320px){
+  header.ansSeasonHeader>nav{display:none!important}
+  header.ansSeasonHeader .menu{display:grid!important}
+  header.ansSeasonHeader .mobileNav{display:grid}
+  header.ansSeasonHeader{padding-right:clamp(70px,7vw,105px)}
+}
+@media(max-width:900px){
+  header.ansSeasonHeader>.ansSeasonDecoration{width:42px!important;height:42px!important;right:3px!important;top:3px!important;opacity:.55}
+  header.ansSeasonHeader{padding-right:58px}
+}
+@media(max-width:560px){
+  header.ansSeasonHeader>.ansSeasonDecoration{width:28px!important;height:28px!important;top:2px!important;right:2px!important;opacity:.45}
+  header.ansSeasonHeader{padding-right:40px}
+}
+footer.ansSeasonFooter{isolation:isolate;min-width:0}
+footer.ansSeasonFooter>.ansSeasonDecoration{
+  position:absolute!important;right:8px!important;bottom:4px!important;
+  width:clamp(40px,6vw,85px)!important;height:clamp(40px,6vw,85px)!important;
+  max-width:85px!important;max-height:calc(100% - 8px)!important;
+  object-fit:contain;opacity:.62;pointer-events:none;z-index:0!important;
+}
+footer.ansSeasonFooter>:not(.ansSeasonDecoration){min-width:0;overflow-wrap:anywhere}
+@media(min-width:901px){footer.ansSeasonFooter{padding-right:clamp(95px,9vw,145px)}}
+@media(max-width:900px){footer.ansSeasonFooter{padding-right:65px}}
+@media(max-width:560px){footer.ansSeasonFooter{padding-right:45px}footer.ansSeasonFooter>.ansSeasonDecoration{width:36px!important;height:36px!important;opacity:.5}}
+/* La imagen del hero no debe expandir el contenido ni alterar su distribución. */
+.hero.ansSeasonHero{min-width:0;max-width:100%;overflow:hidden}
+.hero.ansSeasonHero>.heroContent{min-width:0;max-width:100%}
+.sectionHead h2.ansSeasonTitle{max-width:100%;overflow-wrap:break-word}
