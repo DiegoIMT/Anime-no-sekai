@@ -288,27 +288,39 @@ function prepareDetailMainImage(detail){
  img.classList.add('detailImageEnter');
  if(img.complete&&img.naturalWidth)reveal();else img.addEventListener('load',reveal,{once:true});
 }
-// Transición tipo álbum: la imagen nueva se precarga y la anterior sale como una página.
+// Carrusel de desplazamiento real: dos paneles separados, sin opacidad ni solapamiento.
 const ansAlbumReduced=()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 function ansAlbumSwap(img,src,direction=1){
- if(!img||!src||img.getAttribute('src')===src)return;
+ if(!img||!src)return;
  const stage=img.parentElement;
- const token=String((Number(stage.dataset.albumToken)||0)+1);stage.dataset.albumToken=token;
+ if(stage.dataset.albumBusy==='1')return false;
+ if(img.getAttribute('src')===src)return true;
+ stage.dataset.albumBusy='1';
  const pre=new Image();pre.decoding='async';pre.src=src;
+ const release=()=>{stage.dataset.albumBusy='0'};
  const commit=()=>{
-  if(!img.isConnected||stage.dataset.albumToken!==token)return;
-  stage.querySelectorAll('.ansAlbumOutgoing').forEach(n=>n.remove());
-  if(ansAlbumReduced()){img.src=src;return}
-  const old=img.cloneNode(false);old.removeAttribute('id');old.removeAttribute('srcset');old.className='ansAlbumOutgoing';old.setAttribute('aria-hidden','true');
-  old.style.objectFit=getComputedStyle(img).objectFit;old.style.objectPosition=getComputedStyle(img).objectPosition;
-  stage.appendChild(old);img.src=src;
-  const sign=direction<0?1:-1;
-  const motion=old.animate([{transform:'translateX(0) rotate(0deg)',opacity:1},{transform:`translateX(${sign*26}%) rotate(${sign*2}deg)`,opacity:0}],{duration:680,easing:'cubic-bezier(.35,0,.18,1)',fill:'forwards'});
-  motion.finished.catch(()=>{}).finally(()=>old.remove());
+  if(!img.isConnected){release();return}
+  if(ansAlbumReduced()){img.src=src;release();return}
+  const outgoing=img.cloneNode(false),incoming=img.cloneNode(false);
+  outgoing.removeAttribute('id');incoming.removeAttribute('id');
+  outgoing.removeAttribute('srcset');incoming.removeAttribute('srcset');
+  outgoing.className='ansSlideImage';incoming.className='ansSlideImage';
+  incoming.src=src;
+  const sign=direction<0?-1:1;
+  stage.classList.add('ansSlideStage');
+  img.style.visibility='hidden';
+  stage.append(outgoing,incoming);
+  outgoing.style.transform='translateX(0)';incoming.style.transform=`translateX(${sign*100}%)`;
+  const duration=650,easing='cubic-bezier(.45,0,.2,1)';
+  const outMotion=outgoing.animate([{transform:'translateX(0)'},{transform:`translateX(${-sign*100}%)`}],{duration,easing,fill:'forwards'});
+  const inMotion=incoming.animate([{transform:`translateX(${sign*100}%)`},{transform:'translateX(0)'}],{duration,easing,fill:'forwards'});
+  const finish=()=>{img.src=src;img.style.visibility='';outgoing.remove();incoming.remove();stage.classList.remove('ansSlideStage');release()};
+  inMotion.finished.then(finish).catch(finish);
  };
- if(pre.complete&&pre.naturalWidth)commit();else{pre.addEventListener('load',commit,{once:true});pre.addEventListener('error',()=>{if(stage.dataset.albumToken===token)img.src=src},{once:true})}
+ if(pre.complete&&pre.naturalWidth)commit();else{pre.addEventListener('load',commit,{once:true});pre.addEventListener('error',release,{once:true})}
+ return true;
 }
-function swapDetailMainImage(img,src,direction=1){ansAlbumSwap(img,src,direction)}
+function swapDetailMainImage(img,src,direction=1){return ansAlbumSwap(img,src,direction)}
 
 async function loadPublicCatalog(){
  const [offersRes,featuredRes,upcomingRes]=await Promise.all([
@@ -418,7 +430,7 @@ function openGalleryLightbox(gallery,startIndex,altText,onChange,kind='figura'){
  viewer.innerHTML=`<button class="imageLightboxClose" type="button" aria-label="Cerrar imagen">×</button><button class="imageLightboxArrow imageLightboxPrev" type="button" aria-label="Imagen anterior">‹</button><div class="imageLightboxStage"><img src="${attr(gallery[index])}" alt="${attr(altText)}">${productWatermark(kind)}<span class="imageLightboxCounter">${index+1} / ${gallery.length}</span></div><button class="imageLightboxArrow imageLightboxNext" type="button" aria-label="Imagen siguiente">›</button>`;
  document.body.appendChild(viewer);
  const img=viewer.querySelector('img'),counter=viewer.querySelector('.imageLightboxCounter');
- const show=next=>{const previous=index;index=(next+gallery.length)%gallery.length;if(previous===index)return;ansAlbumSwap(img,gallery[index],next>previous?1:-1);counter.textContent=`${index+1} / ${gallery.length}`;onChange?.(index)};
+ const show=next=>{if(viewer.querySelector('.imageLightboxStage')?.dataset.albumBusy==='1')return;const previous=index;index=(next+gallery.length)%gallery.length;if(previous===index)return;ansAlbumSwap(img,gallery[index],next>previous?1:-1);counter.textContent=`${index+1} / ${gallery.length}`;onChange?.(index)};
  const close=()=>{document.removeEventListener('keydown',onKey);viewer.remove()};
  const onKey=e=>{if(e.key==='Escape')close();else if(e.key==='ArrowLeft'&&gallery.length>1)show(index-1);else if(e.key==='ArrowRight'&&gallery.length>1)show(index+1)};
  viewer.querySelector('.imageLightboxClose').addEventListener('click',close);
@@ -442,7 +454,7 @@ async function openAdditionalDetail(sku,push=true){
  detail.innerHTML=`<div class="detailTop"><button class="backBtn" type="button">‹ Volver a Más para tu colección</button><button class="detailClose" type="button" aria-label="Cerrar">×</button></div><div class="detailShell"><div class="detailGallery"><div class="detailMainPhoto">${main?`<img id="detailMainImage" src="${attr(main)}" alt="${attr(p.name)}">${productWatermark('adicional')}<button class="galleryFullscreen" type="button">⛶ <span>Ver imagen completa</span></button>${gallery.length>1?`<button class="galleryArrow galleryPrev" type="button">‹</button><button class="galleryArrow galleryNext" type="button">›</button>`:''}<span class="galleryCounter" id="galleryCounter">${currentIndex+1} / ${gallery.length}</span>`:`<div class="photoPlaceholder large"><span>界</span><small>Fotografía próximamente</small></div>`}</div>${gallery.length?`<div class="detailThumbs">${gallery.map((img,i)=>`<button class="detailThumb ${i===currentIndex?'active':''}" type="button" data-index="${i}"><img src="${attr(img)}" alt="Vista ${i+1} de ${attr(p.name)}">${productWatermark('adicional')}</button>`).join('')}</div>`:''}</div><div class="detailInfo"><p class="series">${escapeHtml(p.type)}</p><h1>${escapeHtml(p.name)}</h1><p class="detailSku">${escapeHtml(p.sku)}</p><div class="detailBadges">${pct?`<span class="detailBadge sale">-${pct}%</span>`:''}<span class="detailBadge ${p.status==='apartada'?'hold':''}">${statusLabel(p.status)}</span>${p.handmade?'<span class="detailBadge craft">Hecho a mano</span>':''}</div><div class="detailPrice">${p.sale?`<span class="old">Antes ${money(p.price)}</span>`:''}<strong>${money(p.sale||p.price)}</strong></div><p>${escapeHtml(p.description)}</p><div class="detailMeta additionalMeta">${meta.map(([k,v])=>`<div><small>${escapeHtml(k)}</small><b>${escapeHtml(v)}</b></div>`).join('')}</div><div class="detailActions"><a class="whatsapp ${action.cls}" data-analytics-whatsapp="${attr(p.sku)}" data-analytics-kind="adicional" href="${attr(wa)}" target="_blank" rel="noopener">${icon('chat')} ${action.text}</a><div class="detailUtilityActions"><button class="interestToggle ${isInInterestList(p.sku,'adicional')?'active':''}" data-interest-toggle="${attr(p.sku)}" data-interest-kind="adicional" type="button" aria-pressed="${isInInterestList(p.sku,'adicional')}"><span class="interestStateIcon">${isInInterestList(p.sku,'adicional')?'✓':'＋'}</span> <span class="interestLabel">${isInInterestList(p.sku,'adicional')?'En mi lista':'Agregar a mi lista'}</span></button><button class="shareProductButton" data-share-product="${attr(p.sku)}" data-share-kind="adicional" type="button">↗ Compartir</button></div><p class="detailNote">Entrega local en Mérida, Yucatán. La compra y los detalles de entrega se acuerdan directamente por WhatsApp.</p></div></div></div>`;
  document.body.appendChild(detail);document.body.classList.add('detail-open');detail.classList.add('ansDetailReveal');updateInterestListUI();prepareDetailMainImage(detail);
  const close=()=>{detail.remove();document.body.classList.remove('detail-open');if(location.pathname.startsWith('/producto/')||location.hash.startsWith('#producto='))history.replaceState({},'','/#mas-coleccion')};detail.querySelectorAll('.backBtn,.detailClose').forEach(b=>b.addEventListener('click',close));
- const show=i=>{const previousIndex=currentIndex;currentIndex=(i+gallery.length)%gallery.length;const m=detail.querySelector('#detailMainImage');if(m)swapDetailMainImage(m,gallery[currentIndex],currentIndex>=previousIndex?1:-1);detail.querySelectorAll('.detailThumb').forEach((x,j)=>x.classList.toggle('active',j===currentIndex));detail.querySelector('#galleryCounter').textContent=`${currentIndex+1} / ${gallery.length}`};detail.querySelectorAll('.detailThumb').forEach(t=>t.onclick=()=>show(Number(t.dataset.index)));detail.querySelector('.galleryPrev')?.addEventListener('click',()=>show(currentIndex-1));detail.querySelector('.galleryNext')?.addEventListener('click',()=>show(currentIndex+1));detail.querySelector('.galleryFullscreen')?.addEventListener('click',()=>openGalleryLightbox(gallery,currentIndex,p.name,show,'adicional'));
+ const show=i=>{if(detail.querySelector('.detailMainPhoto')?.dataset.albumBusy==='1')return;const previousIndex=currentIndex;currentIndex=(i+gallery.length)%gallery.length;const m=detail.querySelector('#detailMainImage');if(m)swapDetailMainImage(m,gallery[currentIndex],currentIndex>=previousIndex?1:-1);detail.querySelectorAll('.detailThumb').forEach((x,j)=>x.classList.toggle('active',j===currentIndex));detail.querySelector('#galleryCounter').textContent=`${currentIndex+1} / ${gallery.length}`};detail.querySelectorAll('.detailThumb').forEach(t=>t.onclick=()=>show(Number(t.dataset.index)));detail.querySelector('.galleryPrev')?.addEventListener('click',()=>show(currentIndex-1));detail.querySelector('.galleryNext')?.addEventListener('click',()=>show(currentIndex+1));detail.querySelector('.galleryFullscreen')?.addEventListener('click',()=>openGalleryLightbox(gallery,currentIndex,p.name,show,'adicional'));
  if(push)history.pushState({additional:sku},'',`/producto/${encodeURIComponent(sku)}`);
 }
 function normalizeSearch(value){return String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim()}
@@ -525,7 +537,7 @@ async function openDetail(sku,push=true){
  detail.innerHTML=`<div class="detailTop"><button class="backBtn" type="button">‹ Volver al catálogo</button><button class="detailClose" type="button" aria-label="Cerrar">×</button></div><div class="detailShell"><div class="detailGallery"><div class="detailMainPhoto">${main?`<img id="detailMainImage" src="${attr(main)}" alt="${attr(p.name)}">${productWatermark('figura')}<button class="galleryFullscreen" type="button" aria-label="Ver figura completa">⛶ <span>Ver figura completa</span></button>${gallery.length>1?`<button class="galleryArrow galleryPrev" type="button" aria-label="Fotografía anterior">‹</button><button class="galleryArrow galleryNext" type="button" aria-label="Fotografía siguiente">›</button>`:''}<span class="galleryCounter" id="galleryCounter">${currentIndex+1} / ${gallery.length}</span>`:`<div class="photoPlaceholder large"><span>界</span><small>Fotografía próximamente</small></div>`}</div>${gallery.length?`<div class="detailThumbs">${gallery.map((img,i)=>`<button class="detailThumb ${i===currentIndex?'active':''}" type="button" data-index="${i}" data-img="${attr(img)}"><img src="${attr(img)}" alt="Vista ${i+1} de ${attr(p.name)}">${productWatermark('figura')}</button>`).join('')}</div>`:''}</div><div class="detailInfo"><p class="series">${escapeHtml(p.series)}</p><h1>${escapeHtml(p.name)}</h1><p class="detailSku">${escapeHtml(p.sku)}</p><div class="detailBadges">${pct?`<span class="detailBadge sale">-${pct}%</span>`:''}<span class="detailBadge ${p.status==='apartada'?'hold':''}">${statusLabel(p.status)}</span></div><div class="detailPrice">${p.sale?`<span class="old">Antes ${money(p.price)}</span>`:''}<strong>${money(p.sale||p.price)}</strong></div><p>${escapeHtml(p.description)}</p><div class="detailMeta"><div><small>Personaje</small><b>${escapeHtml(p.character)}</b></div><div><small>Franquicia</small><b>${escapeHtml(p.series)}</b></div><div><small>Fabricante</small><b>${escapeHtml(p.manufacturer)}</b></div><div><small>Condición figura</small><b>${escapeHtml(p.figureCondition)}</b></div><div><small>Condición caja</small><b>${escapeHtml(p.boxCondition)}</b></div><div><small>Procedencia</small><b>${escapeHtml(p.origin)}</b></div><div><small>Stock</small><b>${p.stock}</b></div><div><small>Entrega</small><b>${escapeHtml(p.delivery)}</b></div></div><div class="detailActions"><a class="whatsapp ${action.cls}" data-analytics-whatsapp="${attr(p.sku)}" data-analytics-kind="figura" href="${attr(wa)}" target="_blank" rel="noopener">${icon('chat')} ${action.text}</a><div class="detailUtilityActions"><button class="interestToggle ${isInInterestList(p.sku,'figura')?'active':''}" data-interest-toggle="${attr(p.sku)}" data-interest-kind="figura" type="button" aria-pressed="${isInInterestList(p.sku,'figura')}"><span class="interestStateIcon">${isInInterestList(p.sku,'figura')?'✓':'＋'}</span> <span class="interestLabel">${isInInterestList(p.sku,'figura')?'En mi lista':'Agregar a mi lista'}</span></button><button class="shareProductButton" data-share-product="${attr(p.sku)}" data-share-kind="figura" type="button">↗ Compartir</button></div><p class="detailNote">Entrega local en Mérida, Yucatán. La compra y los detalles de entrega se acuerdan directamente por WhatsApp.</p></div></div></div>`;
  document.body.appendChild(detail);document.body.classList.add('detail-open');detail.classList.add('ansDetailReveal');updateInterestListUI();prepareDetailMainImage(detail);
  detail.querySelectorAll('.backBtn,.detailClose').forEach(b=>b.addEventListener('click',closeDetail));
- const showImage=index=>{if(!gallery.length)return;const previousIndex=currentIndex;currentIndex=(index+gallery.length)%gallery.length;const m=detail.querySelector('#detailMainImage');if(m)swapDetailMainImage(m,gallery[currentIndex],currentIndex>=previousIndex?1:-1);detail.querySelectorAll('.detailThumb').forEach((x,i)=>x.classList.toggle('active',i===currentIndex));const c=detail.querySelector('#galleryCounter');if(c)c.textContent=`${currentIndex+1} / ${gallery.length}`};
+ const showImage=index=>{if(!gallery.length||detail.querySelector('.detailMainPhoto')?.dataset.albumBusy==='1')return;const previousIndex=currentIndex;currentIndex=(index+gallery.length)%gallery.length;const m=detail.querySelector('#detailMainImage');if(m)swapDetailMainImage(m,gallery[currentIndex],currentIndex>=previousIndex?1:-1);detail.querySelectorAll('.detailThumb').forEach((x,i)=>x.classList.toggle('active',i===currentIndex));const c=detail.querySelector('#galleryCounter');if(c)c.textContent=`${currentIndex+1} / ${gallery.length}`};
  detail.querySelectorAll('.detailThumb').forEach(t=>t.addEventListener('click',()=>showImage(Number(t.dataset.index))));
  detail.querySelector('.galleryPrev')?.addEventListener('click',()=>showImage(currentIndex-1));
  detail.querySelector('.galleryNext')?.addEventListener('click',()=>showImage(currentIndex+1));

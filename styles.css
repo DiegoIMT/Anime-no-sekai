@@ -1814,10 +1814,16 @@ a.whatsapp:active{transform:scale(.96)}a.whatsapp:active .whatsappIcon{transform
 .ansMotionButton[data-ans-motion="save"] .ansMotionIcon .ansAdminIcon{width:21px;height:21px}
 @media(max-width:480px){.adminRowActions button .ansAdminIcon{width:15px;height:15px}}
 
-/* V7.13.1 - Álbum elegante: movimiento únicamente dentro de la fotografía */
+/* V7.13.2: desplazamiento de álbum sin transparencias ni recortes */
 .detailMainPhoto,.imageLightboxStage{position:relative;overflow:hidden}
-.detailMainPhoto > img#detailMainImage,.imageLightboxStage > img{transition:none!important;animation:none!important;transform:none!important;opacity:1!important}
-.ansAlbumOutgoing{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;max-width:none!important;z-index:4!important;pointer-events:none!important;margin:0!important;transform-origin:50% 50%;}
+.detailMainPhoto > img#detailMainImage{transition:none!important;animation:none!important;transform:none!important;opacity:1!important}
+.imageLightboxStage > img{transition:none!important;animation:none!important;transform:none!important;opacity:1!important}
+.ansSlideStage{isolation:isolate}
+.ansSlideImage{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:contain!important;object-position:center!important;margin:0!important;pointer-events:none!important;z-index:2!important;opacity:1!important;animation:none!important;transition:none!important}
+/* El escenario de pantalla completa mantiene tamaño estable para imágenes verticales u horizontales */
+.imageLightboxStage{width:92vw;height:90vh;max-width:92vw;max-height:90vh}
+.imageLightboxStage > img{width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;object-position:center}
+@media(max-width:560px){.imageLightboxStage{width:96vw;height:86vh;max-width:96vw;max-height:86vh}}
 .ansDetailReveal .detailShell{animation:ansElegantDetail .62s cubic-bezier(.22,1,.36,1) both!important}
 @keyframes ansElegantDetail{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
 @media(prefers-reduced-motion:reduce){.ansDetailReveal .detailShell{animation:none!important}}
