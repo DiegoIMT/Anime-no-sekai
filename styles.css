@@ -1804,3 +1804,12 @@ a.whatsapp:after{content:"";position:absolute;inset:-60% auto -60% -55%;width:30
 @media(hover:hover){a.whatsapp:hover{transform:translateY(-3px);box-shadow:0 9px 25px #1caa7355;background:#176c4a}a.whatsapp:hover .whatsappIcon{transform:translateY(-4px) rotate(-13deg) scale(1.25)}a.whatsapp:hover:after{left:125%}}
 a.whatsapp:active{transform:scale(.96)}a.whatsapp:active .whatsappIcon{transform:rotate(12deg) scale(1.3)}
 @media(prefers-reduced-motion:reduce){.publicProductCard,.publicAdditionalCard,.publicProductCard *, .publicAdditionalCard *, .ansDetailReveal .detailShell,.ansDetailReveal .detailMainPhoto,a.whatsapp,a.whatsapp *{animation:none!important;transition:none!important}}
+
+/* V7.12.0 — Iconografía funcional en administración */
+.ansAdminIcon{width:15px;height:15px;flex:none;display:inline-block;vertical-align:-3px;stroke:currentColor}
+.adminRowActions button,.adminHeaderActions button,.formActions button,.adminFormHead .backBtn{display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.adminRowActions button .ansAdminIcon{width:14px;height:14px}
+.uploadButton .ansAdminIcon{width:26px;height:26px}
+.ansMotionButton[data-ans-motion="save"] .ansMotionIcon{display:inline-flex;align-items:center;justify-content:center}
+.ansMotionButton[data-ans-motion="save"] .ansMotionIcon .ansAdminIcon{width:21px;height:21px}
+@media(max-width:480px){.adminRowActions button .ansAdminIcon{width:15px;height:15px}}
