@@ -2375,3 +2375,20 @@ footer.ansSeasonFooter{padding-right:max(22px,calc((100% - 1180px)/2))!important
 .ansVitrineOpen .ansVitrineLock,.ansVitrineOpen .ansVitrineSeam{animation-duration:.55s!important}
 .ansVitrineOpen .ansThemeParticle{animation-duration:max(1.5s,var(--p-duration,1.5s))!important}
 @media(prefers-reduced-motion:reduce){.ansVitrineOpen .ansThemeParticle{animation:none!important}}
+
+/* V7.17.4: adornos decorativos, sin afectar al flujo del header/footer. */
+header.ansSeasonHeader,footer.ansSeasonFooter{background-image:none!important;position:relative;isolation:isolate}
+header.ansSeasonHeader::before,footer.ansSeasonFooter::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background-image:var(--ans-season-decoration);background-repeat:no-repeat;background-size:auto min(var(--ans-decor-size,64px),100%);background-position:var(--ans-decor-position,right center);opacity:var(--ans-decor-opacity,.75)}
+header.ansSeasonHeader>:not(.mobileNav),footer.ansSeasonFooter>*{position:relative;z-index:1}
+header.ansSeasonHeader{min-width:0;gap:clamp(12px,1.2vw,22px)}
+header.ansSeasonHeader>.brand{flex:0 0 auto;min-width:0}
+header.ansSeasonHeader>nav{flex:0 1 auto!important;min-width:0;gap:clamp(9px,1vw,18px)!important;white-space:nowrap}
+header.ansSeasonHeader>nav>a{flex:0 0 auto;white-space:nowrap!important}
+header.ansSeasonHeader>.headActions{flex:0 0 auto;min-width:0;margin-left:auto}
+@media(max-width:1600px){header.ansSeasonHeader>nav{display:none!important}header.ansSeasonHeader .menu{display:grid!important}header.ansSeasonHeader .mobileNav{display:grid}}
+@media(min-width:1601px){header.ansSeasonHeader>nav{display:flex!important}header.ansSeasonHeader .menu{display:none!important}}
+@media(max-width:900px){header.ansSeasonHeader::before,footer.ansSeasonFooter::before{background-size:auto min(var(--ans-decor-size,64px),65%)}}
+/* Las tres fases ocurren en paralelo: puertas, revelación y partículas. */
+.ansVitrineOpen .ansVitrineLeft,.ansVitrineOpen .ansVitrineRight{animation-duration:.83s!important;animation-delay:.12s!important}
+.ansVitrineOpen .ansVitrineLock,.ansVitrineOpen .ansVitrineSeam{animation-duration:.4s!important}
+.ansVitrineOpen .ansThemeParticle{animation-duration:clamp(.95s,var(--p-duration,1.2s),1.4s)!important}
