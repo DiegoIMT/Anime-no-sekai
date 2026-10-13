@@ -38,7 +38,7 @@ async function ansOpenProductFromCard(target, open){
    // Una única secuencia, sin ampliar ni desplazar la imagen de la tarjeta.
    overlay.classList.add('ansVitrineOpen');
    button?.classList.add('ansVitrineButtonBusy');
-   await ansWait(680);
+   await ansWait(1550);
   }
   await open();
  }finally{
@@ -65,15 +65,16 @@ function ansApplySiteTheme(previewConfig){
  root.style.setProperty('--ans-season-accent',/^#[0-9a-f]{6}$/i.test(c.acento||'')?c.acento:'#a78bfa');
  const hero=document.querySelector('.hero');
  if(hero){const desk=ansThemeAsset(c.hero_escritorio,!!previewConfig),mobile=ansThemeAsset(c.hero_movil,!!previewConfig);
-  hero.classList.toggle('ansSeasonHero',!!desk);
-  if(desk)hero.style.setProperty('--ans-season-hero',`url("${desk}")`);else hero.style.removeProperty('--ans-season-hero');
+  hero.classList.toggle('ansSeasonHero',!!(desk||mobile));
+  if(desk||mobile)hero.style.setProperty('--ans-season-hero',`url("${desk||mobile}")`);else hero.style.removeProperty('--ans-season-hero');
   if(mobile)hero.style.setProperty('--ans-season-hero-mobile',`url("${mobile}")`);else hero.style.removeProperty('--ans-season-hero-mobile');
  }
  const header=document.querySelector('#app > header')||document.querySelector('header');
  const footer=document.querySelector('footer');
  for(const [host,key,cls] of [[header,'encabezado','ansSeasonHeader'],[footer,'pie','ansSeasonFooter']]){
-  if(!host)continue;host.querySelectorAll(':scope > .ansSeasonDecoration').forEach(x=>x.remove());host.classList.toggle(cls,!!ansThemeAsset(c[key],!!previewConfig));
-  const url=ansThemeAsset(c[key],!!previewConfig);if(url){const img=document.createElement('img');img.className='ansSeasonDecoration';img.src=url;img.alt='';img.setAttribute('aria-hidden','true');host.appendChild(img)}
+  if(!host)continue;host.querySelectorAll(':scope > .ansSeasonDecoration').forEach(x=>x.remove());
+  const url=ansThemeAsset(c[key],!!previewConfig);host.classList.toggle(cls,!!url);
+  if(url)host.style.setProperty('--ans-season-decoration',`url("${url}")`);else host.style.removeProperty('--ans-season-decoration');
  }
  document.querySelectorAll('main .sectionHead h2').forEach(h=>h.classList.toggle('ansSeasonTitle',!!c.titulos));
  document.getElementById('ansSeasonAmbient')?.remove();

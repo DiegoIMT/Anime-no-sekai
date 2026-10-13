@@ -2357,3 +2357,21 @@ footer.ansSeasonFooter>:not(.ansSeasonDecoration){min-width:0;overflow-wrap:anyw
 .hero.ansSeasonHero{min-width:0;max-width:100%;overflow:hidden}
 .hero.ansSeasonHero>.heroContent{min-width:0;max-width:100%}
 .sectionHead h2.ansSeasonTitle{max-width:100%;overflow-wrap:break-word}
+
+/* V7.17.3: decoración de fondo, nunca un elemento del layout. */
+header.ansSeasonHeader,footer.ansSeasonFooter{background-image:var(--ans-season-decoration)!important;background-repeat:no-repeat!important;background-size:auto 64px!important;background-position:right 6px center!important}
+header.ansSeasonHeader{padding-left:max(22px,calc((100% - 1180px)/2))!important;padding-right:max(22px,calc((100% - 1180px)/2))!important}
+header.ansSeasonHeader>.ansSeasonDecoration,footer.ansSeasonFooter>.ansSeasonDecoration{display:none!important}
+header.ansSeasonHeader>nav{display:flex!important;gap:clamp(10px,1.25vw,22px);flex:0 1 auto}
+header.ansSeasonHeader>nav>a{white-space:nowrap!important;word-break:normal!important;overflow-wrap:normal!important}
+header.ansSeasonHeader .menu{display:none!important}
+header.ansSeasonHeader .mobileNav{display:none}
+footer.ansSeasonFooter{padding-right:max(22px,calc((100% - 1180px)/2))!important;background-size:auto 85px!important;background-position:right 12px center!important}
+@media(max-width:1320px){header.ansSeasonHeader>nav{display:none!important}header.ansSeasonHeader .menu{display:grid!important}header.ansSeasonHeader .mobileNav{display:grid}}
+@media(max-width:900px){header.ansSeasonHeader{padding:0 22px!important;background-size:auto 43px!important;background-position:right 4px center!important}footer.ansSeasonFooter{padding:35px 22px!important;background-size:auto 55px!important}}
+@media(max-width:560px){header.ansSeasonHeader{padding:0 16px!important;background-size:auto 30px!important;background-position:right 3px center!important}footer.ansSeasonFooter{background-size:auto 36px!important}}
+/* La vitrina se abre en una secuencia visible, antes de navegar al detalle. */
+.ansVitrineOpen .ansVitrineLeft,.ansVitrineOpen .ansVitrineRight{animation-duration:1.12s!important;animation-delay:.32s!important}
+.ansVitrineOpen .ansVitrineLock,.ansVitrineOpen .ansVitrineSeam{animation-duration:.55s!important}
+.ansVitrineOpen .ansThemeParticle{animation-duration:max(1.5s,var(--p-duration,1.5s))!important}
+@media(prefers-reduced-motion:reduce){.ansVitrineOpen .ansThemeParticle{animation:none!important}}
