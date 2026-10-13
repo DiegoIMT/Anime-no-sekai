@@ -2131,3 +2131,11 @@ a.whatsapp:active{transform:scale(.96)}a.whatsapp:active .whatsappIcon{transform
 @keyframes ansDistinctLeaves{0%{opacity:0;transform:rotate(-30deg)}12%{opacity:1}50%{opacity:1;transform:translate(calc(var(--p-end-x) * .5),14px) rotate(110deg)}85%{opacity:.95}100%{opacity:0;transform:translate(var(--p-end-x),35px) rotate(280deg)}}
 @keyframes ansOriginalConfetti{0%{opacity:0;transform:scale(.4)}12%{opacity:1}50%{opacity:1;transform:translate(calc(var(--p-end-x) * .55),calc(var(--p-end-y) * .45)) rotate(150deg)}85%{opacity:.95}100%{opacity:0;transform:translate(var(--p-end-x),var(--p-end-y)) rotate(var(--p-spin))}}
 @media(prefers-reduced-motion:reduce){.ansVitrineOpen .ansThemeParticle{animation:none!important;display:none!important}}
+
+/* V7.16.4 — Apertura ágil y partículas independientes; sin prolongar navegación. */
+.ansVitrineOpen .ansVitrineLeft,.ansVitrineOpen .ansVitrineRight{animation-duration:.66s;animation-delay:.22s}
+.ansVitrineOpen .ansVitrineLock,.ansVitrineOpen .ansVitrineSeam{animation-duration:.32s}
+.ansVitrineOpen .ansThemeParticle{animation-duration:var(--p-duration,1s)!important;animation-delay:var(--p-delay,0s)!important;animation-timing-function:ease-out;animation-fill-mode:both}
+.ansVitrineOpen .ansThemeParticle-lluvia,.ansVitrineOpen .ansThemeParticle-nieve{animation-timing-function:linear}
+.ansVitrineOpen .ansThemeParticle-petalos,.ansVitrineOpen .ansThemeParticle-hojas,.ansVitrineOpen .ansThemeParticle-corazones{animation-timing-function:ease-in-out}
+@media(prefers-reduced-motion:reduce){.ansVitrineOpen .ansThemeParticle{animation:none!important;display:none!important}}
