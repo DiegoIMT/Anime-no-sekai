@@ -28,7 +28,25 @@ async function ansOpenProductFromCard(target, open){
  // Se abre el detalle inmediatamente; el efecto de entrada ocurre en su propia vista.
  try{await open()}finally{card.classList.remove('ansCardOpening');delete card.dataset.ansOpening}
 }
-function ansAnimateView(button,callback){return ansOpenProductFromCard(button,callback)}
+// Animación narrativa del botón: el visor abre sus dos hojas antes de navegar.
+// Se limita al botón; no desplaza la tarjeta ni bloquea otros controles.
+async function ansAnimateView(button,callback){
+ if(!button||button.dataset.ansRevealBusy==='1')return;
+ if(ansMotionReduced()){await callback();return}
+ button.dataset.ansRevealBusy='1';
+ const original=button.innerHTML;
+ button.classList.add('ansRevealButton','ansRevealPlaying');
+ button.innerHTML=`<span class="ansRevealLabel">${button.textContent.trim()}</span><span class="ansRevealViewer" aria-hidden="true"><span class="ansRevealFrame"><span class="ansRevealIris"></span><span class="ansRevealLeft"></span><span class="ansRevealRight"></span></span><span class="ansRevealRay rayOne"></span><span class="ansRevealRay rayTwo"></span><span class="ansRevealRay rayThree"></span></span>`;
+ try{
+  await ansWait(590);
+  // El detalle se abre al terminar la secuencia, nunca durante ella.
+  await callback();
+ }finally{
+  button.innerHTML=original;
+  button.classList.remove('ansRevealButton','ansRevealPlaying');
+  delete button.dataset.ansRevealBusy;
+ }
+}
 
 const SUPABASE_URL = 'https://uobqjdvaovqbqthnmvpm.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_5L3IfGy74SfEDB0YNnH9Fw_n3HjwND7';
