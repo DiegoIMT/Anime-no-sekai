@@ -11,53 +11,22 @@ function ansMotion(button,kind,state='play'){
  button.dataset.ansMotion=kind;
  button.classList.add(state==='success'?'ansMotionSuccess':state==='busy'?'ansMotionBusy':state==='error'?'ansMotionError':'ansMotionPlay');
  const label=button.dataset.ansOriginalHtml;
- const glyph=kind==='delete'?'🗑':kind==='save'?ansAdminIcon('save'):'↗';
+ const glyph=kind==='delete'?'🗑':kind==='save'?ansAdminIcon('save'):ansAdminIcon('eye');
  const text=kind==='delete'?'Eliminar':kind==='save'?'Guardando':'Ver figura';
- button.innerHTML=`<span class="ansMotionIcon" aria-hidden="true">${glyph}</span><span class="ansMotionWords">${state==='success'?'¡Listo!':state==='error'?'Error':text}</span>${kind==='save'?'':'<span class="ansMotionSpark" aria-hidden="true">✦</span><span class="ansMotionSpark second" aria-hidden="true">✧</span>'}`;
+ button.innerHTML=`<span class="ansMotionIcon" aria-hidden="true">${glyph}</span><span class="ansMotionWords">${state==='success'?'¡Listo!':state==='error'?'Error':text}</span>${kind==='delete'?'<span class="ansMotionSpark" aria-hidden="true">✦</span><span class="ansMotionSpark second" aria-hidden="true">✧</span>':''}`;
  button.setAttribute('aria-label',state==='success'?'Operación completada':state==='busy'?'Procesando':text);
 }
 function ansMotionReset(button){if(!button||!button.isConnected)return;button.innerHTML=button.dataset.ansOriginalHtml||button.innerHTML;button.classList.remove('ansMotionButton','ansMotionPlay','ansMotionBusy','ansMotionSuccess','ansMotionError');delete button.dataset.ansOriginalHtml;delete button.dataset.ansMotion;button.removeAttribute('aria-label')}
-// V7.13.0 — Transición compartida: animación aislada, no bloqueante y sin observadores.
-let ansActiveFlight=null;
-function ansCancelFlight(){
- if(!ansActiveFlight)return;
- ansActiveFlight.animation?.cancel();
- ansActiveFlight.element?.remove();
- ansActiveFlight=null;
-}
-function ansFlyImage(card,detail){
- if(ansMotionReduced()||!card||!detail||!detail.isConnected||!document.body.contains(card))return;
- const from=card.querySelector('.photo img');
- const to=detail.querySelector('.detailMainPhoto img');
- if(!from||!to||!from.complete||!from.naturalWidth||!Element.prototype.animate)return;
- const a=from.getBoundingClientRect(),b=to.getBoundingClientRect();
- if(a.width<1||a.height<1||b.width<1||b.height<1)return;
- ansCancelFlight();
- const ghost=from.cloneNode(false);
- ghost.removeAttribute('id');ghost.removeAttribute('loading');ghost.setAttribute('aria-hidden','true');
- ghost.className='ansFlyingProduct';
- Object.assign(ghost.style,{left:a.left+'px',top:a.top+'px',width:a.width+'px',height:a.height+'px'});
- document.body.appendChild(ghost);
- const dx=b.left-a.left,dy=b.top-a.top,sx=b.width/a.width,sy=b.height/a.height;
- const flight={element:ghost,animation:null};ansActiveFlight=flight;
- const animation=ghost.animate([
-  {transform:'translate3d(0,0,0) scale(1)',opacity:1,borderRadius:'14px'},
-  {transform:`translate3d(${dx*.55}px,${dy*.55}px,0) scale(${1+(sx-1)*.55},${1+(sy-1)*.55})`,opacity:.95,borderRadius:'18px',offset:.55},
-  {transform:`translate3d(${dx}px,${dy}px,0) scale(${sx},${sy})`,opacity:0,borderRadius:'12px'}
- ],{duration:480,easing:'cubic-bezier(.18,.78,.18,1)',fill:'forwards'});
- flight.animation=animation;
- animation.finished.catch(()=>{}).finally(()=>{if(ansActiveFlight===flight)ansActiveFlight=null;ghost.remove()});
-}
-async function ansOpenProductFromCard(target,open){
+// La tarjeta y su botón comparten una sola transición; no altera el destino.
+async function ansOpenProductFromCard(target, open){
  const card=target?.closest('.publicProductCard,.publicAdditionalCard');
  if(!card||card.dataset.ansOpening==='1')return;
- card.dataset.ansOpening='1';card.classList.add('ansCardOpening');
- // Capturamos la tarjeta antes de abrir. El detalle se abre sin temporizadores.
- try{
-  await open();
-  const detail=document.getElementById('detailView');
-  if(detail&&detail.isConnected)ansFlyImage(card,detail);
- }finally{card.classList.remove('ansCardOpening');delete card.dataset.ansOpening}
+ card.dataset.ansOpening='1';
+ card.classList.add('ansCardOpening');
+ const photo=card.querySelector('.photo img');
+ const reduced=ansMotionReduced();
+ // Se abre el detalle inmediatamente; el efecto de entrada ocurre en su propia vista.
+ try{await open()}finally{card.classList.remove('ansCardOpening');delete card.dataset.ansOpening}
 }
 function ansAnimateView(button,callback){return ansOpenProductFromCard(button,callback)}
 
@@ -451,7 +420,7 @@ function animateGalleryImage(img){if(!img)return;img.classList.remove('galleryIm
 async function openAdditionalDetail(sku,push=true){
  let p=additionalProducts.find(x=>x.sku===sku);if(!p){const {data,error}=await supabaseClient.from('productos_adicionales').select('*, tipos_producto(nombre), franquicias(nombre), personajes(nombre), producto_adicional_imagenes(*)').eq('activo',true).eq('sku',sku).maybeSingle();if(error||!data)return;p=mapAdditionalProduct(data);additionalProducts.push(p)}
  registerAnalyticsEvent('vista_adicional',{producto_id:p.id,sku:p.sku,contexto:{estado:p.status}});
- ansCancelFlight();document.getElementById('detailView')?.remove();
+ document.getElementById('detailView')?.remove();
  const pct=p.sale?Math.round((1-p.sale/p.price)*100):null,action=additionalProductAction(p),wa=`https://wa.me/529994739090?text=${encodeURIComponent(action.msg)}`;
  const gallery=p.images.length?p.images.map(x=>x.url):(p.img?[p.img]:[]),principal=p.images.find(x=>x.principal)?.url||p.img||gallery[0]||'';let currentIndex=Math.max(0,gallery.indexOf(principal)),main=gallery[currentIndex]||'';
  const meta=[['Tipo de producto',p.type],['Franquicia',p.series],['Personaje',p.character],['Stock',p.stock],['Hecho a mano',p.handmade?'Sí':'No'],['Acepta pedidos',p.madeToOrder?'Sí':'No'],['Tiempo de elaboración',p.leadTime]].filter(x=>x[1]!==''&&x[1]!=null);
@@ -532,7 +501,7 @@ async function ensureProductLoaded(sku){let p=products.find(x=>x.sku===sku)||cat
 async function openDetail(sku,push=true){
  const p=await ensureProductLoaded(sku); if(!p)return;
  registerAnalyticsEvent('vista_producto',{producto_id:p.id,sku:p.sku,contexto:{estado:p.status}});
- ansCancelFlight();document.getElementById('detailView')?.remove();
+ document.getElementById('detailView')?.remove();
  const pct=p.sale?Math.round((1-p.sale/p.price)*100):null, action=productAction(p), wa=`https://wa.me/529994739090?text=${encodeURIComponent(action.msg)}`;
  const gallery=p.images.length?p.images.map(x=>x.url):(p.img?[p.img]:[]);
  const principalUrl=p.images.find(x=>x.principal)?.url||p.img||gallery[0]||'';
@@ -549,10 +518,10 @@ async function openDetail(sku,push=true){
  detail.querySelector('.galleryFullscreen')?.addEventListener('click',()=>openGalleryLightbox(gallery,currentIndex,p.name,showImage,'figura'));
  if(push) history.pushState({detail:sku},'',`/figura/${encodeURIComponent(sku)}`);
 }
-function closeDetail(){ansCancelFlight();document.getElementById('detailView')?.remove();document.getElementById('helpView')?.remove();document.body.classList.remove('detail-open');if(location.pathname.startsWith('/figura/')||location.hash.startsWith('#figura='))history.replaceState({},'','/#catalogo')}
+function closeDetail(){document.getElementById('detailView')?.remove();document.getElementById('helpView')?.remove();document.body.classList.remove('detail-open');if(location.pathname.startsWith('/figura/')||location.hash.startsWith('#figura='))history.replaceState({},'','/#catalogo')}
 document.addEventListener('click',e=>{const routeLink=e.target.closest('[data-route-link]');if(routeLink){e.preventDefault();closeMobileMenu?.();navigatePublic(new URL(routeLink.href,location.origin).pathname);return}const help=e.target.closest('[data-open-help]');if(help){e.preventDefault();closeMobileMenu?.();openHelpView();return}const listToggle=e.target.closest('[data-interest-toggle]');if(listToggle){const p=findPublicProduct(listToggle.dataset.interestToggle,listToggle.dataset.interestKind||'figura');if(p){toggleInterest(p,listToggle.dataset.interestKind||'figura');showPublicToast(isInInterestList(p.sku,listToggle.dataset.interestKind||'figura')?'Agregado a Mi lista.':'Quitado de Mi lista.')}return}const share=e.target.closest('[data-share-product]');if(share){const p=findPublicProduct(share.dataset.shareProduct,share.dataset.shareKind||'figura');if(p)openShareMenu(productShareData(p,share.dataset.shareKind||'figura'));return}const remove=e.target.closest('[data-interest-remove]');if(remove){const items=getInterestList().filter(x=>!(x.sku===remove.dataset.interestRemove&&x.kind===remove.dataset.interestKind));saveInterestList(items);return}if(e.target.closest('[data-interest-clear]')){saveInterestList([]);return}const wa=e.target.closest('[data-analytics-whatsapp]');if(wa){const kind=wa.dataset.analyticsKind,sku=wa.dataset.analyticsWhatsapp,p=kind==='adicional'?additionalProducts.find(x=>x.sku===sku):(products.find(x=>x.sku===sku)||catalogProducts.find(x=>x.sku===sku));if(p)trackWhatsapp(p,kind);return}const clear=e.target.closest('[data-clear-public-filters]');if(clear){clearPublicCatalogFilters();return}const abtn=e.target.closest('.additionalDetails[data-additional]');if(abtn){ansAnimateView(abtn,()=>openAdditionalDetail(abtn.dataset.additional));return}const acard=e.target.closest('.publicAdditionalCard[data-additional-product]');if(acard&&!e.target.closest('a,button,input,select')){ansOpenProductFromCard(acard,()=>openAdditionalDetail(acard.dataset.additionalProduct));return}const btn=e.target.closest('.details[data-product]');if(btn){ansAnimateView(btn,()=>openDetail(btn.dataset.product));return}const card=e.target.closest('.publicProductCard[data-card-product]');if(card&&!e.target.closest('a,button,input,select'))ansOpenProductFromCard(card,()=>openDetail(card.dataset.cardProduct))});
-document.addEventListener('keydown',e=>{const acard=e.target.closest?.('.publicAdditionalCard[data-additional-product]');if(acard&&(e.key==='Enter'||e.key===' ')){e.preventDefault();ansOpenProductFromCard(acard,()=>openAdditionalDetail(acard.dataset.additionalProduct));return}const card=e.target.closest?.('.publicProductCard[data-card-product]');if(card&&(e.key==='Enter'||e.key===' ')){e.preventDefault();ansOpenProductFromCard(card,()=>openDetail(card.dataset.cardProduct))}});
-window.addEventListener('popstate',()=>{ansCancelFlight();if(PUBLIC_ROUTES.has(location.pathname)){navigatePublic(location.pathname,false);return}if(!location.pathname.startsWith('/figura/')&&!location.pathname.startsWith('/producto/')&&!location.hash.startsWith('#figura=')&&!location.hash.startsWith('#producto=')){document.getElementById('detailView')?.remove();document.body.classList.remove('detail-open')}});
+document.addEventListener('keydown',e=>{const acard=e.target.closest?.('.publicAdditionalCard[data-additional-product]');if(acard&&(e.key==='Enter'||e.key===' ')){e.preventDefault();ansOpenProductFromCard(acard,()=>openAdditionalDetail(acard.dataset.additionalProduct));return}const card=e.target.closest?.('.publicProductCard[data-card-product]');if(card&&(e.key==='Enter'||e.key===' ')){e.preventDefault();openDetail(card.dataset.cardProduct)}});
+window.addEventListener('popstate',()=>{if(PUBLIC_ROUTES.has(location.pathname)){navigatePublic(location.pathname,false);return}if(!location.pathname.startsWith('/figura/')&&!location.pathname.startsWith('/producto/')&&!location.hash.startsWith('#figura=')&&!location.hash.startsWith('#producto=')){document.getElementById('detailView')?.remove();document.body.classList.remove('detail-open')}});
 
 
 /* V7.11.1 — Reseñas públicas */
