@@ -2393,21 +2393,34 @@ header.ansSeasonHeader>.headActions{flex:0 0 auto;min-width:0;margin-left:auto}
 .ansVitrineOpen .ansVitrineLock,.ansVitrineOpen .ansVitrineSeam{animation-duration:.4s!important}
 .ansVitrineOpen .ansThemeParticle{animation-duration:clamp(.95s,var(--p-duration,1.2s),1.4s)!important}
 
-/* V7.17.5 — corrección estructural de navegación: no permitir enlaces bajo acciones. */
-@media (max-width:2200px){
-  #app>header{display:flex;align-items:center;justify-content:space-between;gap:12px}
-  #app>header>.brand{flex:0 1 auto;min-width:0;max-width:calc(100% - 245px)}
-  #app>header>.headActions{position:relative;z-index:3;display:flex;align-items:center;flex:0 0 auto;margin-left:auto}
-  #app>header>nav{display:none!important}
-  #app>header .headActions>.menu{display:grid!important;place-items:center;flex:0 0 40px}
-  #app>header>.mobileNav{position:absolute;top:100%;left:0;right:0;z-index:25;display:grid;grid-template-rows:0fr;background:var(--header-bg,rgba(9,10,13,.98));border-bottom:1px solid transparent;overflow:hidden;opacity:0;pointer-events:none;transition:opacity .2s ease,grid-template-rows .2s ease}
+
+/* V7.17.6: reconstrucción del layout público del encabezado.
+   Las decoraciones son capas visuales y no alteran las columnas. */
+@media (min-width:1151px){
+  #app>header{display:grid!important;grid-template-columns:minmax(170px,220px) minmax(0,1fr) max-content!important;align-items:center!important;column-gap:22px!important;justify-content:initial!important;padding-left:max(24px,calc((100% - 1320px)/2))!important;padding-right:max(24px,calc((100% - 1320px)/2))!important}
+  #app>header>.brand{grid-column:1;min-width:0;max-width:220px}
+  #app>header>nav,#app>header.ansSeasonHeader>nav{grid-column:2;display:flex!important;min-width:0;justify-content:center;gap:clamp(10px,1.05vw,20px)!important;white-space:nowrap}
+  #app>header>nav>a{font-size:clamp(11px,.85vw,14px);white-space:nowrap!important;flex-shrink:0}
+  #app>header>.headActions{grid-column:3;display:flex;flex-shrink:0;justify-self:end;margin-left:0!important;gap:8px}
+  #app>header .headActions>.menu,#app>header.ansSeasonHeader .menu{display:none!important}
+  #app>header>.mobileNav,#app>header.ansSeasonHeader .mobileNav{display:none!important}
+}
+@media (max-width:1150px){
+  #app>header{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;padding-left:22px!important;padding-right:22px!important}
+  #app>header>nav,#app>header.ansSeasonHeader>nav{display:none!important}
+  #app>header>.brand{flex:0 1 auto;min-width:0;max-width:min(38vw,220px)}
+  #app>header>.headActions{display:flex;flex:0 0 auto;margin-left:auto!important;gap:6px}
+  #app>header .headActions>.menu,#app>header.ansSeasonHeader .menu{display:grid!important;place-items:center}
+  #app>header>.mobileNav,#app>header.ansSeasonHeader .mobileNav{position:absolute;top:100%;left:0;right:0;z-index:25;display:grid!important;grid-template-rows:0fr;background:var(--header-bg,rgba(9,10,13,.98));border-bottom:1px solid transparent;overflow:hidden;opacity:0;pointer-events:none;transition:grid-template-rows .2s ease,opacity .2s ease}
   #app>header>.mobileNav.open{grid-template-rows:1fr;opacity:1;pointer-events:auto;border-bottom-color:var(--line,#292c33);max-height:calc(100vh - 76px);overflow-y:auto}
   #app>header>.mobileNav>a,#app>header>.mobileNav>button{display:none;padding:14px 22px;border-top:1px solid var(--line,#292c33)}
   #app>header>.mobileNav.open>a,#app>header>.mobileNav.open>button{display:block}
 }
-@media(max-width:600px){
-  #app>header>.brand{max-width:calc(100% - 170px)}
-  #app>header .headActions{gap:5px}
+@media(max-width:560px){
+  #app>header{padding-left:16px!important;padding-right:16px!important;gap:7px!important}
+  #app>header>.brand{max-width:36vw}
+  #app>header>.headActions{gap:5px}
 }
-/* Las decoraciones permanecen recortadas al área visible sin alterar el flujo. */
-#app>header.ansSeasonHeader::before,#app>footer.ansSeasonFooter::before{background-repeat:no-repeat;pointer-events:none}
+/* Los adornos se recortan dentro de la propia superficie, sin reservar columnas. */
+#app>header.ansSeasonHeader,#app>footer.ansSeasonFooter{overflow:clip}
+#app>header.ansSeasonHeader::before,#app>footer.ansSeasonFooter::before{pointer-events:none;max-width:100%}
