@@ -288,14 +288,39 @@ function prepareDetailMainImage(detail){
  img.classList.add('detailImageEnter');
  if(img.complete&&img.naturalWidth)reveal();else img.addEventListener('load',reveal,{once:true});
 }
-function swapDetailMainImage(img,src){
- if(!img)return;
- img.classList.add('detailImageEnter');img.classList.remove('detailImageReady','galleryImageChanging');
- const reveal=()=>requestAnimationFrame(()=>img.classList.add('detailImageReady'));
- img.addEventListener('load',reveal,{once:true});
- img.src=src;
- if(img.complete&&img.naturalWidth)reveal();
+// Crossfade local: no mueve la tarjeta ni la galería; conserva la foto anterior hasta cargar la siguiente.
+const ansGalleryRequests=new WeakMap();
+function ansSwapGalleryImage(img,src){
+ if(!img||!src||img.getAttribute('src')===src)return;
+ const request=(ansGalleryRequests.get(img)||0)+1;ansGalleryRequests.set(img,request);
+ const parent=img.parentElement;if(!parent)return;
+ parent.querySelectorAll('.ansGalleryPrevious').forEach(el=>el.remove());
+ const previous=img.cloneNode(false);previous.removeAttribute('id');previous.className='ansGalleryPrevious';previous.removeAttribute('style');previous.setAttribute('aria-hidden','true');
+ parent.insertBefore(previous,img);
+ const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ const next=new Image();next.decoding='async';
+ const finish=()=>{
+  if(ansGalleryRequests.get(img)!==request||!img.isConnected){previous.remove();return}
+  img.classList.remove('detailImageEnter','detailImageReady','galleryImageChanging');img.src=src;
+  if(reduce){previous.remove();return}
+  previous.classList.add('ansGalleryPreviousExit');
+  previous.addEventListener('transitionend',()=>previous.remove(),{once:true});
+  setTimeout(()=>previous.remove(),340);
+ };
+ next.onload=finish;
+ next.onerror=()=>{if(ansGalleryRequests.get(img)===request)previous.remove()};
+ next.src=src;
+ if(next.complete&&next.naturalWidth)finish();
 }
+function swapDetailMainImage(img,src){ansSwapGalleryImage(img,src)}
+function ansTapFeedback(event){
+ if(event.target.closest('button,a,input,select,textarea,[data-interest-toggle]'))return;
+ const card=event.target.closest('.publicProductCard,.publicAdditionalCard');if(!card)return;
+ card.classList.remove('ansTapFeedback');void card.offsetWidth;card.classList.add('ansTapFeedback');
+ setTimeout(()=>card.classList.remove('ansTapFeedback'),240);
+}
+document.addEventListener('pointerdown',ansTapFeedback,{passive:true});
+
 async function loadPublicCatalog(){
  const [offersRes,featuredRes,upcomingRes]=await Promise.all([
    supabaseClient.from('productos').select('*, producto_imagenes(*)').eq('activo',true).not('precio_oferta','is',null).order('fecha_creacion',{ascending:false}).limit(4),
@@ -404,7 +429,7 @@ function openGalleryLightbox(gallery,startIndex,altText,onChange,kind='figura'){
  viewer.innerHTML=`<button class="imageLightboxClose" type="button" aria-label="Cerrar imagen">×</button><button class="imageLightboxArrow imageLightboxPrev" type="button" aria-label="Imagen anterior">‹</button><div class="imageLightboxStage"><img src="${attr(gallery[index])}" alt="${attr(altText)}">${productWatermark(kind)}<span class="imageLightboxCounter">${index+1} / ${gallery.length}</span></div><button class="imageLightboxArrow imageLightboxNext" type="button" aria-label="Imagen siguiente">›</button>`;
  document.body.appendChild(viewer);
  const img=viewer.querySelector('img'),counter=viewer.querySelector('.imageLightboxCounter');
- const show=next=>{index=(next+gallery.length)%gallery.length;img.classList.remove('is-changing');void img.offsetWidth;img.src=gallery[index];img.classList.add('is-changing');counter.textContent=`${index+1} / ${gallery.length}`;onChange?.(index)};
+ const show=next=>{const target=(next+gallery.length)%gallery.length;if(target===index)return;index=target;ansSwapGalleryImage(img,gallery[index]);counter.textContent=`${index+1} / ${gallery.length}`;onChange?.(index)};
  const close=()=>{document.removeEventListener('keydown',onKey);viewer.remove()};
  const onKey=e=>{if(e.key==='Escape')close();else if(e.key==='ArrowLeft'&&gallery.length>1)show(index-1);else if(e.key==='ArrowRight'&&gallery.length>1)show(index+1)};
  viewer.querySelector('.imageLightboxClose').addEventListener('click',close);
