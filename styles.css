@@ -1813,3 +1813,7 @@ a.whatsapp:active{transform:scale(.96)}a.whatsapp:active .whatsappIcon{transform
 .ansMotionButton[data-ans-motion="save"] .ansMotionIcon{display:inline-flex;align-items:center;justify-content:center}
 .ansMotionButton[data-ans-motion="save"] .ansMotionIcon .ansAdminIcon{width:21px;height:21px}
 @media(max-width:480px){.adminRowActions button .ansAdminIcon{width:15px;height:15px}}
+
+/* V7.13.0 — Imagen compartida: capa temporal, solo transform/opacity. */
+.ansFlyingProduct{position:fixed!important;z-index:2147483000;object-fit:cover;object-position:center;pointer-events:none!important;transform-origin:top left;contain:paint;box-shadow:0 18px 55px rgba(99,55,185,.28)}
+@media(prefers-reduced-motion:reduce){.ansFlyingProduct{display:none!important}}
