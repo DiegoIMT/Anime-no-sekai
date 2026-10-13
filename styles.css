@@ -2139,3 +2139,24 @@ a.whatsapp:active{transform:scale(.96)}a.whatsapp:active .whatsappIcon{transform
 .ansVitrineOpen .ansThemeParticle-lluvia,.ansVitrineOpen .ansThemeParticle-nieve{animation-timing-function:linear}
 .ansVitrineOpen .ansThemeParticle-petalos,.ansVitrineOpen .ansThemeParticle-hojas,.ansVitrineOpen .ansThemeParticle-corazones{animation-timing-function:ease-in-out}
 @media(prefers-reduced-motion:reduce){.ansVitrineOpen .ansThemeParticle{animation:none!important;display:none!important}}
+
+/* V7.16.5 — Deriva individual y trayectorias curvas sin sincronía artificial. */
+@keyframes ansNaturalFloat{
+  0%{opacity:0;transform:translate3d(0,0,0) rotate(0deg) scale(.85)}
+  17%{opacity:.94}
+  55%{opacity:.9;transform:translate3d(var(--p-orbit-x),var(--p-orbit-y),0) rotate(calc(var(--p-spin) * .4)) scale(1)}
+  88%{opacity:.75}
+  100%{opacity:0;transform:translate3d(var(--p-end-x),var(--p-end-y),0) rotate(var(--p-spin)) scale(.92)}
+}
+.ansVitrineOpen .ansThemeParticle{
+ animation-name:ansNaturalFloat!important;
+ animation-duration:var(--p-duration,1.25s)!important;
+ animation-delay:var(--p-delay,0s)!important;
+ animation-timing-function:cubic-bezier(.35,.12,.6,.88)!important;
+ animation-fill-mode:both;
+}
+.ansVitrineOpen .ansThemeParticle-lluvia{animation-timing-function:linear!important}
+.ansVitrineOpen .ansThemeParticle-nieve,.ansVitrineOpen .ansThemeParticle-petalos,.ansVitrineOpen .ansThemeParticle-hojas{animation-timing-function:ease-in-out!important}
+.ansVitrineOpen .ansVitrineLeft,.ansVitrineOpen .ansVitrineRight{animation-duration:.62s;animation-delay:.14s}
+.ansVitrineOpen .ansVitrineLock,.ansVitrineOpen .ansVitrineSeam{animation-duration:.28s}
+@media(prefers-reduced-motion:reduce){.ansVitrineOpen .ansThemeParticle{animation:none!important;display:none!important}}
