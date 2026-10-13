@@ -1951,3 +1951,26 @@ a.whatsapp:active{transform:scale(.96)}a.whatsapp:active .whatsappIcon{transform
 .ansVitrineLock{background:linear-gradient(135deg,var(--ans-v-primary),var(--ans-v-secondary));border:var(--ans-v-border-width) var(--ans-v-border-style) var(--ans-v-secondary);box-shadow:0 0 0 3px color-mix(in srgb,var(--ans-v-primary) 35%,transparent),0 0 12px var(--ans-v-secondary)}
 .ansVitrineLock span{border-color:var(--ans-v-secondary)}
 .ansThemePreview{border-color:var(--ans-v-primary,#8b5cf6)}
+
+/* V7.15.5 — El marco decorativo queda contenido dentro de la tarjeta.
+   La geometría exterior siempre la determina la tarjeta, no el selector de esquinas. */
+.publicProductCard>.ansVitrine,.publicAdditionalCard>.ansVitrine,.ansThemePreview>.ansVitrine{
+  inset:0;box-sizing:border-box;border-radius:inherit;
+  clip-path:inset(0 round var(--ans-v-card-radius,12px));
+  overflow:hidden;
+}
+.ansVitrineLeft,.ansVitrineRight{
+  box-sizing:border-box;border:0!important;
+  border-radius:0!important;
+  background-clip:padding-box;
+}
+/* El borde es una única pieza interior: no se duplica en cada hoja ni sobresale. */
+.ansVitrine::after{
+  content:"";position:absolute;inset:2px;z-index:6;pointer-events:none;
+  box-sizing:border-box;
+  border:var(--ans-v-border-width,2px) var(--ans-v-border-style,solid) var(--ans-v-secondary,#f97316);
+  border-radius:min(var(--ans-v-corner,10px),var(--ans-v-card-radius,12px));
+  opacity:1;
+}
+.ansVitrineOpen::after{animation:ansVFrameFade .42s .34s ease forwards}
+@keyframes ansVFrameFade{to{opacity:0}}
