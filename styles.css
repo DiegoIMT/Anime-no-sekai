@@ -2248,3 +2248,7 @@ a.whatsapp:active{transform:scale(.96)}a.whatsapp:active .whatsappIcon{transform
  78%{opacity:.5}
  100%{opacity:0;transform:translate3d(var(--p-end-x),var(--p-end-y),0) scale(1.22)}
 }
+
+/* V7.16.9: vista previa y tienda comparten ventana de apertura (~0.9 s).
+   Los movimientos mantienen su identidad pero terminan antes de mostrar el detalle. */
+.ansVitrineOpen .ansThemeParticle{animation-fill-mode:both!important}
