@@ -1859,3 +1859,23 @@ a.whatsapp:active{transform:scale(.96)}a.whatsapp:active .whatsappIcon{transform
 @keyframes ansRevealIris{0%,45%{opacity:0;transform:scale(.45)}78%{opacity:1;transform:scale(1.15)}100%{opacity:0;transform:scale(1.35)}}
 @keyframes ansRevealRay{0%,55%{opacity:0}70%{opacity:1}100%{opacity:0;transform:translate(var(--dx),var(--dy))}}
 @media(prefers-reduced-motion:reduce){.details.ansRevealButton,.details.ansRevealButton *{animation:none!important;transition:none!important}}
+
+/* V7.14.1 — Vitrina narrativa: activación exclusiva al abrir el detalle. */
+.publicProductCard .photo,.publicAdditionalCard .photo{isolation:isolate}
+.ansVitrine{position:absolute;inset:0;z-index:8;overflow:hidden;border-radius:inherit;pointer-events:none;perspective:850px;transform-style:preserve-3d}
+.ansVitrineLeft,.ansVitrineRight{position:absolute;top:0;bottom:0;width:50%;background:linear-gradient(125deg,rgba(119,78,165,.68),rgba(31,21,48,.87) 45%,rgba(164,117,212,.52));border:1px solid rgba(220,186,255,.65);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);backface-visibility:hidden}
+.ansVitrineLeft{left:0;transform-origin:left center;border-radius:8px 0 0 8px}
+.ansVitrineRight{right:0;transform-origin:right center;border-radius:0 8px 8px 0}
+.ansVitrineSeam{position:absolute;top:0;bottom:0;left:calc(50% - 1px);width:2px;background:#dcc4ff;box-shadow:0 0 12px #c69aff;z-index:2}
+.ansVitrineLock{position:absolute;top:50%;left:50%;width:37px;height:37px;display:grid;place-items:center;transform:translate(-50%,-50%);border-radius:50%;border:1px solid #dec6ff;background:#322044;box-shadow:0 0 0 4px #25152b80,0 0 16px #b88cff;z-index:3}
+.ansVitrineLock span{width:12px;height:12px;border:2px solid #f0dcff;transform:rotate(45deg);border-radius:2px}
+.ansVitrineOpen .ansVitrineLock{animation:ansVUnlock .38s ease forwards}
+.ansVitrineOpen .ansVitrineSeam{animation:ansVSeam .4s ease forwards}
+.ansVitrineOpen .ansVitrineLeft{animation:ansVLeft .74s .32s cubic-bezier(.22,.65,.2,1) forwards}
+.ansVitrineOpen .ansVitrineRight{animation:ansVRight .74s .32s cubic-bezier(.22,.65,.2,1) forwards}
+.details.ansVitrineButtonBusy{pointer-events:none}
+@keyframes ansVUnlock{0%{opacity:1;transform:translate(-50%,-50%) rotate(0) scale(1)}55%{opacity:1;transform:translate(-50%,-50%) rotate(-45deg) scale(1.1)}100%{opacity:0;transform:translate(-50%,-50%) rotate(-90deg) scale(.6)}}
+@keyframes ansVSeam{0%,60%{opacity:1}100%{opacity:0}}
+@keyframes ansVLeft{from{transform:rotateY(0)}to{transform:rotateY(-108deg)}}
+@keyframes ansVRight{from{transform:rotateY(0)}to{transform:rotateY(108deg)}}
+@media(prefers-reduced-motion:reduce){.ansVitrine{display:none!important}}

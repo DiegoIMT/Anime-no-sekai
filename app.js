@@ -17,34 +17,32 @@ function ansMotion(button,kind,state='play'){
  button.setAttribute('aria-label',state==='success'?'Operación completada':state==='busy'?'Procesando':text);
 }
 function ansMotionReset(button){if(!button||!button.isConnected)return;button.innerHTML=button.dataset.ansOriginalHtml||button.innerHTML;button.classList.remove('ansMotionButton','ansMotionPlay','ansMotionBusy','ansMotionSuccess','ansMotionError');delete button.dataset.ansOriginalHtml;delete button.dataset.ansMotion;button.removeAttribute('aria-label')}
-// La tarjeta y su botón comparten una sola transición; no altera el destino.
+// V7.14.1 — Una sola apertura de vitrina para tarjeta y botón.
 async function ansOpenProductFromCard(target, open){
  const card=target?.closest('.publicProductCard,.publicAdditionalCard');
- if(!card||card.dataset.ansOpening==='1')return;
+ if(!card){await open();return}
+ if(card.dataset.ansOpening==='1')return;
  card.dataset.ansOpening='1';
- card.classList.add('ansCardOpening');
- const photo=card.querySelector('.photo img');
- const reduced=ansMotionReduced();
- // Se abre el detalle inmediatamente; el efecto de entrada ocurre en su propia vista.
- try{await open()}finally{card.classList.remove('ansCardOpening');delete card.dataset.ansOpening}
-}
-// Animación narrativa del botón: el visor abre sus dos hojas antes de navegar.
-// Se limita al botón; no desplaza la tarjeta ni bloquea otros controles.
-async function ansAnimateView(button,callback){
- if(!button||button.dataset.ansRevealBusy==='1')return;
- if(ansMotionReduced()){await callback();return}
- button.dataset.ansRevealBusy='1';
- const original=button.innerHTML;
- button.classList.add('ansRevealButton','ansRevealPlaying');
- button.innerHTML=`<span class="ansRevealLabel">${button.textContent.trim()}</span><span class="ansRevealViewer" aria-hidden="true"><span class="ansRevealFrame"><span class="ansRevealIris"></span><span class="ansRevealLeft"></span><span class="ansRevealRight"></span></span><span class="ansRevealRay rayOne"></span><span class="ansRevealRay rayTwo"></span><span class="ansRevealRay rayThree"></span></span>`;
+ const photo=card.querySelector('.photo');
+ const button=card.querySelector('.details');
+ let overlay=null;
  try{
-  await ansWait(590);
-  // El detalle se abre al terminar la secuencia, nunca durante ella.
-  await callback();
+  if(photo&&!ansMotionReduced()){
+   overlay=document.createElement('div');
+   overlay.className='ansVitrine';
+   overlay.setAttribute('aria-hidden','true');
+   overlay.innerHTML='<div class="ansVitrineLeft"></div><div class="ansVitrineRight"></div><div class="ansVitrineSeam"></div><div class="ansVitrineLock"><span></span></div>';
+   photo.appendChild(overlay);
+   // Una única secuencia, sin ampliar ni desplazar la imagen de la tarjeta.
+   overlay.classList.add('ansVitrineOpen');
+   button?.classList.add('ansVitrineButtonBusy');
+   await ansWait(1080);
+  }
+  await open();
  }finally{
-  button.innerHTML=original;
-  button.classList.remove('ansRevealButton','ansRevealPlaying');
-  delete button.dataset.ansRevealBusy;
+  overlay?.remove();
+  button?.classList.remove('ansVitrineButtonBusy');
+  delete card.dataset.ansOpening;
  }
 }
 
@@ -620,8 +618,8 @@ async function openDetail(sku,push=true){
  if(push) history.pushState({detail:sku},'',`/figura/${encodeURIComponent(sku)}`);
 }
 function closeDetail(){document.getElementById('detailView')?.remove();document.getElementById('helpView')?.remove();document.body.classList.remove('detail-open');if(location.pathname.startsWith('/figura/')||location.hash.startsWith('#figura='))history.replaceState({},'','/#catalogo')}
-document.addEventListener('click',e=>{const routeLink=e.target.closest('[data-route-link]');if(routeLink){e.preventDefault();closeMobileMenu?.();navigatePublic(new URL(routeLink.href,location.origin).pathname);return}const help=e.target.closest('[data-open-help]');if(help){e.preventDefault();closeMobileMenu?.();openHelpView();return}const listToggle=e.target.closest('[data-interest-toggle]');if(listToggle){const p=findPublicProduct(listToggle.dataset.interestToggle,listToggle.dataset.interestKind||'figura');if(p){toggleInterest(p,listToggle.dataset.interestKind||'figura');showPublicToast(isInInterestList(p.sku,listToggle.dataset.interestKind||'figura')?'Agregado a Mi lista.':'Quitado de Mi lista.')}return}const share=e.target.closest('[data-share-product]');if(share){const p=findPublicProduct(share.dataset.shareProduct,share.dataset.shareKind||'figura');if(p)openShareMenu(productShareData(p,share.dataset.shareKind||'figura'));return}const remove=e.target.closest('[data-interest-remove]');if(remove){const items=getInterestList().filter(x=>!(x.sku===remove.dataset.interestRemove&&x.kind===remove.dataset.interestKind));saveInterestList(items);return}if(e.target.closest('[data-interest-clear]')){saveInterestList([]);return}const wa=e.target.closest('[data-analytics-whatsapp]');if(wa){const kind=wa.dataset.analyticsKind,sku=wa.dataset.analyticsWhatsapp,p=kind==='adicional'?additionalProducts.find(x=>x.sku===sku):(products.find(x=>x.sku===sku)||catalogProducts.find(x=>x.sku===sku));if(p)trackWhatsapp(p,kind);return}const clear=e.target.closest('[data-clear-public-filters]');if(clear){clearPublicCatalogFilters();return}const abtn=e.target.closest('.additionalDetails[data-additional]');if(abtn){ansAnimateView(abtn,()=>openAdditionalDetail(abtn.dataset.additional));return}const acard=e.target.closest('.publicAdditionalCard[data-additional-product]');if(acard&&!e.target.closest('a,button,input,select')){ansOpenProductFromCard(acard,()=>openAdditionalDetail(acard.dataset.additionalProduct));return}const btn=e.target.closest('.details[data-product]');if(btn){ansAnimateView(btn,()=>openDetail(btn.dataset.product));return}const card=e.target.closest('.publicProductCard[data-card-product]');if(card&&!e.target.closest('a,button,input,select'))ansOpenProductFromCard(card,()=>openDetail(card.dataset.cardProduct))});
-document.addEventListener('keydown',e=>{const acard=e.target.closest?.('.publicAdditionalCard[data-additional-product]');if(acard&&(e.key==='Enter'||e.key===' ')){e.preventDefault();ansOpenProductFromCard(acard,()=>openAdditionalDetail(acard.dataset.additionalProduct));return}const card=e.target.closest?.('.publicProductCard[data-card-product]');if(card&&(e.key==='Enter'||e.key===' ')){e.preventDefault();openDetail(card.dataset.cardProduct)}});
+document.addEventListener('click',e=>{const routeLink=e.target.closest('[data-route-link]');if(routeLink){e.preventDefault();closeMobileMenu?.();navigatePublic(new URL(routeLink.href,location.origin).pathname);return}const help=e.target.closest('[data-open-help]');if(help){e.preventDefault();closeMobileMenu?.();openHelpView();return}const listToggle=e.target.closest('[data-interest-toggle]');if(listToggle){const p=findPublicProduct(listToggle.dataset.interestToggle,listToggle.dataset.interestKind||'figura');if(p){toggleInterest(p,listToggle.dataset.interestKind||'figura');showPublicToast(isInInterestList(p.sku,listToggle.dataset.interestKind||'figura')?'Agregado a Mi lista.':'Quitado de Mi lista.')}return}const share=e.target.closest('[data-share-product]');if(share){const p=findPublicProduct(share.dataset.shareProduct,share.dataset.shareKind||'figura');if(p)openShareMenu(productShareData(p,share.dataset.shareKind||'figura'));return}const remove=e.target.closest('[data-interest-remove]');if(remove){const items=getInterestList().filter(x=>!(x.sku===remove.dataset.interestRemove&&x.kind===remove.dataset.interestKind));saveInterestList(items);return}if(e.target.closest('[data-interest-clear]')){saveInterestList([]);return}const wa=e.target.closest('[data-analytics-whatsapp]');if(wa){const kind=wa.dataset.analyticsKind,sku=wa.dataset.analyticsWhatsapp,p=kind==='adicional'?additionalProducts.find(x=>x.sku===sku):(products.find(x=>x.sku===sku)||catalogProducts.find(x=>x.sku===sku));if(p)trackWhatsapp(p,kind);return}const clear=e.target.closest('[data-clear-public-filters]');if(clear){clearPublicCatalogFilters();return}const abtn=e.target.closest('.additionalDetails[data-additional]');if(abtn){ansOpenProductFromCard(abtn,()=>openAdditionalDetail(abtn.dataset.additional));return}const acard=e.target.closest('.publicAdditionalCard[data-additional-product]');if(acard&&!e.target.closest('a,button,input,select')){ansOpenProductFromCard(acard,()=>openAdditionalDetail(acard.dataset.additionalProduct));return}const btn=e.target.closest('.details[data-product]');if(btn){ansOpenProductFromCard(btn,()=>openDetail(btn.dataset.product));return}const card=e.target.closest('.publicProductCard[data-card-product]');if(card&&!e.target.closest('a,button,input,select'))ansOpenProductFromCard(card,()=>openDetail(card.dataset.cardProduct))});
+document.addEventListener('keydown',e=>{const acard=e.target.closest?.('.publicAdditionalCard[data-additional-product]');if(acard&&(e.key==='Enter'||e.key===' ')){e.preventDefault();ansOpenProductFromCard(acard,()=>openAdditionalDetail(acard.dataset.additionalProduct));return}const card=e.target.closest?.('.publicProductCard[data-card-product]');if(card&&(e.key==='Enter'||e.key===' ')){e.preventDefault();ansOpenProductFromCard(card,()=>openDetail(card.dataset.cardProduct))}});
 window.addEventListener('popstate',()=>{if(PUBLIC_ROUTES.has(location.pathname)){navigatePublic(location.pathname,false);return}if(!location.pathname.startsWith('/figura/')&&!location.pathname.startsWith('/producto/')&&!location.hash.startsWith('#figura=')&&!location.hash.startsWith('#producto=')){document.getElementById('detailView')?.remove();document.body.classList.remove('detail-open')}});
 
 
