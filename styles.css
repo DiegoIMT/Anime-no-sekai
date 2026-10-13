@@ -2115,3 +2115,19 @@ a.whatsapp:active{transform:scale(.96)}a.whatsapp:active .whatsappIcon{transform
 @keyframes ansOriginalHearts{0%{opacity:0;transform:translate(0,0) scale(.2)}18%{opacity:1;transform:translate(0,-18px) scale(1.25)}55%{opacity:.95;transform:translate(calc(var(--p-drift) * -.5),-110px) scale(.95)}100%{opacity:0;transform:translate(var(--p-drift),var(--p-end-y,-250px)) scale(1.45)}}
 @keyframes ansOriginalConfetti{0%{opacity:0;transform:translate(0,0) rotate(0) scale(.3)}12%{opacity:1}42%{opacity:1;transform:translate(calc(var(--p-end-x) * .8),calc(var(--p-end-y) * .25)) rotate(180deg) scale(1.15)}100%{opacity:0;transform:translate(var(--p-end-x),var(--p-end-y)) rotate(var(--p-spin)) scale(.8)}}
 @media(prefers-reduced-motion:reduce){.ansVitrineOpen .ansThemeParticle{animation:none!important;display:none!important}}
+
+/* V7.16.3 — Partículas legibles durante toda la apertura, en el área visible. */
+.ansVitrineOpen .ansThemeParticle{animation-duration:2.1s!important;animation-timing-function:ease-in-out;animation-fill-mode:both}
+.ansVitrineOpen .ansThemeParticle-lluvia{animation-timing-function:linear}
+.ansVitrineOpen .ansThemeParticle-explosion{animation-timing-function:cubic-bezier(.2,.7,.35,1)}
+.ansVitrineOpen .ansVitrineLeft,.ansVitrineOpen .ansVitrineRight{animation-duration:1.25s;animation-delay:.7s}
+.ansVitrineOpen .ansVitrineLock,.ansVitrineOpen .ansVitrineSeam{animation-duration:.7s}
+/* Mantener las partículas presentes mientras atraviesan el centro de la tarjeta. */
+@keyframes ansDistinctRain{0%{opacity:0;transform:translateY(0)}12%{opacity:1}82%{opacity:1}100%{opacity:0;transform:translate(5px,var(--p-end-y,180px))}}
+@keyframes ansDistinctSnow{0%{opacity:0;transform:translate(0,0)}12%{opacity:1}82%{opacity:.95}100%{opacity:0;transform:translate(var(--p-drift),var(--p-end-y,180px)) rotate(110deg)}}
+@keyframes ansOriginalPetals{0%{opacity:0;transform:translate(0,0) rotate(-30deg)}12%{opacity:1}55%{opacity:1;transform:translate(calc(var(--p-drift) * .7),calc(var(--p-end-y) * .5)) rotate(120deg)}85%{opacity:.95}100%{opacity:0;transform:translate(var(--p-drift),var(--p-end-y)) rotate(290deg)}}
+@keyframes ansOriginalHearts{0%{opacity:0;transform:scale(.5)}12%{opacity:1}50%{opacity:1;transform:translate(calc(var(--p-drift) * -.5),calc(var(--p-end-y) * .5)) scale(1.1)}85%{opacity:1}100%{opacity:0;transform:translate(var(--p-drift),var(--p-end-y)) scale(1.25)}}
+@keyframes ansDistinctBubbles{0%{opacity:0;transform:scale(.5)}12%{opacity:.95}55%{opacity:1;transform:translate(12px,calc(var(--p-end-y) * .5)) scale(1.1)}85%{opacity:.9}100%{opacity:0;transform:translate(-10px,var(--p-end-y)) scale(1.5)}}
+@keyframes ansDistinctLeaves{0%{opacity:0;transform:rotate(-30deg)}12%{opacity:1}50%{opacity:1;transform:translate(calc(var(--p-end-x) * .5),14px) rotate(110deg)}85%{opacity:.95}100%{opacity:0;transform:translate(var(--p-end-x),35px) rotate(280deg)}}
+@keyframes ansOriginalConfetti{0%{opacity:0;transform:scale(.4)}12%{opacity:1}50%{opacity:1;transform:translate(calc(var(--p-end-x) * .55),calc(var(--p-end-y) * .45)) rotate(150deg)}85%{opacity:.95}100%{opacity:0;transform:translate(var(--p-end-x),var(--p-end-y)) rotate(var(--p-spin))}}
+@media(prefers-reduced-motion:reduce){.ansVitrineOpen .ansThemeParticle{animation:none!important;display:none!important}}
