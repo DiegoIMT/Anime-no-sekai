@@ -1,3 +1,23 @@
+
+// V7.12.0 — Microinteracciones con estado real; sin observadores ni dependencias.
+const ansMotionReduced=()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const ansWait=ms=>new Promise(resolve=>setTimeout(resolve,ansMotionReduced()?0:ms));
+function ansMotion(button,kind,state='play'){
+ if(!button||!button.isConnected)return;
+ if(!button.dataset.ansOriginalHtml)button.dataset.ansOriginalHtml=button.innerHTML;
+ button.classList.add('ansMotionButton');
+ button.classList.remove('ansMotionPlay','ansMotionBusy','ansMotionSuccess','ansMotionError');
+ button.dataset.ansMotion=kind;
+ button.classList.add(state==='success'?'ansMotionSuccess':state==='busy'?'ansMotionBusy':state==='error'?'ansMotionError':'ansMotionPlay');
+ const label=button.dataset.ansOriginalHtml;
+ const glyph=kind==='delete'?'🗑':kind==='save'?'✦':'✧';
+ const text=kind==='delete'?'Eliminar':kind==='save'?'Guardando':'Ver figura';
+ button.innerHTML=`<span class="ansMotionIcon" aria-hidden="true">${glyph}</span><span class="ansMotionWords">${state==='success'?'¡Listo!':state==='error'?'Error':text}</span><span class="ansMotionSpark" aria-hidden="true">✦</span><span class="ansMotionSpark second" aria-hidden="true">✧</span>`;
+ button.setAttribute('aria-label',state==='success'?'Operación completada':state==='busy'?'Procesando':text);
+}
+function ansMotionReset(button){if(!button||!button.isConnected)return;button.innerHTML=button.dataset.ansOriginalHtml||button.innerHTML;button.classList.remove('ansMotionButton','ansMotionPlay','ansMotionBusy','ansMotionSuccess','ansMotionError');delete button.dataset.ansOriginalHtml;delete button.dataset.ansMotion;button.removeAttribute('aria-label')}
+async function ansAnimateView(button,callback){if(button?.dataset.ansLocked)return; if(!button){callback();return}button.dataset.ansLocked='1';ansMotion(button,'view');await ansWait(680);if(button.isConnected)ansMotionReset(button);delete button.dataset.ansLocked;callback()}
+
 const SUPABASE_URL = 'https://uobqjdvaovqbqthnmvpm.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_5L3IfGy74SfEDB0YNnH9Fw_n3HjwND7';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
@@ -105,17 +125,6 @@ function productCard(p){
 
 const INTEREST_LIST_KEY='animeNoSekaiInterestList';
 function getInterestList(){try{return JSON.parse(sessionStorage.getItem(INTEREST_LIST_KEY)||'[]')}catch{return []}}
-// V7.12.0 — Microinteracciones por acción. No altera operaciones ni confirmaciones.
-function motionButton(button,kind,state='play'){
- if(!button||window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
- button.classList.remove('ansMotionView','ansMotionSave','ansMotionDelete','ansMotionWorking','ansMotionSuccess');
- void button.offsetWidth;
- button.classList.add(kind==='view'?'ansMotionView':kind==='delete'?'ansMotionDelete':'ansMotionSave');
- if(state==='working')button.classList.add('ansMotionWorking');
- if(state==='success')button.classList.add('ansMotionSuccess');
- if(state!=='working')setTimeout(()=>{if(button.isConnected)button.classList.remove('ansMotionView','ansMotionSave','ansMotionDelete','ansMotionSuccess')},850);
-}
-function motionAdminDelete(selector,id){const button=[...document.querySelectorAll(selector)].find(x=>x.dataset.delete===String(id)||x.dataset.additionalDelete===String(id)||x.dataset.reviewDelete===String(id));motionButton(button,'delete','success')}
 function saveInterestList(items){sessionStorage.setItem(INTEREST_LIST_KEY,JSON.stringify(items));updateInterestListUI();document.querySelectorAll('[data-interest-count]').forEach(x=>{x.classList.remove('pulse');void x.offsetWidth;x.classList.add('pulse')})}
 function interestItem(p,kind='figura'){return {kind,sku:p.sku,name:p.name,price:p.price,sale:p.sale,status:p.status,img:p.img||'',url:publicProductUrl(p.sku,kind)}}
 function isInInterestList(sku,kind='figura'){return getInterestList().some(x=>x.sku===sku&&x.kind===kind)}
@@ -498,7 +507,7 @@ async function openDetail(sku,push=true){
  if(push) history.pushState({detail:sku},'',`/figura/${encodeURIComponent(sku)}`);
 }
 function closeDetail(){document.getElementById('detailView')?.remove();document.getElementById('helpView')?.remove();document.body.classList.remove('detail-open');if(location.pathname.startsWith('/figura/')||location.hash.startsWith('#figura='))history.replaceState({},'','/#catalogo')}
-document.addEventListener('click',e=>{const routeLink=e.target.closest('[data-route-link]');if(routeLink){e.preventDefault();closeMobileMenu?.();navigatePublic(new URL(routeLink.href,location.origin).pathname);return}const help=e.target.closest('[data-open-help]');if(help){e.preventDefault();closeMobileMenu?.();openHelpView();return}const listToggle=e.target.closest('[data-interest-toggle]');if(listToggle){const p=findPublicProduct(listToggle.dataset.interestToggle,listToggle.dataset.interestKind||'figura');if(p){toggleInterest(p,listToggle.dataset.interestKind||'figura');showPublicToast(isInInterestList(p.sku,listToggle.dataset.interestKind||'figura')?'Agregado a Mi lista.':'Quitado de Mi lista.')}return}const share=e.target.closest('[data-share-product]');if(share){const p=findPublicProduct(share.dataset.shareProduct,share.dataset.shareKind||'figura');if(p)openShareMenu(productShareData(p,share.dataset.shareKind||'figura'));return}const remove=e.target.closest('[data-interest-remove]');if(remove){const items=getInterestList().filter(x=>!(x.sku===remove.dataset.interestRemove&&x.kind===remove.dataset.interestKind));saveInterestList(items);return}if(e.target.closest('[data-interest-clear]')){saveInterestList([]);return}const wa=e.target.closest('[data-analytics-whatsapp]');if(wa){const kind=wa.dataset.analyticsKind,sku=wa.dataset.analyticsWhatsapp,p=kind==='adicional'?additionalProducts.find(x=>x.sku===sku):(products.find(x=>x.sku===sku)||catalogProducts.find(x=>x.sku===sku));if(p)trackWhatsapp(p,kind);return}const clear=e.target.closest('[data-clear-public-filters]');if(clear){clearPublicCatalogFilters();return}const abtn=e.target.closest('.additionalDetails[data-additional]');if(abtn){motionButton(abtn,'view');openAdditionalDetail(abtn.dataset.additional);return}const acard=e.target.closest('.publicAdditionalCard[data-additional-product]');if(acard&&!e.target.closest('a,button,input,select')){openAdditionalDetail(acard.dataset.additionalProduct);return}const btn=e.target.closest('.details[data-product]');if(btn){motionButton(btn,'view');openDetail(btn.dataset.product);return}const card=e.target.closest('.publicProductCard[data-card-product]');if(card&&!e.target.closest('a,button,input,select'))openDetail(card.dataset.cardProduct)});
+document.addEventListener('click',e=>{const routeLink=e.target.closest('[data-route-link]');if(routeLink){e.preventDefault();closeMobileMenu?.();navigatePublic(new URL(routeLink.href,location.origin).pathname);return}const help=e.target.closest('[data-open-help]');if(help){e.preventDefault();closeMobileMenu?.();openHelpView();return}const listToggle=e.target.closest('[data-interest-toggle]');if(listToggle){const p=findPublicProduct(listToggle.dataset.interestToggle,listToggle.dataset.interestKind||'figura');if(p){toggleInterest(p,listToggle.dataset.interestKind||'figura');showPublicToast(isInInterestList(p.sku,listToggle.dataset.interestKind||'figura')?'Agregado a Mi lista.':'Quitado de Mi lista.')}return}const share=e.target.closest('[data-share-product]');if(share){const p=findPublicProduct(share.dataset.shareProduct,share.dataset.shareKind||'figura');if(p)openShareMenu(productShareData(p,share.dataset.shareKind||'figura'));return}const remove=e.target.closest('[data-interest-remove]');if(remove){const items=getInterestList().filter(x=>!(x.sku===remove.dataset.interestRemove&&x.kind===remove.dataset.interestKind));saveInterestList(items);return}if(e.target.closest('[data-interest-clear]')){saveInterestList([]);return}const wa=e.target.closest('[data-analytics-whatsapp]');if(wa){const kind=wa.dataset.analyticsKind,sku=wa.dataset.analyticsWhatsapp,p=kind==='adicional'?additionalProducts.find(x=>x.sku===sku):(products.find(x=>x.sku===sku)||catalogProducts.find(x=>x.sku===sku));if(p)trackWhatsapp(p,kind);return}const clear=e.target.closest('[data-clear-public-filters]');if(clear){clearPublicCatalogFilters();return}const abtn=e.target.closest('.additionalDetails[data-additional]');if(abtn){ansAnimateView(abtn,()=>openAdditionalDetail(abtn.dataset.additional));return}const acard=e.target.closest('.publicAdditionalCard[data-additional-product]');if(acard&&!e.target.closest('a,button,input,select')){openAdditionalDetail(acard.dataset.additionalProduct);return}const btn=e.target.closest('.details[data-product]');if(btn){ansAnimateView(btn,()=>openDetail(btn.dataset.product));return}const card=e.target.closest('.publicProductCard[data-card-product]');if(card&&!e.target.closest('a,button,input,select'))openDetail(card.dataset.cardProduct)});
 document.addEventListener('keydown',e=>{const acard=e.target.closest?.('.publicAdditionalCard[data-additional-product]');if(acard&&(e.key==='Enter'||e.key===' ')){e.preventDefault();openAdditionalDetail(acard.dataset.additionalProduct);return}const card=e.target.closest?.('.publicProductCard[data-card-product]');if(card&&(e.key==='Enter'||e.key===' ')){e.preventDefault();openDetail(card.dataset.cardProduct)}});
 window.addEventListener('popstate',()=>{if(PUBLIC_ROUTES.has(location.pathname)){navigatePublic(location.pathname,false);return}if(!location.pathname.startsWith('/figura/')&&!location.pathname.startsWith('/producto/')&&!location.hash.startsWith('#figura=')&&!location.hash.startsWith('#producto=')){document.getElementById('detailView')?.remove();document.body.classList.remove('detail-open')}});
 
@@ -839,13 +848,13 @@ async function saveReview(e,id){
  if(!obj.cliente||!obj.comentario){msg.textContent='Completa cliente y comentario.';msg.className='formMessage error';return}
  if(obj.producto_tipo&&!obj.producto_sku){msg.textContent='Selecciona un producto de los resultados de búsqueda o elige “Sin producto relacionado”.';msg.className='formMessage error';return}
  if(obj.producto_sku&&!/^(ANS|ANX)-\d{5}$/i.test(obj.producto_sku)){msg.textContent='El SKU relacionado debe tener formato ANS-00000 o ANX-00000.';msg.className='formMessage error';return}
- motionButton(btn,'save','working');btn.disabled=true;msg.textContent='Guardando reseña…';msg.className='formMessage';
+ btn.disabled=true;msg.textContent='Guardando reseña…';msg.className='formMessage';
  try{
   let reviewId=id;
   if(id){const {error}=await supabaseClient.from('resenas').update(obj).eq('id',id);if(error)throw error}
   else{const {data,error}=await supabaseClient.from('resenas').insert(obj).select('id').single();if(error)throw error;reviewId=data.id}
-  await syncReviewImages(reviewId);motionButton(btn,'save','success');cleanupReviewPreviews();await showAdminReviewsSection();
- }catch(error){msg.textContent='No se pudo guardar: '+(error?.message||'Error inesperado.');msg.className='formMessage error';btn.disabled=false;btn.classList.remove('ansMotionWorking','ansMotionSave')}
+  await syncReviewImages(reviewId);cleanupReviewPreviews();await showAdminReviewsSection();
+ }catch(error){msg.textContent='No se pudo guardar: '+(error?.message||'Error inesperado.');msg.className='formMessage error';btn.disabled=false}
 }
 async function toggleReviewVisibility(id){
  const r=adminReviewsCache.find(x=>String(x.id)===String(id));if(!r)return;
@@ -855,7 +864,7 @@ async function deleteReview(id){
  const r=adminReviewsCache.find(x=>String(x.id)===String(id));if(!confirm(`¿Eliminar la reseña de ${r?.cliente||'este cliente'}? Esta acción no se puede deshacer.`))return;
  const imgs=r?.resena_imagenes||[];const paths=imgs.map(x=>reviewStoragePath(x.url)).filter(Boolean);
  if(paths.length){const {error}=await supabaseClient.storage.from('resenas').remove(paths);if(error){alert('No se pudieron eliminar las evidencias: '+error.message);return}}
- const {error}=await supabaseClient.from('resenas').delete().eq('id',id);if(error){alert('No se pudo eliminar: '+error.message);return}motionAdminDelete('[data-review-delete]',id);await new Promise(r=>setTimeout(r,420));await loadAdminReviews();
+ const {error}=await supabaseClient.from('resenas').delete().eq('id',id);if(error){alert('No se pudo eliminar: '+error.message);return}await loadAdminReviews();
 }
 
 let adminCatalogKind='franquicias';
@@ -1360,14 +1369,14 @@ async function saveProduct(e,id,currentSku){
  const fabricanteNombre=fabricanteId?emptyNull(fabricanteSelect?.selectedOptions?.[0]?.dataset?.name):null;
  const obj={nombre:f.get('nombre').trim(),personaje_id:personajeId,personaje:personajeNombre,franquicia_id:franquiciaId,franquicia:franquiciaNombre,fabricante_id:fabricanteId,fabricante:fabricanteNombre,descripcion:emptyNull(f.get('descripcion')),precio:Number(f.get('precio')),precio_oferta:f.get('precio_oferta')===''?null:Number(f.get('precio_oferta')),estado:f.get('estado'),stock:Number(f.get('stock')),condicion_figura:emptyNull(f.get('condicion_figura')),condicion_caja:emptyNull(f.get('condicion_caja')),procedencia:emptyNull(f.get('procedencia')),entrega:emptyNull(f.get('entrega')),destacada:f.get('destacada')==='on',activo:f.get('activo')==='on'};
  const validationErrors=validateProductCommon(obj,obj.activo);if(validationErrors.length){showValidationErrors(e.currentTarget,validationErrors);return}
- motionButton(button,'save','working');button.disabled=true;button.dataset.originalText=button.textContent;button.textContent=id?'Guardando…':'Creando…';msg.textContent=id?'Guardando cambios…':'Creando figura…';msg.className='formMessage';
+ button.disabled=true;button.dataset.originalText=button.textContent;ansMotion(button,'save','busy');msg.textContent=id?'Guardando cambios…':'Creando figura…';msg.className='formMessage';
  try{
    let product;
    if(id){const {data,error}=await supabaseClient.from('productos').update(obj).eq('id',id).select().single();if(error)throw error;product=data||{id,sku:currentSku}}
    else {const {data,error}=await supabaseClient.from('productos').insert(obj).select().single();if(error)throw error;product=data}
    msg.textContent=productFormImages.length||existingProductImages.some(x=>x.removed)?'Procesando fotografías…':'Guardado correctamente…';
-   await syncProductImages(product);motionButton(button,'save','success');adminProductFormDirty=false;cleanupNewImagePreviews(); renderAdminPanel();await loadAdminProducts();
- }catch(error){showProductMessage('No se pudo guardar: '+(error?.message||'Error inesperado.'),true);button.disabled=false;button.classList.remove('ansMotionWorking','ansMotionSave');button.textContent=button.dataset.originalText||button.textContent}
+   await syncProductImages(product);adminProductFormDirty=false;cleanupNewImagePreviews();ansMotion(button,'save','success');await ansWait(1050);renderAdminPanel();await loadAdminProducts();
+ }catch(error){showProductMessage('No se pudo guardar: '+(error?.message||'Error inesperado.'),true);button.disabled=false;ansMotion(button,'save','error');await ansWait(800);ansMotionReset(button)}
 }
 function initDescriptionCounter(form){if(!form)return;form.querySelectorAll('[data-count-for]').forEach(counter=>{const name=counter.dataset.countFor,field=form.querySelector(`[name="${name}"]`);if(!field||!field.maxLength||field.maxLength<1)return;const sync=()=>{counter.textContent=`${field.value.length} / ${field.maxLength}`;counter.classList.toggle('nearLimit',field.value.length>=Math.ceil(field.maxLength*.85))};field.addEventListener('input',sync);sync()})}
 function showProductMessage(text,error=false){
@@ -1378,11 +1387,12 @@ function showProductMessage(text,error=false){
 }
 async function deleteProduct(id){
  const p=adminProductsCache.find(x=>x.id===id); if(!confirm(`¿Eliminar ${p?.nombre||'este producto'}? Esta acción no se puede deshacer.`))return;
+ const button=Array.from(document.querySelectorAll('[data-delete]')).find(x=>x.dataset.delete===String(id));if(button){button.disabled=true;ansMotion(button,'delete','busy');await ansWait(850)}
  const {data:imgs,error:imgReadError}=await supabaseClient.from('producto_imagenes').select('url').eq('producto_id',id);
  if(imgReadError){alert('No se pudieron consultar las fotografías: '+imgReadError.message);return}
  const paths=(imgs||[]).map(x=>storagePathFromPublicUrl(x.url)).filter(Boolean);
- if(paths.length){const {error:storageError}=await supabaseClient.storage.from('productos').remove(paths);if(storageError){alert('No se pudieron eliminar las fotografías de Storage: '+storageError.message);return}}
- const {error}=await supabaseClient.from('productos').delete().eq('id',id); if(error){alert('No se pudo eliminar: '+error.message);return} motionAdminDelete('[data-delete]',id);await new Promise(r=>setTimeout(r,420));await loadAdminProducts();
+ if(paths.length){const {error:storageError}=await supabaseClient.storage.from('productos').remove(paths);if(storageError){if(button){ansMotionReset(button);button.disabled=false}alert('No se pudieron eliminar las fotografías de Storage: '+storageError.message);return}}
+ const {error}=await supabaseClient.from('productos').delete().eq('id',id); if(error){if(button){ansMotionReset(button);button.disabled=false}alert('No se pudo eliminar: '+error.message);return}if(button){ansMotion(button,'delete','success');await ansWait(850)}await loadAdminProducts();
 }
 
 // =========================================================
@@ -1465,10 +1475,10 @@ async function syncAdditionalProductImages(product){
 async function saveAdditionalProduct(e,id,currentSku){
  e.preventDefault();const f=new FormData(e.currentTarget),msg=document.getElementById('productMessage'),button=document.getElementById('saveAdditionalProductButton');const obj={tipo_producto_id:emptyNull(f.get('tipo_producto_id')),nombre:f.get('nombre').trim(),franquicia_id:emptyNull(f.get('franquicia_id')),personaje_id:emptyNull(f.get('personaje_id')),descripcion:emptyNull(f.get('descripcion')),precio:Number(f.get('precio')),precio_oferta:f.get('precio_oferta')===''?null:Number(f.get('precio_oferta')),estado:f.get('estado'),stock:Number(f.get('stock')),hecho_mano:f.get('hecho_mano')==='on',sobre_pedido:f.get('sobre_pedido')==='on',tiempo_elaboracion:emptyNull(f.get('tiempo_elaboracion')),destacado:f.get('destacado')==='on',activo:f.get('activo')==='on'};
  const validationErrors=validateProductCommon(obj,obj.activo);if(!obj.tipo_producto_id)validationErrors.unshift({field:'tipo_producto_id',message:'Selecciona un tipo de producto.'});if(validationErrors.length){showValidationErrors(e.currentTarget,validationErrors);return}
- motionButton(button,'save','working');button.disabled=true;button.dataset.originalText=button.textContent;button.textContent=id?'Guardando…':'Creando…';msg.textContent=id?'Guardando cambios…':'Creando producto…';msg.className='formMessage';try{let product;if(id){const {data,error}=await supabaseClient.from('productos_adicionales').update(obj).eq('id',id).select().single();if(error)throw error;product=data||{id,sku:currentSku}}else{const {data,error}=await supabaseClient.from('productos_adicionales').insert(obj).select().single();if(error)throw error;product=data}msg.textContent='Procesando fotografías…';await syncAdditionalProductImages(product);motionButton(button,'save','success');adminProductFormDirty=false;cleanupNewImagePreviews();renderAdminPanel();showAdminProductsSection('adicionales')}catch(error){showProductMessage('No se pudo guardar: '+(error?.message||'Error inesperado.'),true);button.disabled=false;button.classList.remove('ansMotionWorking','ansMotionSave');button.textContent=button.dataset.originalText||button.textContent}
+ button.disabled=true;button.dataset.originalText=button.textContent;button.textContent=id?'Guardando…':'Creando…';msg.textContent=id?'Guardando cambios…':'Creando producto…';msg.className='formMessage';try{let product;if(id){const {data,error}=await supabaseClient.from('productos_adicionales').update(obj).eq('id',id).select().single();if(error)throw error;product=data||{id,sku:currentSku}}else{const {data,error}=await supabaseClient.from('productos_adicionales').insert(obj).select().single();if(error)throw error;product=data}msg.textContent='Procesando fotografías…';await syncAdditionalProductImages(product);adminProductFormDirty=false;cleanupNewImagePreviews();renderAdminPanel();showAdminProductsSection('adicionales')}catch(error){showProductMessage('No se pudo guardar: '+(error?.message||'Error inesperado.'),true);button.disabled=false;button.textContent=button.dataset.originalText||button.textContent}
 }
 async function deleteAdditionalProduct(id){
- const p=adminAdditionalProductsCache.find(x=>x.id===id);if(!confirm(`¿Eliminar ${p?.nombre||'este producto'}? Esta acción no se puede deshacer.`))return;const {data:imgs,error:readError}=await supabaseClient.from('producto_adicional_imagenes').select('url').eq('producto_id',id);if(readError){alert('No se pudieron consultar las fotografías: '+readError.message);return}const paths=(imgs||[]).map(x=>storagePathFromPublicUrl(x.url)).filter(Boolean);if(paths.length){const {error}=await supabaseClient.storage.from('productos').remove(paths);if(error){alert('No se pudieron eliminar las fotografías de Storage: '+error.message);return}}const {error}=await supabaseClient.from('productos_adicionales').delete().eq('id',id);if(error){alert('No se pudo eliminar: '+error.message);return}motionAdminDelete('[data-additional-delete]',id);await new Promise(r=>setTimeout(r,420));await loadAdminAdditionalProducts();
+ const p=adminAdditionalProductsCache.find(x=>x.id===id);if(!confirm(`¿Eliminar ${p?.nombre||'este producto'}? Esta acción no se puede deshacer.`))return;const {data:imgs,error:readError}=await supabaseClient.from('producto_adicional_imagenes').select('url').eq('producto_id',id);if(readError){alert('No se pudieron consultar las fotografías: '+readError.message);return}const paths=(imgs||[]).map(x=>storagePathFromPublicUrl(x.url)).filter(Boolean);if(paths.length){const {error}=await supabaseClient.storage.from('productos').remove(paths);if(error){alert('No se pudieron eliminar las fotografías de Storage: '+error.message);return}}const {error}=await supabaseClient.from('productos_adicionales').delete().eq('id',id);if(error){alert('No se pudo eliminar: '+error.message);return}await loadAdminAdditionalProducts();
 }
 
 function emptyNull(v){v=(v??'').toString().trim();return v===''?null:v}
