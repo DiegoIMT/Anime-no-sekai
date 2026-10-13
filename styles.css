@@ -2313,186 +2313,217 @@ html[data-theme="light"] .hero.ansSeasonHero{background-image:linear-gradient(90
 @media(prefers-reduced-motion:reduce){.ansVitrineOpen .ansThemeParticle{animation:none!important}}
 
 
-/* V7.17.7 — Distribución coherente del encabezado y pie temáticos.
-   Los adornos son fondos de pseudoelementos, nunca nodos del flujo. */
+
+/* V7.17.8: navegación y footer públicos, aislados del admin y de las decoraciones. */
 #app > header {
-  display: grid !important;
-  grid-template-columns: minmax(0, 220px) minmax(0, 1fr) max-content !important;
-  align-items: center !important;
-  column-gap: clamp(12px, 1.3vw, 25px) !important;
-  padding-inline: max(24px, calc((100% - 1320px) / 2)) !important;
-  overflow: visible !important; /* El menú y el buscador deben poder desplegarse. */
+  display:flex !important;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  padding-inline:max(20px,calc((100% - 1380px)/2)) !important;
+  overflow:visible;
 }
 #app > header > .brand {
-  grid-column: 1;
-  min-width: 0;
-  max-width: 220px;
-  position: relative;
-  z-index: 2;
+  flex:0 0 190px;
+  width:190px;
+  min-width:0;
+  position:relative;
+  z-index:2;
 }
 #app > header > nav {
-  grid-column: 2;
-  display: flex !important;
-  justify-content: center;
-  min-width: 0;
-  gap: clamp(9px, 1vw, 20px) !important;
-  white-space: nowrap;
-  position: relative;
-  z-index: 2;
+  flex:1 1 auto;
+  min-width:0;
+  display:flex !important;
+  align-items:center;
+  justify-content:center;
+  gap:clamp(10px,1.3vw,24px);
+  white-space:nowrap;
+  position:relative;
+  z-index:2;
 }
-#app > header > nav > a {
-  flex: 0 0 auto;
-  white-space: nowrap !important;
-  font-size: clamp(11px, .78vw, 14px);
-}
+#app > header > nav a {white-space:nowrap;font-size:clamp(11px,.85vw,14px)}
 #app > header > .headActions {
-  grid-column: 3;
-  justify-self: end;
-  display: flex;
-  flex: 0 0 auto;
-  gap: 8px;
-  margin-left: 0 !important;
-  position: relative;
-  z-index: 2;
+  flex:0 0 auto;
+  margin-left:auto;
+  display:flex;
+  gap:8px;
+  position:relative;
+  z-index:2;
 }
-#app > header .headActions > .menu { display: none !important; }
-#app > header > .mobileNav { display: none !important; }
-#app > header.ansSeasonHeader,
-#app > footer.ansSeasonFooter {
-  background-image: none !important;
-  isolation: isolate;
+#app > header .headActions > .menu {display:none !important}
+#app > header > .mobileNav {display:none !important}
+#app > header.ansSeasonHeader,#app > footer.ansSeasonFooter {
+  isolation:isolate;
+  background-image:none !important;
 }
-#app > header.ansSeasonHeader::before,
-#app > footer.ansSeasonFooter::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background-image: var(--ans-season-decoration);
-  background-repeat: no-repeat;
-  background-position: var(--ans-decor-position, right center);
-  background-size: auto min(var(--ans-decor-size, 64px), 100%);
-  opacity: var(--ans-decor-opacity, .75);
+#app > header.ansSeasonHeader::before,#app > footer.ansSeasonFooter::before {
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  background-image:var(--ans-season-decoration);
+  background-repeat:no-repeat;
+  background-position:var(--ans-decor-position,right center);
+  background-size:auto min(var(--ans-decor-size,64px),100%);
+  opacity:var(--ans-decor-opacity,.75);
 }
 #app > header.ansSeasonHeader > .ansSeasonDecoration,
-#app > footer.ansSeasonFooter > .ansSeasonDecoration { display: none !important; }
+#app > footer.ansSeasonFooter > .ansSeasonDecoration {display:none !important}
 #app > footer {
-  position: relative;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 14px 22px;
-  padding: 36px max(90px, calc((100% - 1180px) / 2)) !important;
-  min-height: 150px;
+  position:relative;
+  display:grid !important;
+  grid-template-columns:minmax(0,1.2fr) minmax(0,1.5fr) auto auto;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px 22px;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  padding:35px max(100px,calc((100% - 1180px)/2)) !important;
 }
-#app > footer > :not(.ansSeasonDecoration) {
-  position: relative;
-  z-index: 1;
+#app > footer > :not(.ansSeasonDecoration):not(.reviewsTab) {
+  min-width:0;
+  position:relative;
+  z-index:1;
 }
-#app > footer > .brand { flex: 0 0 auto; }
-#app > footer > p { margin: 0; }
-#app > footer > small { white-space: nowrap; }
+#app > footer > .brand {grid-column:1;grid-row:1;justify-self:start}
+#app > footer > p {grid-column:2;grid-row:1;margin:0;overflow-wrap:anywhere}
+#app > footer > .footerHelp {grid-column:3;grid-row:1;margin:0;white-space:nowrap}
+#app > footer > .footerShare {grid-column:4;grid-row:1;margin:0;white-space:nowrap}
+#app > footer > small {grid-column:1/-1;grid-row:2;text-align:center}
 #app > footer.ansSeasonFooter::before {
-  background-position: right 12px center;
-  background-size: auto min(var(--ans-decor-size, 85px), 100%);
+  background-position:right 12px center;
+  background-size:auto min(var(--ans-decor-size,85px),100%);
 }
-@media (max-width: 1450px) {
-  #app > header {
-    display: flex !important;
-    justify-content: space-between !important;
-    gap: 12px !important;
-    padding-inline: max(20px, calc((100% - 1180px) / 2)) !important;
-  }
-  #app > header > nav { display: none !important; }
-  #app > header > .brand { flex: 0 1 auto; }
-  #app > header > .headActions { margin-left: auto !important; }
-  #app > header .headActions > .menu { display: grid !important; place-items: center; }
+/* El acceso a reseñas vuelve a ser flotante en escritorio. */
+#app > footer > .reviewsTab {
+  position:fixed !important;
+  left:0 !important;
+  top:52% !important;
+  bottom:auto !important;
+  margin:0 !important;
+  z-index:800 !important;
+  transform:translateY(-50%) !important;
+  rotate:180deg !important;
+  writing-mode:vertical-rl !important;
+  width:auto !important;
+  display:inline-flex !important;
+  border-radius:0 12px 12px 0;
+  padding:15px 10px;
+}
+@media(max-width:1500px){
+  #app > header > nav {display:none !important}
+  #app > header .headActions > .menu {display:grid !important;place-items:center}
   #app > header > .mobileNav {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    z-index: 40;
-    display: grid !important;
-    grid-template-rows: 0fr;
-    background: rgba(9,10,13,.98);
-    border-bottom: 1px solid transparent;
-    overflow: hidden;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity .2s ease, grid-template-rows .2s ease;
+    position:absolute;
+    top:100%;left:0;right:0;
+    z-index:40;
+    display:block !important;
+    background:rgba(9,10,13,.98);
+    border-bottom:1px solid #292c33;
+    max-height:0;
+    opacity:0;
+    overflow:hidden;
+    pointer-events:none;
+    transition:max-height .2s ease,opacity .2s ease;
   }
   #app > header > .mobileNav.open {
-    grid-template-rows: 1fr;
-    opacity: 1;
-    pointer-events: auto;
-    border-bottom-color: #292c33;
-    max-height: calc(100dvh - 76px);
-    overflow-y: auto;
+    max-height:calc(100dvh - 76px);
+    overflow-y:auto;
+    opacity:1;
+    pointer-events:auto;
   }
   #app > header > .mobileNav > a,
-  #app > header > .mobileNav > button { display: none; }
+  #app > header > .mobileNav > button {display:none}
   #app > header > .mobileNav.open > a,
-  #app > header > .mobileNav.open > button { display: block; }
+  #app > header > .mobileNav.open > button {display:block}
+  #app > footer {
+    grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);
+    padding-inline:max(105px,calc((100% - 1000px)/2)) !important;
+  }
+  #app > footer > .brand {grid-column:1;grid-row:1}
+  #app > footer > p {grid-column:2;grid-row:1}
+  #app > footer > .footerHelp {grid-column:1;grid-row:2;justify-self:start}
+  #app > footer > .footerShare {grid-column:2;grid-row:2;justify-self:start}
+  #app > footer > small {grid-column:1/-1;grid-row:3}
 }
-@media (max-width: 900px) {
-  #app > header { padding-inline: 16px !important; gap: 8px !important; }
-  #app > header > .brand { max-width: min(40vw, 190px); }
-  #app > header > .headActions { gap: 5px; }
-  #app > header .headActions > .themeToggle,
-  #app > header .headActions > .interestListButton,
-  #app > header .headActions > .headerSearchTrigger,
-  #app > header .headActions > .menu {
-    width: 40px !important;
-    min-width: 40px !important;
-    height: 40px !important;
-    padding: 0 !important;
-    display: grid !important;
-    place-items: center !important;
+@media(max-width:760px){
+  #app > header {padding-inline:12px !important;gap:8px !important}
+  #app > header > .brand {
+    flex:0 1 185px;
+    width:auto;
+    max-width:185px;
+    min-width:0;
+  }
+  #app > header .brand.logoOnly .brandIcon {
+    width:100% !important;
+    max-width:185px !important;
+    height:48px !important;
+    flex:0 1 auto !important;
+  }
+  #app > header .brand.logoOnly .brandLogo {
+    display:block;
+    width:100% !important;
+    max-width:185px !important;
+    height:48px !important;
+    max-height:48px !important;
+    object-fit:contain;
+  }
+  #app > header > .headActions {gap:5px !important;margin-left:auto !important}
+  #app > header .headActions > button {
+    flex:0 0 38px;
+    width:38px !important;
+    min-width:38px !important;
+    height:38px !important;
+    padding:0 !important;
+    display:grid !important;
+    place-items:center !important;
   }
   #app > header .themeToggleText,
   #app > header .interestListText,
-  #app > header .headerSearchTriggerText { display: none !important; }
+  #app > header .headerSearchTriggerText {display:none !important}
   #app > footer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 12px;
-    padding: 40px 64px 48px !important;
+    display:flex !important;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:14px;
+    text-align:center;
+    padding:40px 72px 48px !important;
+    overflow:hidden;
   }
-  #app > footer > .brand { justify-content: center; margin: 0; }
-  #app > footer > p { margin: 0; }
+  #app > footer > .brand,
+  #app > footer > p,
+  #app > footer > .footerHelp,
+  #app > footer > .footerShare,
+  #app > footer > small {grid-column:auto;grid-row:auto;margin:0 !important;justify-self:center}
+  #app > footer > .brand {justify-content:center}
+  #app > footer > .reviewsTab {display:none !important}
   #app > footer.ansSeasonFooter::before {
-    background-position: right 8px bottom 10px;
-    background-size: auto min(var(--ans-decor-size, 85px), 65px);
+    background-position:right 8px bottom 12px;
+    background-size:auto min(var(--ans-decor-size,85px),55px);
   }
 }
-@media (max-width: 560px) {
-  #app > header { padding-inline: 10px !important; gap: 4px !important; }
-  #app > header > .brand { flex: 0 1 auto; max-width: calc(100vw - 208px); }
-  #app > header .brand.logoOnly .brandIcon { max-width: 100%; }
-  #app > header .brand.logoOnly .brandLogo { max-width: 100%; max-height: 42px; }
-  #app > header > .headActions { gap: 4px !important; }
-  #app > header .headActions > .themeToggle,
-  #app > header .headActions > .interestListButton,
-  #app > header .headActions > .headerSearchTrigger,
-  #app > header .headActions > .menu {
-    width: 38px !important;
-    min-width: 38px !important;
-    height: 38px !important;
+@media(max-width:440px){
+  #app > header {padding-inline:8px !important;gap:4px !important}
+  #app > header > .brand {flex:1 1 auto;max-width:calc(100vw - 188px)}
+  #app > header .brand.logoOnly .brandIcon,
+  #app > header .brand.logoOnly .brandLogo {max-width:100% !important}
+  #app > header > .headActions {gap:3px !important}
+  #app > header .headActions > button {
+    flex-basis:36px;
+    width:36px !important;
+    min-width:36px !important;
+    height:36px !important;
   }
   #app > header.ansSeasonHeader::before {
-    background-position: right 2px top 1px;
-    background-size: auto min(var(--ans-decor-size,64px), 26px);
-    opacity: calc(var(--ans-decor-opacity,.75) * .55);
+    background-position:right top;
+    background-size:auto min(var(--ans-decor-size,64px),25px);
+    opacity:calc(var(--ans-decor-opacity,.75) * .45);
   }
-  #app > footer { padding: 40px 44px 55px !important; }
+  #app > footer {padding-inline:46px !important}
   #app > footer.ansSeasonFooter::before {
-    background-position: right 5px bottom 8px;
-    background-size: auto min(var(--ans-decor-size,85px), 40px);
-    opacity: calc(var(--ans-decor-opacity,.75) * .75);
+    background-size:auto min(var(--ans-decor-size,85px),36px);
   }
 }
