@@ -2306,121 +2306,193 @@ html[data-theme="light"] .hero.ansSeasonHero{background-image:linear-gradient(90
 @media(max-width:560px){.ansMiniPreviewWrap{padding:10px}.ansMiniPreviewViewport{padding:6px}}
 @media(prefers-reduced-motion:reduce){.ansMiniAmbient span{animation:none}}
 
-/* V7.17.2 — La temática decora, pero nunca altera el espacio de navegación. */
-header.ansSeasonHeader{isolation:isolate;overflow:visible}
-header.ansSeasonHeader>.ansSeasonDecoration{
-  position:absolute!important;top:2px!important;right:4px!important;bottom:auto!important;
-  width:clamp(36px,4.3vw,64px)!important;height:clamp(36px,4.3vw,64px)!important;
-  max-width:64px!important;max-height:calc(100% - 4px)!important;
-  object-fit:contain;object-position:center;opacity:.72;pointer-events:none;
-  z-index:0!important;filter:drop-shadow(0 2px 5px rgba(0,0,0,.3));
-}
-header.ansSeasonHeader>.brand,header.ansSeasonHeader>nav,header.ansSeasonHeader>.headActions{
-  position:relative;z-index:2;min-width:0;
-}
-/* Mantener los enlaces en una sola línea y evitar que la marca invada el menú. */
-header>.brand{flex:0 0 auto;min-width:0}
-header>nav{flex:0 1 auto;min-width:0;align-items:center;gap:clamp(10px,1.35vw,23px)}
-header>nav>a{white-space:nowrap;flex:0 0 auto}
-header>.headActions{flex:0 0 auto;align-items:center}
-@media(min-width:1321px){
-  header.ansSeasonHeader{padding-left:clamp(22px,3vw,64px);padding-right:clamp(76px,6vw,120px)}
-}
-/* A partir de este ancho no caben seis enlaces, logo y acciones completos.
-   Reutilizar el menú móvil existente en vez de comprimir o partir los textos. */
-@media(min-width:901px) and (max-width:1320px){
-  header.ansSeasonHeader>nav{display:none!important}
-  header.ansSeasonHeader .menu{display:grid!important}
-  header.ansSeasonHeader .mobileNav{display:grid}
-  header.ansSeasonHeader{padding-right:clamp(70px,7vw,105px)}
-}
-@media(max-width:900px){
-  header.ansSeasonHeader>.ansSeasonDecoration{width:42px!important;height:42px!important;right:3px!important;top:3px!important;opacity:.55}
-  header.ansSeasonHeader{padding-right:58px}
-}
-@media(max-width:560px){
-  header.ansSeasonHeader>.ansSeasonDecoration{width:28px!important;height:28px!important;top:2px!important;right:2px!important;opacity:.45}
-  header.ansSeasonHeader{padding-right:40px}
-}
-footer.ansSeasonFooter{isolation:isolate;min-width:0}
-footer.ansSeasonFooter>.ansSeasonDecoration{
-  position:absolute!important;right:8px!important;bottom:4px!important;
-  width:clamp(40px,6vw,85px)!important;height:clamp(40px,6vw,85px)!important;
-  max-width:85px!important;max-height:calc(100% - 8px)!important;
-  object-fit:contain;opacity:.62;pointer-events:none;z-index:0!important;
-}
-footer.ansSeasonFooter>:not(.ansSeasonDecoration){min-width:0;overflow-wrap:anywhere}
-@media(min-width:901px){footer.ansSeasonFooter{padding-right:clamp(95px,9vw,145px)}}
-@media(max-width:900px){footer.ansSeasonFooter{padding-right:65px}}
-@media(max-width:560px){footer.ansSeasonFooter{padding-right:45px}footer.ansSeasonFooter>.ansSeasonDecoration{width:36px!important;height:36px!important;opacity:.5}}
-/* La imagen del hero no debe expandir el contenido ni alterar su distribución. */
-.hero.ansSeasonHero{min-width:0;max-width:100%;overflow:hidden}
-.hero.ansSeasonHero>.heroContent{min-width:0;max-width:100%}
-.sectionHead h2.ansSeasonTitle{max-width:100%;overflow-wrap:break-word}
-
-/* V7.17.3: decoración de fondo, nunca un elemento del layout. */
-header.ansSeasonHeader,footer.ansSeasonFooter{background-image:var(--ans-season-decoration)!important;background-repeat:no-repeat!important;background-size:auto 64px!important;background-position:right 6px center!important}
-header.ansSeasonHeader{padding-left:max(22px,calc((100% - 1180px)/2))!important;padding-right:max(22px,calc((100% - 1180px)/2))!important}
-header.ansSeasonHeader>.ansSeasonDecoration,footer.ansSeasonFooter>.ansSeasonDecoration{display:none!important}
-header.ansSeasonHeader>nav{display:flex!important;gap:clamp(10px,1.25vw,22px);flex:0 1 auto}
-header.ansSeasonHeader>nav>a{white-space:nowrap!important;word-break:normal!important;overflow-wrap:normal!important}
-header.ansSeasonHeader .menu{display:none!important}
-header.ansSeasonHeader .mobileNav{display:none}
-footer.ansSeasonFooter{padding-right:max(22px,calc((100% - 1180px)/2))!important;background-size:auto 85px!important;background-position:right 12px center!important}
-@media(max-width:1320px){header.ansSeasonHeader>nav{display:none!important}header.ansSeasonHeader .menu{display:grid!important}header.ansSeasonHeader .mobileNav{display:grid}}
-@media(max-width:900px){header.ansSeasonHeader{padding:0 22px!important;background-size:auto 43px!important;background-position:right 4px center!important}footer.ansSeasonFooter{padding:35px 22px!important;background-size:auto 55px!important}}
-@media(max-width:560px){header.ansSeasonHeader{padding:0 16px!important;background-size:auto 30px!important;background-position:right 3px center!important}footer.ansSeasonFooter{background-size:auto 36px!important}}
 /* La vitrina se abre en una secuencia visible, antes de navegar al detalle. */
 .ansVitrineOpen .ansVitrineLeft,.ansVitrineOpen .ansVitrineRight{animation-duration:1.12s!important;animation-delay:.32s!important}
 .ansVitrineOpen .ansVitrineLock,.ansVitrineOpen .ansVitrineSeam{animation-duration:.55s!important}
 .ansVitrineOpen .ansThemeParticle{animation-duration:max(1.5s,var(--p-duration,1.5s))!important}
 @media(prefers-reduced-motion:reduce){.ansVitrineOpen .ansThemeParticle{animation:none!important}}
 
-/* V7.17.4: adornos decorativos, sin afectar al flujo del header/footer. */
-header.ansSeasonHeader,footer.ansSeasonFooter{background-image:none!important;position:relative;isolation:isolate}
-header.ansSeasonHeader::before,footer.ansSeasonFooter::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background-image:var(--ans-season-decoration);background-repeat:no-repeat;background-size:auto min(var(--ans-decor-size,64px),100%);background-position:var(--ans-decor-position,right center);opacity:var(--ans-decor-opacity,.75)}
-header.ansSeasonHeader>:not(.mobileNav),footer.ansSeasonFooter>*{position:relative;z-index:1}
-header.ansSeasonHeader{min-width:0;gap:clamp(12px,1.2vw,22px)}
-header.ansSeasonHeader>.brand{flex:0 0 auto;min-width:0}
-header.ansSeasonHeader>nav{flex:0 1 auto!important;min-width:0;gap:clamp(9px,1vw,18px)!important;white-space:nowrap}
-header.ansSeasonHeader>nav>a{flex:0 0 auto;white-space:nowrap!important}
-header.ansSeasonHeader>.headActions{flex:0 0 auto;min-width:0;margin-left:auto}
-@media(max-width:1600px){header.ansSeasonHeader>nav{display:none!important}header.ansSeasonHeader .menu{display:grid!important}header.ansSeasonHeader .mobileNav{display:grid}}
-@media(min-width:1601px){header.ansSeasonHeader>nav{display:flex!important}header.ansSeasonHeader .menu{display:none!important}}
-@media(max-width:900px){header.ansSeasonHeader::before,footer.ansSeasonFooter::before{background-size:auto min(var(--ans-decor-size,64px),65%)}}
-/* Las tres fases ocurren en paralelo: puertas, revelación y partículas. */
-.ansVitrineOpen .ansVitrineLeft,.ansVitrineOpen .ansVitrineRight{animation-duration:.83s!important;animation-delay:.12s!important}
-.ansVitrineOpen .ansVitrineLock,.ansVitrineOpen .ansVitrineSeam{animation-duration:.4s!important}
-.ansVitrineOpen .ansThemeParticle{animation-duration:clamp(.95s,var(--p-duration,1.2s),1.4s)!important}
 
-
-/* V7.17.6: reconstrucción del layout público del encabezado.
-   Las decoraciones son capas visuales y no alteran las columnas. */
-@media (min-width:1151px){
-  #app>header{display:grid!important;grid-template-columns:minmax(170px,220px) minmax(0,1fr) max-content!important;align-items:center!important;column-gap:22px!important;justify-content:initial!important;padding-left:max(24px,calc((100% - 1320px)/2))!important;padding-right:max(24px,calc((100% - 1320px)/2))!important}
-  #app>header>.brand{grid-column:1;min-width:0;max-width:220px}
-  #app>header>nav,#app>header.ansSeasonHeader>nav{grid-column:2;display:flex!important;min-width:0;justify-content:center;gap:clamp(10px,1.05vw,20px)!important;white-space:nowrap}
-  #app>header>nav>a{font-size:clamp(11px,.85vw,14px);white-space:nowrap!important;flex-shrink:0}
-  #app>header>.headActions{grid-column:3;display:flex;flex-shrink:0;justify-self:end;margin-left:0!important;gap:8px}
-  #app>header .headActions>.menu,#app>header.ansSeasonHeader .menu{display:none!important}
-  #app>header>.mobileNav,#app>header.ansSeasonHeader .mobileNav{display:none!important}
+/* V7.17.7 — Distribución coherente del encabezado y pie temáticos.
+   Los adornos son fondos de pseudoelementos, nunca nodos del flujo. */
+#app > header {
+  display: grid !important;
+  grid-template-columns: minmax(0, 220px) minmax(0, 1fr) max-content !important;
+  align-items: center !important;
+  column-gap: clamp(12px, 1.3vw, 25px) !important;
+  padding-inline: max(24px, calc((100% - 1320px) / 2)) !important;
+  overflow: visible !important; /* El menú y el buscador deben poder desplegarse. */
 }
-@media (max-width:1150px){
-  #app>header{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;padding-left:22px!important;padding-right:22px!important}
-  #app>header>nav,#app>header.ansSeasonHeader>nav{display:none!important}
-  #app>header>.brand{flex:0 1 auto;min-width:0;max-width:min(38vw,220px)}
-  #app>header>.headActions{display:flex;flex:0 0 auto;margin-left:auto!important;gap:6px}
-  #app>header .headActions>.menu,#app>header.ansSeasonHeader .menu{display:grid!important;place-items:center}
-  #app>header>.mobileNav,#app>header.ansSeasonHeader .mobileNav{position:absolute;top:100%;left:0;right:0;z-index:25;display:grid!important;grid-template-rows:0fr;background:var(--header-bg,rgba(9,10,13,.98));border-bottom:1px solid transparent;overflow:hidden;opacity:0;pointer-events:none;transition:grid-template-rows .2s ease,opacity .2s ease}
-  #app>header>.mobileNav.open{grid-template-rows:1fr;opacity:1;pointer-events:auto;border-bottom-color:var(--line,#292c33);max-height:calc(100vh - 76px);overflow-y:auto}
-  #app>header>.mobileNav>a,#app>header>.mobileNav>button{display:none;padding:14px 22px;border-top:1px solid var(--line,#292c33)}
-  #app>header>.mobileNav.open>a,#app>header>.mobileNav.open>button{display:block}
+#app > header > .brand {
+  grid-column: 1;
+  min-width: 0;
+  max-width: 220px;
+  position: relative;
+  z-index: 2;
 }
-@media(max-width:560px){
-  #app>header{padding-left:16px!important;padding-right:16px!important;gap:7px!important}
-  #app>header>.brand{max-width:36vw}
-  #app>header>.headActions{gap:5px}
+#app > header > nav {
+  grid-column: 2;
+  display: flex !important;
+  justify-content: center;
+  min-width: 0;
+  gap: clamp(9px, 1vw, 20px) !important;
+  white-space: nowrap;
+  position: relative;
+  z-index: 2;
 }
-/* Los adornos se recortan dentro de la propia superficie, sin reservar columnas. */
-#app>header.ansSeasonHeader,#app>footer.ansSeasonFooter{overflow:clip}
-#app>header.ansSeasonHeader::before,#app>footer.ansSeasonFooter::before{pointer-events:none;max-width:100%}
+#app > header > nav > a {
+  flex: 0 0 auto;
+  white-space: nowrap !important;
+  font-size: clamp(11px, .78vw, 14px);
+}
+#app > header > .headActions {
+  grid-column: 3;
+  justify-self: end;
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+  margin-left: 0 !important;
+  position: relative;
+  z-index: 2;
+}
+#app > header .headActions > .menu { display: none !important; }
+#app > header > .mobileNav { display: none !important; }
+#app > header.ansSeasonHeader,
+#app > footer.ansSeasonFooter {
+  background-image: none !important;
+  isolation: isolate;
+}
+#app > header.ansSeasonHeader::before,
+#app > footer.ansSeasonFooter::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: var(--ans-season-decoration);
+  background-repeat: no-repeat;
+  background-position: var(--ans-decor-position, right center);
+  background-size: auto min(var(--ans-decor-size, 64px), 100%);
+  opacity: var(--ans-decor-opacity, .75);
+}
+#app > header.ansSeasonHeader > .ansSeasonDecoration,
+#app > footer.ansSeasonFooter > .ansSeasonDecoration { display: none !important; }
+#app > footer {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 14px 22px;
+  padding: 36px max(90px, calc((100% - 1180px) / 2)) !important;
+  min-height: 150px;
+}
+#app > footer > :not(.ansSeasonDecoration) {
+  position: relative;
+  z-index: 1;
+}
+#app > footer > .brand { flex: 0 0 auto; }
+#app > footer > p { margin: 0; }
+#app > footer > small { white-space: nowrap; }
+#app > footer.ansSeasonFooter::before {
+  background-position: right 12px center;
+  background-size: auto min(var(--ans-decor-size, 85px), 100%);
+}
+@media (max-width: 1450px) {
+  #app > header {
+    display: flex !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    padding-inline: max(20px, calc((100% - 1180px) / 2)) !important;
+  }
+  #app > header > nav { display: none !important; }
+  #app > header > .brand { flex: 0 1 auto; }
+  #app > header > .headActions { margin-left: auto !important; }
+  #app > header .headActions > .menu { display: grid !important; place-items: center; }
+  #app > header > .mobileNav {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 40;
+    display: grid !important;
+    grid-template-rows: 0fr;
+    background: rgba(9,10,13,.98);
+    border-bottom: 1px solid transparent;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s ease, grid-template-rows .2s ease;
+  }
+  #app > header > .mobileNav.open {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    pointer-events: auto;
+    border-bottom-color: #292c33;
+    max-height: calc(100dvh - 76px);
+    overflow-y: auto;
+  }
+  #app > header > .mobileNav > a,
+  #app > header > .mobileNav > button { display: none; }
+  #app > header > .mobileNav.open > a,
+  #app > header > .mobileNav.open > button { display: block; }
+}
+@media (max-width: 900px) {
+  #app > header { padding-inline: 16px !important; gap: 8px !important; }
+  #app > header > .brand { max-width: min(40vw, 190px); }
+  #app > header > .headActions { gap: 5px; }
+  #app > header .headActions > .themeToggle,
+  #app > header .headActions > .interestListButton,
+  #app > header .headActions > .headerSearchTrigger,
+  #app > header .headActions > .menu {
+    width: 40px !important;
+    min-width: 40px !important;
+    height: 40px !important;
+    padding: 0 !important;
+    display: grid !important;
+    place-items: center !important;
+  }
+  #app > header .themeToggleText,
+  #app > header .interestListText,
+  #app > header .headerSearchTriggerText { display: none !important; }
+  #app > footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+    padding: 40px 64px 48px !important;
+  }
+  #app > footer > .brand { justify-content: center; margin: 0; }
+  #app > footer > p { margin: 0; }
+  #app > footer.ansSeasonFooter::before {
+    background-position: right 8px bottom 10px;
+    background-size: auto min(var(--ans-decor-size, 85px), 65px);
+  }
+}
+@media (max-width: 560px) {
+  #app > header { padding-inline: 10px !important; gap: 4px !important; }
+  #app > header > .brand { flex: 0 1 auto; max-width: calc(100vw - 208px); }
+  #app > header .brand.logoOnly .brandIcon { max-width: 100%; }
+  #app > header .brand.logoOnly .brandLogo { max-width: 100%; max-height: 42px; }
+  #app > header > .headActions { gap: 4px !important; }
+  #app > header .headActions > .themeToggle,
+  #app > header .headActions > .interestListButton,
+  #app > header .headActions > .headerSearchTrigger,
+  #app > header .headActions > .menu {
+    width: 38px !important;
+    min-width: 38px !important;
+    height: 38px !important;
+  }
+  #app > header.ansSeasonHeader::before {
+    background-position: right 2px top 1px;
+    background-size: auto min(var(--ans-decor-size,64px), 26px);
+    opacity: calc(var(--ans-decor-opacity,.75) * .55);
+  }
+  #app > footer { padding: 40px 44px 55px !important; }
+  #app > footer.ansSeasonFooter::before {
+    background-position: right 5px bottom 8px;
+    background-size: auto min(var(--ans-decor-size,85px), 40px);
+    opacity: calc(var(--ans-decor-opacity,.75) * .75);
+  }
+}
