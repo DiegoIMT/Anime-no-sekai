@@ -2258,10 +2258,6 @@ a.whatsapp:active{transform:scale(.96)}a.whatsapp:active .whatsappIcon{transform
 html[data-theme="light"] .hero.ansSeasonHero{background-image:linear-gradient(90deg,rgba(246,243,250,.88),rgba(246,243,250,.28)),var(--ans-season-hero)!important}
 @media(max-width:560px){.hero.ansSeasonHero{background-image:linear-gradient(90deg,rgba(9,10,13,.83),rgba(9,10,13,.38)),var(--ans-season-hero-mobile,var(--ans-season-hero))!important}html[data-theme="light"] .hero.ansSeasonHero{background-image:linear-gradient(90deg,rgba(246,243,250,.86),rgba(246,243,250,.35)),var(--ans-season-hero-mobile,var(--ans-season-hero))!important}}
 #app>header.ansSeasonHeader,#app>footer.ansSeasonFooter{position:relative;isolation:isolate}
-.ansSeasonDecoration{position:absolute;pointer-events:none;object-fit:contain;max-width:130px;max-height:95%;z-index:0;opacity:.85}
-.ansSeasonHeader>.ansSeasonDecoration{right:4px;bottom:0;width:min(14vw,115px);height:90%;object-position:right bottom}
-.ansSeasonFooter>.ansSeasonDecoration{right:10px;bottom:0;width:min(16vw,130px);height:100%;object-position:right bottom}
-.ansSeasonHeader>:not(.ansSeasonDecoration),.ansSeasonFooter>:not(.ansSeasonDecoration){position:relative;z-index:1}
 .sectionHead h2.ansSeasonTitle{display:inline-block;position:relative;padding-left:18px}
 .sectionHead h2.ansSeasonTitle:before{content:'✦';position:absolute;left:0;top:0;font-size:.55em;color:var(--ans-season-accent);text-shadow:0 0 10px color-mix(in srgb,var(--ans-season-accent) 55%,transparent)}
 .sectionHead h2.ansSeasonTitle:after{content:'';display:block;height:2px;width:46%;max-width:130px;margin-top:5px;background:linear-gradient(90deg,var(--ans-season-accent),transparent)}
@@ -2314,216 +2310,36 @@ html[data-theme="light"] .hero.ansSeasonHero{background-image:linear-gradient(90
 
 
 
-/* V7.17.8: navegación y footer públicos, aislados del admin y de las decoraciones. */
-#app > header {
-  display:flex !important;
-  align-items:center;
-  justify-content:space-between;
-  gap:18px;
-  padding-inline:max(20px,calc((100% - 1380px)/2)) !important;
-  overflow:visible;
-}
-#app > header > .brand {
-  flex:0 0 190px;
-  width:190px;
-  min-width:0;
-  position:relative;
-  z-index:2;
-}
-#app > header > nav {
-  flex:1 1 auto;
-  min-width:0;
-  display:flex !important;
-  align-items:center;
-  justify-content:center;
-  gap:clamp(10px,1.3vw,24px);
-  white-space:nowrap;
-  position:relative;
-  z-index:2;
-}
-#app > header > nav a {white-space:nowrap;font-size:clamp(11px,.85vw,14px)}
-#app > header > .headActions {
-  flex:0 0 auto;
-  margin-left:auto;
-  display:flex;
-  gap:8px;
-  position:relative;
-  z-index:2;
-}
-#app > header .headActions > .menu {display:none !important}
-#app > header > .mobileNav {display:none !important}
-#app > header.ansSeasonHeader,#app > footer.ansSeasonFooter {
-  isolation:isolate;
-  background-image:none !important;
-}
-#app > header.ansSeasonHeader::before,#app > footer.ansSeasonFooter::before {
-  content:"";
-  position:absolute;
-  inset:0;
-  z-index:0;
-  pointer-events:none;
-  background-image:var(--ans-season-decoration);
-  background-repeat:no-repeat;
-  background-position:var(--ans-decor-position,right center);
-  background-size:auto min(var(--ans-decor-size,64px),100%);
-  opacity:var(--ans-decor-opacity,.75);
-}
-#app > header.ansSeasonHeader > .ansSeasonDecoration,
-#app > footer.ansSeasonFooter > .ansSeasonDecoration {display:none !important}
-#app > footer {
-  position:relative;
-  display:grid !important;
-  grid-template-columns:minmax(0,1.2fr) minmax(0,1.5fr) auto auto;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px 22px;
-  width:100%;
-  max-width:100%;
-  min-width:0;
-  padding:35px max(100px,calc((100% - 1180px)/2)) !important;
-}
-#app > footer > :not(.ansSeasonDecoration):not(.reviewsTab) {
-  min-width:0;
-  position:relative;
-  z-index:1;
-}
-#app > footer > .brand {grid-column:1;grid-row:1;justify-self:start}
-#app > footer > p {grid-column:2;grid-row:1;margin:0;overflow-wrap:anywhere}
-#app > footer > .footerHelp {grid-column:3;grid-row:1;margin:0;white-space:nowrap}
-#app > footer > .footerShare {grid-column:4;grid-row:1;margin:0;white-space:nowrap}
-#app > footer > small {grid-column:1/-1;grid-row:2;text-align:center}
-#app > footer.ansSeasonFooter::before {
-  background-position:right 12px center;
-  background-size:auto min(var(--ans-decor-size,85px),100%);
-}
-/* El acceso a reseñas vuelve a ser flotante en escritorio. */
-#app > footer > .reviewsTab {
-  position:fixed !important;
-  left:0 !important;
-  top:52% !important;
-  bottom:auto !important;
-  margin:0 !important;
-  z-index:800 !important;
-  transform:translateY(-50%) !important;
-  rotate:180deg !important;
-  writing-mode:vertical-rl !important;
-  width:auto !important;
-  display:inline-flex !important;
-  border-radius:0 12px 12px 0;
-  padding:15px 10px;
-}
-@media(max-width:1500px){
-  #app > header > nav {display:none !important}
-  #app > header .headActions > .menu {display:grid !important;place-items:center}
-  #app > header > .mobileNav {
-    position:absolute;
-    top:100%;left:0;right:0;
-    z-index:40;
-    display:block !important;
-    background:rgba(9,10,13,.98);
-    border-bottom:1px solid #292c33;
-    max-height:0;
-    opacity:0;
-    overflow:hidden;
-    pointer-events:none;
-    transition:max-height .2s ease,opacity .2s ease;
-  }
-  #app > header > .mobileNav.open {
-    max-height:calc(100dvh - 76px);
-    overflow-y:auto;
-    opacity:1;
-    pointer-events:auto;
-  }
-  #app > header > .mobileNav > a,
-  #app > header > .mobileNav > button {display:none}
-  #app > header > .mobileNav.open > a,
-  #app > header > .mobileNav.open > button {display:block}
-  #app > footer {
-    grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);
-    padding-inline:max(105px,calc((100% - 1000px)/2)) !important;
-  }
-  #app > footer > .brand {grid-column:1;grid-row:1}
-  #app > footer > p {grid-column:2;grid-row:1}
-  #app > footer > .footerHelp {grid-column:1;grid-row:2;justify-self:start}
-  #app > footer > .footerShare {grid-column:2;grid-row:2;justify-self:start}
-  #app > footer > small {grid-column:1/-1;grid-row:3}
+
+
+/* V7.17.9: restituir el layout original, adornos solo como fondo. */
+#app > header.ansSeasonHeader,#app > footer.ansSeasonFooter{position:relative;isolation:isolate}
+#app > header.ansSeasonHeader::before,#app > footer.ansSeasonFooter::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background-image:var(--ans-season-decoration);background-repeat:no-repeat;background-position:var(--ans-decor-position,right center);background-size:auto min(var(--ans-decor-size,64px),100%);opacity:var(--ans-decor-opacity,.75)}
+#app > header.ansSeasonHeader > .ansSeasonDecoration,#app > footer.ansSeasonFooter > .ansSeasonDecoration{display:none!important}
+#app > header.ansSeasonHeader > :not(.ansSeasonDecoration),#app > footer.ansSeasonFooter > :not(.ansSeasonDecoration){position:relative;z-index:1}
+#app > header.ansSeasonHeader > .headerSearch,#app > header.ansSeasonHeader > .mobileNav{position:absolute}
+#app > footer.ansSeasonFooter > .reviewsTab{position:fixed}
+#app > footer.ansSeasonFooter::before{background-position:right 12px center;background-size:auto min(var(--ans-decor-size,85px),100%)}
+@media(min-width:901px) and (max-width:1370px){
+ #app > header > nav{display:none}
+ #app > header .menu{display:grid!important}
+ #app > header > .mobileNav{position:absolute;top:100%;left:0;right:0;display:grid;grid-template-rows:0fr;background:rgba(9,10,13,.98);border-bottom:1px solid transparent;overflow:hidden;opacity:0;pointer-events:none}
+ #app > header > .mobileNav.open{grid-template-rows:1fr;opacity:1;pointer-events:auto;border-bottom-color:#292c33}
+ #app > header > .mobileNav a{display:none}
+ #app > header > .mobileNav.open a{display:block;padding:16px 22px;border-top:1px solid #22252b}
+ #app > header > .mobileNav.open .mobileReviewsButton{display:block;width:100%;text-align:left;padding:16px 22px}
 }
 @media(max-width:760px){
-  #app > header {padding-inline:12px !important;gap:8px !important}
-  #app > header > .brand {
-    flex:0 1 185px;
-    width:auto;
-    max-width:185px;
-    min-width:0;
-  }
-  #app > header .brand.logoOnly .brandIcon {
-    width:100% !important;
-    max-width:185px !important;
-    height:48px !important;
-    flex:0 1 auto !important;
-  }
-  #app > header .brand.logoOnly .brandLogo {
-    display:block;
-    width:100% !important;
-    max-width:185px !important;
-    height:48px !important;
-    max-height:48px !important;
-    object-fit:contain;
-  }
-  #app > header > .headActions {gap:5px !important;margin-left:auto !important}
-  #app > header .headActions > button {
-    flex:0 0 38px;
-    width:38px !important;
-    min-width:38px !important;
-    height:38px !important;
-    padding:0 !important;
-    display:grid !important;
-    place-items:center !important;
-  }
-  #app > header .themeToggleText,
-  #app > header .interestListText,
-  #app > header .headerSearchTriggerText {display:none !important}
-  #app > footer {
-    display:flex !important;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    gap:14px;
-    text-align:center;
-    padding:40px 72px 48px !important;
-    overflow:hidden;
-  }
-  #app > footer > .brand,
-  #app > footer > p,
-  #app > footer > .footerHelp,
-  #app > footer > .footerShare,
-  #app > footer > small {grid-column:auto;grid-row:auto;margin:0 !important;justify-self:center}
-  #app > footer > .brand {justify-content:center}
-  #app > footer > .reviewsTab {display:none !important}
-  #app > footer.ansSeasonFooter::before {
-    background-position:right 8px bottom 12px;
-    background-size:auto min(var(--ans-decor-size,85px),55px);
-  }
+ #app > header{gap:8px;padding-inline:14px}
+ #app > header > .brand.logoOnly{flex:0 1 auto;min-width:0;max-width:calc(100vw - 205px)}
+ #app > header .brand.logoOnly .brandIcon{max-width:100%;min-width:0}
+ #app > header .brand.logoOnly .brandLogo{max-width:100%;object-fit:contain}
+ #app > header > .headActions{flex:0 0 auto;gap:5px}
+ #app > header.ansSeasonHeader::before{background-position:right top;background-size:auto min(var(--ans-decor-size,64px),28px);opacity:calc(var(--ans-decor-opacity,.75) * .55)}
+ #app > footer.ansSeasonFooter::before{background-position:right 7px bottom 8px;background-size:auto min(var(--ans-decor-size,85px),48px)}
 }
-@media(max-width:440px){
-  #app > header {padding-inline:8px !important;gap:4px !important}
-  #app > header > .brand {flex:1 1 auto;max-width:calc(100vw - 188px)}
-  #app > header .brand.logoOnly .brandIcon,
-  #app > header .brand.logoOnly .brandLogo {max-width:100% !important}
-  #app > header > .headActions {gap:3px !important}
-  #app > header .headActions > button {
-    flex-basis:36px;
-    width:36px !important;
-    min-width:36px !important;
-    height:36px !important;
-  }
-  #app > header.ansSeasonHeader::before {
-    background-position:right top;
-    background-size:auto min(var(--ans-decor-size,64px),25px);
-    opacity:calc(var(--ans-decor-opacity,.75) * .45);
-  }
-  #app > footer {padding-inline:46px !important}
-  #app > footer.ansSeasonFooter::before {
-    background-size:auto min(var(--ans-decor-size,85px),36px);
-  }
+@media(max-width:560px){
+ #app > header > .brand.logoOnly{max-width:calc(100vw - 200px)}
+ #app > header .headActions button{min-width:38px}
+ #app > footer{padding-right:58px;padding-left:58px}
 }
