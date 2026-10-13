@@ -1781,3 +1781,26 @@ html[data-theme="light"] .shareProductButton{
 @keyframes ansTrashText{0%,25%{transform:translateY(0) scale(1);opacity:1}70%{transform:translate(-28px,10px) scale(.15);opacity:0}100%{transform:translate(-30px,12px) scale(0);opacity:0}}
 @keyframes ansSuccess{0%{transform:scale(.92)}55%{transform:scale(1.06)}100%{transform:scale(1)}}
 @media(prefers-reduced-motion:reduce){.ansMotionButton,.ansMotionButton *,.ansMotionButton:before{animation:none!important;transition:none!important}}
+
+/* V7.12.0 — Experiencia pública: tarjeta, detalle y WhatsApp */
+.publicProductCard,.publicAdditionalCard{position:relative;isolation:isolate;cursor:pointer;transition:transform .32s cubic-bezier(.2,.85,.25,1),border-color .3s,box-shadow .3s}
+.publicProductCard:before,.publicAdditionalCard:before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:2;opacity:0;box-shadow:inset 0 0 0 1px #a78bfa,0 0 30px #8b5cf650;transition:opacity .32s}
+.publicProductCard .photo img,.publicAdditionalCard .photo img{transition:transform .55s cubic-bezier(.2,.85,.25,1),filter .45s}
+@media(hover:hover){.publicProductCard:hover,.publicAdditionalCard:hover{transform:translateY(-7px);border-color:#9060e9;box-shadow:0 20px 40px #0006,0 0 24px #8b5cf630}.publicProductCard:hover:before,.publicAdditionalCard:hover:before{opacity:1}.publicProductCard:hover .photo img,.publicAdditionalCard:hover .photo img{transform:scale(1.065);filter:saturate(1.15)}}
+.publicProductCard.ansCardOpening,.publicAdditionalCard.ansCardOpening{transform:scale(.975);box-shadow:0 0 0 2px #b99aff,0 0 36px #8b5cf677}
+.publicProductCard.ansCardOpening:before,.publicAdditionalCard.ansCardOpening:before{opacity:1}
+.publicProductCard.ansCardOpening .photo img,.publicAdditionalCard.ansCardOpening .photo img{transform:scale(1.12)}
+.publicProductCard .details,.publicAdditionalCard .details{position:relative;overflow:hidden;transition:background .25s,box-shadow .25s,border-color .25s}
+.publicProductCard .details span,.publicAdditionalCard .details span{transition:transform .32s cubic-bezier(.2,1.8,.3,1)}
+@media(hover:hover){.publicProductCard .details:hover,.publicAdditionalCard .details:hover{background:#40216f;border-color:#aa80ff;box-shadow:0 0 22px #8b5cf64a}.publicProductCard .details:hover span,.publicAdditionalCard .details:hover span{transform:translateX(7px) scale(1.2)}}
+.ansDetailReveal .detailShell{animation:ansDetailRise .48s cubic-bezier(.16,1,.3,1) both}
+.ansDetailReveal .detailMainPhoto{animation:ansDetailImage .6s cubic-bezier(.16,1,.3,1) both}
+@keyframes ansDetailRise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+@keyframes ansDetailImage{from{opacity:.45;transform:scale(.94) rotate(-1deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+/* El botón de WhatsApp conserva su enlace nativo y abre una pestaña inmediatamente. */
+a.whatsapp{position:relative;isolation:isolate;overflow:hidden;transition:transform .25s,background .25s,box-shadow .3s}
+a.whatsapp .whatsappIcon{display:inline-flex;transition:transform .38s cubic-bezier(.2,1.8,.3,1)}
+a.whatsapp:after{content:"";position:absolute;inset:-60% auto -60% -55%;width:30%;transform:rotate(25deg);background:linear-gradient(90deg,transparent,#ffffff48,transparent);pointer-events:none;transition:left .55s ease}
+@media(hover:hover){a.whatsapp:hover{transform:translateY(-3px);box-shadow:0 9px 25px #1caa7355;background:#176c4a}a.whatsapp:hover .whatsappIcon{transform:translateY(-4px) rotate(-13deg) scale(1.25)}a.whatsapp:hover:after{left:125%}}
+a.whatsapp:active{transform:scale(.96)}a.whatsapp:active .whatsappIcon{transform:rotate(12deg) scale(1.3)}
+@media(prefers-reduced-motion:reduce){.publicProductCard,.publicAdditionalCard,.publicProductCard *, .publicAdditionalCard *, .ansDetailReveal .detailShell,.ansDetailReveal .detailMainPhoto,a.whatsapp,a.whatsapp *{animation:none!important;transition:none!important}}
