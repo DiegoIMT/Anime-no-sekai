@@ -1935,3 +1935,19 @@ a.whatsapp:active{transform:scale(.96)}a.whatsapp:active .whatsappIcon{transform
 .ansThemeList .adminRowActions .adminActionDelete{background:#3b171d;border-color:#7c303b;color:#ff9ba9}
 .ansThemeList .adminRowActions button:disabled{transform:none;filter:none}
 #ansThemeNew{display:inline-flex;align-items:center;gap:7px}
+
+/* V7.15.4 — Las dos puertas muestran un degradado continuo de los colores elegidos.
+   Sin pigmentos violetas fijos en puertas, marco, cierre o vista previa. */
+.ansVitrine{--ans-v-primary:#8b5cf6;--ans-v-secondary:#f97316;--ans-v-corner:10px;--ans-v-border-style:solid;--ans-v-border-width:2px}
+.ansVitrineLeft,.ansVitrineRight{
+ background-image:linear-gradient(115deg,var(--ans-v-primary) 0%,var(--ans-v-secondary) 100%);
+ background-size:200% 100%;
+ border:var(--ans-v-border-width) var(--ans-v-border-style) var(--ans-v-secondary);
+ backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);
+}
+.ansVitrineLeft{background-position:left center;border-radius:var(--ans-v-corner) 0 0 var(--ans-v-corner)}
+.ansVitrineRight{background-position:right center;border-radius:0 var(--ans-v-corner) var(--ans-v-corner) 0}
+.ansVitrineSeam{background:var(--ans-v-secondary);box-shadow:0 0 8px var(--ans-v-primary)}
+.ansVitrineLock{background:linear-gradient(135deg,var(--ans-v-primary),var(--ans-v-secondary));border:var(--ans-v-border-width) var(--ans-v-border-style) var(--ans-v-secondary);box-shadow:0 0 0 3px color-mix(in srgb,var(--ans-v-primary) 35%,transparent),0 0 12px var(--ans-v-secondary)}
+.ansVitrineLock span{border-color:var(--ans-v-secondary)}
+.ansThemePreview{border-color:var(--ans-v-primary,#8b5cf6)}
