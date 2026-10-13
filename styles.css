@@ -2346,3 +2346,58 @@ html[data-theme="light"] .hero.ansSeasonHero{background-image:linear-gradient(90
 
 /* V7.17.10 — conservar el tamaño configurado de los adornos en ambos formatos. */
 @media(max-width:760px){#app > header.ansSeasonHeader::before{background-size:auto min(var(--ans-decor-size,64px),100%)!important}#app > footer.ansSeasonFooter::before{background-size:auto min(var(--ans-decor-size,85px),100%)!important}}
+
+/* V7.17.11 — Apertura sincronizada con partículas y pigmentación legible. */
+.ansVitrineOpen .ansVitrineLeft,.ansVitrineOpen .ansVitrineRight {
+  animation-duration:1.08s!important;
+  animation-delay:.22s!important;
+  animation-timing-function:cubic-bezier(.25,.58,.18,1)!important;
+  animation-fill-mode:forwards!important;
+}
+.ansVitrineOpen .ansVitrineLock,.ansVitrineOpen .ansVitrineSeam {
+  animation-duration:.45s!important;
+}
+.ansVitrineOpen .ansThemeParticle {
+  animation-duration:var(--p-duration,1.25s)!important;
+  animation-delay:var(--p-delay,0s)!important;
+  animation-fill-mode:both!important;
+}
+.ansVitrineLeft,.ansVitrineRight {
+  background-image:
+    linear-gradient(117deg,rgba(255,255,255,.19) 0%,transparent 20%,rgba(255,255,255,.07) 63%,transparent 82%),
+    linear-gradient(115deg,
+      color-mix(in srgb,var(--ans-v-primary,#8b5cf6) 88%,#17101f) 0%,
+      color-mix(in srgb,var(--ans-v-tertiary,#a66ac4) 84%,#17101f) 50%,
+      color-mix(in srgb,var(--ans-v-secondary,#f97316) 88%,#17101f) 100%)!important;
+  background-color:#17101f!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+@media(prefers-reduced-motion:reduce){
+ .ansVitrineOpen .ansVitrineLeft,.ansVitrineOpen .ansVitrineRight,
+ .ansVitrineOpen .ansThemeParticle{animation:none!important}
+}
+
+/* V7.17.12: las decoraciones panorámicas abarcan la sección completa.
+   No se altera la distribución del header ni del footer. */
+#app > header.ansSeasonHeader::before,
+#app > footer.ansSeasonFooter::before {
+  inset:0;
+  width:100%;
+  height:100%;
+  background-size:var(--ans-decor-mode,cover) !important;
+  background-position:var(--ans-decor-position,center center) !important;
+  background-repeat:no-repeat !important;
+}
+@media(max-width:760px) {
+  #app > header.ansSeasonHeader::before,
+  #app > footer.ansSeasonFooter::before {
+    background-size:var(--ans-decor-mode,cover) !important;
+    background-position:var(--ans-decor-position,center center) !important;
+  }
+}
+.ansMiniHeader img[data-mini-image="encabezado"],
+.ansMiniFooter img[data-mini-image="pie"]{
+  inset:0;width:100%;height:100%;object-fit:cover;object-position:center;
+  pointer-events:none;
+}
