@@ -38,11 +38,14 @@ async function ansOpenProductFromCard(target, open){
    // Una única secuencia, sin ampliar ni desplazar la imagen de la tarjeta.
    overlay.classList.add('ansVitrineOpen');
    button?.classList.add('ansVitrineButtonBusy');
-   await ansWait(970);
+   await ansWait(820);
+   // Retirar la vitrina antes de abrir el detalle: no trasladar el nodo ni reiniciar sus animaciones.
+   overlay.remove();
+   overlay=null;
   }
   await open();
  }finally{
-  if(overlay){const rect=card.getBoundingClientRect();overlay.style.position='fixed';overlay.style.left=rect.left+'px';overlay.style.top=rect.top+'px';overlay.style.width=rect.width+'px';overlay.style.height=rect.height+'px';overlay.style.margin='0';overlay.style.zIndex='4';document.body.appendChild(overlay);setTimeout(()=>overlay.remove(),460)}
+  if(overlay)overlay.remove();
   button?.classList.remove('ansVitrineButtonBusy');
   delete card.dataset.ansOpening;
  }
