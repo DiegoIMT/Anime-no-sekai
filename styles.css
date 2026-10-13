@@ -2060,3 +2060,23 @@ a.whatsapp:active{transform:scale(.96)}a.whatsapp:active .whatsappIcon{transform
 @media(prefers-reduced-motion:reduce){
   .ansVitrineLeft::before,.ansVitrineRight::before{opacity:.48}
 }
+
+/* V7.16.0 — Nuevos movimientos de partículas, sin alterar el cristal ni la apertura. */
+.ansVitrineOpen .ansThemeParticle-lluvia{animation-name:ansThemeRain}
+.ansVitrineOpen .ansThemeParticle-burbujas{animation-name:ansThemeBubbles}
+.ansVitrineOpen .ansThemeParticle-luciernagas{animation-name:ansThemeFireflies}
+.ansVitrineOpen .ansThemeParticle-espiral{animation-name:ansThemeSpiral}
+.ansVitrineOpen .ansThemeParticle-explosion{animation-name:ansThemeBurst}
+.ansVitrineOpen .ansThemeParticle-hojas{animation-name:ansThemeLeaves}
+.ansVitrineOpen .ansThemeParticle-chispas{animation-name:ansThemeSparks}
+.ansThemeParticle-burbujas:not(.ansThemeParticle-custom){color:#e8faff}
+.ansThemeParticle-luciernagas:not(.ansThemeParticle-custom),.ansThemeParticle-chispas:not(.ansThemeParticle-custom){color:var(--ans-particle-glow,#ffcf65)}
+.ansThemeParticle-lluvia:not(.ansThemeParticle-custom){font-size:9px}
+@keyframes ansThemeRain{0%{opacity:0;transform:translateY(-48px) scale(.7)}18%{opacity:.95}85%{opacity:.8}100%{opacity:0;transform:translate(var(--p-drift),62px) scale(.8)}}
+@keyframes ansThemeBubbles{0%{opacity:0;transform:translateY(28px) scale(.25)}35%{opacity:.95}100%{opacity:0;transform:translate(calc(var(--p-drift) * .7),-58px) scale(1.5)}}
+@keyframes ansThemeFireflies{0%{opacity:0;transform:translate(-12px,15px) scale(.2)}25%{opacity:1}55%{opacity:.35;transform:translate(14px,-8px) scale(1.3)}75%{opacity:1}100%{opacity:0;transform:translate(var(--p-drift),-28px) scale(.3)}}
+@keyframes ansThemeSpiral{0%{opacity:0;transform:rotate(0deg) translateX(0) scale(.2)}35%{opacity:1}100%{opacity:0;transform:rotate(var(--p-spin)) translateX(var(--p-distance)) scale(1.15)}}
+@keyframes ansThemeBurst{0%{opacity:0;transform:translate(0,0) scale(.15)}18%{opacity:1}65%{opacity:1}100%{opacity:0;transform:rotate(var(--p-angle)) translateX(var(--p-distance)) scale(.9)}}
+@keyframes ansThemeLeaves{0%{opacity:0;transform:translate(-25px,-28px) rotate(-65deg) scale(.65)}25%{opacity:1}100%{opacity:0;transform:translate(40px,55px) rotate(var(--p-spin)) scale(1.05)}}
+@keyframes ansThemeSparks{0%{opacity:0;transform:translateY(12px) scale(.1)}20%{opacity:1}45%{opacity:.35;transform:translate(var(--p-drift),-18px) scale(1.5)}65%{opacity:1}100%{opacity:0;transform:translate(var(--p-drift),-45px) scale(.15)}}
+@media(prefers-reduced-motion:reduce){.ansThemeParticle{display:none!important}}

@@ -70,7 +70,7 @@ function ansSetVitrineAppearance(overlay,c){
  overlay.style.setProperty('--ans-v-border-style',borderStyles.includes(c.estilo_borde)?c.estilo_borde:'solid');
  overlay.style.setProperty('--ans-v-border-width',c.grosor_borde==='grueso'?'3px':c.grosor_borde==='fino'?'1px':'2px');
 }
-function ansApplyVitrineTheme(overlay){const c=ansThemeConfig();const hex=x=>/^#[0-9a-fA-F]{6}$/.test(x||'')?x:null;const primary=hex(c.color_primario),secondary=hex(c.color_secundario);ansSetVitrineAppearance(overlay,c);overlay.dataset.effect=['niebla','petalos','nieve','corazones','confeti','ninguno'].includes(c.efecto)?c.efecto:'ninguno';}
+function ansApplyVitrineTheme(overlay){const c=ansThemeConfig();const hex=x=>/^#[0-9a-fA-F]{6}$/.test(x||'')?x:null;const primary=hex(c.color_primario),secondary=hex(c.color_secundario);ansSetVitrineAppearance(overlay,c);overlay.dataset.effect=['niebla','petalos','nieve','corazones','confeti','lluvia','burbujas','luciernagas','espiral','explosion','hojas','chispas','ninguno'].includes(c.efecto)?c.efecto:'ninguno';}
 function ansDecorateVitrine(overlay){const c=ansThemeConfig();const urls=Array.isArray(c.decoraciones)?c.decoraciones:[];ansThemeDecorate(overlay,c,urls.filter(url=>typeof url==='string'&&url.startsWith(SUPABASE_URL+'/storage/v1/object/public/sitio/tematicas/')));}
 ansLoadActiveTheme();
 let catalogProducts = [];
@@ -1626,10 +1626,10 @@ window.addEventListener('hashchange',()=>{if(location.hash==='#admin')openAdmin(
 
 // V7.15.1 — Editor de temáticas con vista previa local y validación anticipada.
 let ansThemesCache=[];
-const ansThemeEffects=['ninguno','niebla','petalos','nieve','corazones','confeti'];
+const ansThemeEffects=['ninguno','niebla','petalos','nieve','corazones','confeti','lluvia','burbujas','luciernagas','espiral','explosion','hojas','chispas'];
 const ansThemeIntensities=['sutil','equilibrada','llamativa'];
 const ansThemeGlyphs={automatico:'Automático según efecto',calabaza:'🎃 Calabaza',murcielago:'🦇 Murciélago',fantasma:'👻 Fantasma',estrella:'★ Estrella',flor:'✿ Flor',regalo:'🎁 Regalo',corazon:'♥ Corazón',copo:'❄ Copo de nieve',chispa:'✦ Chispa',hoja:'🍁 Hoja',dulce:'🍬 Dulce',luna:'🌙 Luna'};
-const ansThemeLabels={ninguno:'Sin partículas',niebla:'Niebla',petalos:'Pétalos',nieve:'Nieve',corazones:'Corazones',confeti:'Confeti',sutil:'Sutil',equilibrada:'Equilibrada',llamativa:'Llamativa'};
+const ansThemeLabels={ninguno:'Sin partículas',niebla:'Niebla',petalos:'Pétalos',nieve:'Nieve',corazones:'Corazones',confeti:'Confeti',lluvia:'Lluvia',burbujas:'Burbujas',luciernagas:'Luciérnagas',espiral:'Espiral',explosion:'Explosión de partículas',hojas:'Hojas al viento',chispas:'Chispas',sutil:'Sutil',equilibrada:'Equilibrada',llamativa:'Llamativa'};
 function ansDefaultTheme(){return {vitrina:{color_primario:'#8b5cf6',color_secundario:'#f97316',color_terciario:'#d25c90',color_resplandor_particulas:'#ffcf65',efecto:'ninguno',intensidad:'equilibrada',icono_particula:'automatico',decoraciones:[],emblema:null,esquinas:'suaves',estilo_borde:'solid',grosor_borde:'normal'},apariencia:{},banner:{}}}
 const ansThemeEsc=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 function ansThemeDecorate(overlay,c,urls){(urls||c.decoraciones||[]).slice(0,4).forEach((url,i)=>{const img=document.createElement('img');img.src=url;img.alt='';img.className='ansVitrineDecoration ansVitrineDecoration'+i;overlay.appendChild(img)});if(c.emblema){const lock=overlay.querySelector('.ansVitrineLock');if(lock){lock.innerHTML='';const img=document.createElement('img');img.src=c.emblema;img.alt='';img.className='ansVitrineEmblem';lock.appendChild(img)}}ansThemeParticles(overlay,c)}
@@ -1637,7 +1637,7 @@ function ansThemeParticles(overlay,c){
  const effect=ansThemeEffects.includes(c.efecto)?c.efecto:'ninguno';if(effect==='ninguno')return;
  const level=ansThemeIntensities.includes(c.intensidad)?c.intensidad:'equilibrada';
  const amount={sutil:12,equilibrada:24,llamativa:38}[level];
- const defaults={niebla:'',petalos:'✿',nieve:'❄',corazones:'♥',confeti:'◆'};
+ const defaults={niebla:'',petalos:'✿',nieve:'❄',corazones:'♥',confeti:'◆',lluvia:'●',burbujas:'○',luciernagas:'✦',espiral:'✧',explosion:'✦',hojas:'🍁',chispas:'✧'};
  const glyphs={calabaza:'🎃',murcielago:'🦇',fantasma:'👻',estrella:'★',flor:'✿',regalo:'🎁',corazon:'♥',copo:'❄',chispa:'✦',hoja:'🍁',dulce:'🍬',luna:'🌙'};
  const selected=Object.prototype.hasOwnProperty.call(glyphs,c.icono_particula)?glyphs[c.icono_particula]:null;
  const glyph=selected||defaults[effect];
@@ -1650,6 +1650,9 @@ function ansThemeParticles(overlay,c){
   dot.style.setProperty('--p-delay',(i%11*.045)+'s');
   dot.style.setProperty('--p-drift',((i%2?1:-1)*(12+i%5*7))+'px');
   dot.style.setProperty('--p-size',(12+(i%5)*3)+'px');
+  dot.style.setProperty('--p-angle',((i*137.5)%360)+'deg');
+  dot.style.setProperty('--p-distance',(38+(i%7)*12)+'px');
+  dot.style.setProperty('--p-spin',((i%2?1:-1)*(90+(i%5)*45))+'deg');
   overlay.appendChild(dot);
  }
 }
