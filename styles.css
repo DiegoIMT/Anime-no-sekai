@@ -2014,3 +2014,49 @@ a.whatsapp:active{transform:scale(.96)}a.whatsapp:active .whatsappIcon{transform
 .ansVitrine[data-intensity="llamativa"] .ansThemeParticle{
  filter:drop-shadow(0 0 7px var(--ans-particle-glow,#ffcf65));
 }
+
+/* V7.15.9 — Acabado de vidrio: reflejos especulares, canto iluminado y
+   refracción suave. Se conserva el degradado cromático configurable y la
+   geometría de apertura de las dos hojas. */
+.ansVitrineLeft,.ansVitrineRight{
+  background-image:
+    linear-gradient(117deg,
+      rgba(255,255,255,.25) 0%,
+      rgba(255,255,255,.075) 10%,
+      transparent 21%,
+      transparent 59%,
+      rgba(255,255,255,.11) 69%,
+      transparent 78%,
+      rgba(255,255,255,.075) 100%),
+    linear-gradient(115deg,
+      color-mix(in srgb,var(--ans-v-primary,#8b5cf6) 44%,transparent) 0%,
+      color-mix(in srgb,var(--ans-v-tertiary,#a66ac4) 42%,transparent) 50%,
+      color-mix(in srgb,var(--ans-v-secondary,#f97316) 42%,transparent) 100%);
+  background-size:200% 100%,200% 100%;
+  background-repeat:no-repeat;
+  background-color:rgba(255,255,255,.025);
+  backdrop-filter:blur(5px) saturate(1.22) contrast(1.04);
+  -webkit-backdrop-filter:blur(5px) saturate(1.22) contrast(1.04);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.15),inset 0 0 24px rgba(255,255,255,.045);
+  overflow:hidden;
+}
+/* Cada puerta es media superficie: el brillo se desplaza con ella. */
+.ansVitrineLeft{background-position:left center,left center}
+.ansVitrineRight{background-position:right center,right center}
+.ansVitrineLeft::before,.ansVitrineRight::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(106deg,
+    transparent 9%,rgba(255,255,255,.19) 13%,
+    rgba(255,255,255,.045) 19%,transparent 25%,
+    transparent 66%,rgba(255,255,255,.085) 73%,transparent 80%);
+  opacity:.72;
+}
+.ansVitrineLeft::after,.ansVitrineRight::after{
+  content:"";position:absolute;inset:2px;pointer-events:none;
+  border-top:1px solid rgba(255,255,255,.3);
+  border-bottom:1px solid rgba(255,255,255,.09);
+  opacity:.85;
+}
+@media(prefers-reduced-motion:reduce){
+  .ansVitrineLeft::before,.ansVitrineRight::before{opacity:.48}
+}
