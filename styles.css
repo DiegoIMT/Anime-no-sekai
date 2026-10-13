@@ -1814,39 +1814,10 @@ a.whatsapp:active{transform:scale(.96)}a.whatsapp:active .whatsappIcon{transform
 .ansMotionButton[data-ans-motion="save"] .ansMotionIcon .ansAdminIcon{width:21px;height:21px}
 @media(max-width:480px){.adminRowActions button .ansAdminIcon{width:15px;height:15px}}
 
-/* V7.13.0 revisión confortable: animaciones localizadas, sin imagen flotante ni zoom al abrir. */
-.publicProductCard.ansCardOpening,.publicAdditionalCard.ansCardOpening{transform:none!important;box-shadow:0 0 0 2px #a78bfa!important}
-.publicProductCard.ansCardOpening .photo img,.publicAdditionalCard.ansCardOpening .photo img{transform:none!important}
-.ansDetailReveal .detailShell{animation:ansCalmReveal .22s ease-out both!important}
-.ansDetailReveal .detailMainPhoto{animation:none!important}
-@keyframes ansCalmReveal{from{opacity:.7;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
-.ansMotionButton.ansMotionPlay[data-ans-motion="view"] .ansMotionIcon{animation:ansEyeReveal .32s ease-out both!important}
-.ansMotionButton.ansMotionPlay[data-ans-motion="view"] .ansMotionWords{animation:none!important}
-.ansMotionButton[data-ans-motion="view"] .ansAdminIcon{width:22px;height:22px}
-@keyframes ansEyeReveal{0%{opacity:.65;transform:scaleY(.35)}65%{opacity:1;transform:scaleY(1.12)}100%{opacity:1;transform:scaleY(1)}}
-@media(prefers-reduced-motion:reduce){.ansDetailReveal .detailShell,.ansMotionButton.ansMotionPlay[data-ans-motion="view"] .ansMotionIcon{animation:none!important}}
-
-/* V7.13.1: respuesta táctil breve y crossfade de imágenes sin zoom ni desplazamientos amplios. */
-.publicProductCard.ansTapFeedback,.publicAdditionalCard.ansTapFeedback{animation:ansTapCard .22s ease-out both}
-@keyframes ansTapCard{0%{filter:brightness(1)}45%{filter:brightness(1.16)}100%{filter:brightness(1)}}
-.publicProductCard .details:active,.publicAdditionalCard .details:active,
-.detailThumb:active,.galleryArrow:active,.imageLightboxArrow:active{filter:brightness(1.2)}
-.detailMainPhoto,.imageLightboxStage{position:relative}
-.detailMainPhoto>img.ansGalleryPrevious,.imageLightboxStage>img.ansGalleryPrevious{
- position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;
- z-index:2;opacity:1;transition:opacity .26s ease-out;
-}
-.detailMainPhoto>img.ansGalleryPreviousExit,.imageLightboxStage>img.ansGalleryPreviousExit{opacity:0}
-@media(prefers-reduced-motion:reduce){
- .publicProductCard.ansTapFeedback,.publicAdditionalCard.ansTapFeedback{animation:none!important}
- .detailMainPhoto>img.ansGalleryPrevious,.imageLightboxStage>img.ansGalleryPrevious{transition:none!important}
-}
-
-/* V7.13.1 revisión: respuesta táctil visible, sin depender de hover. */
-@keyframes ansTapCard{0%{transform:scale(1);filter:brightness(1)}38%{transform:scale(.965);filter:brightness(1.16)}100%{transform:scale(1);filter:brightness(1)}}
-.publicProductCard.ansTapFeedback,.publicAdditionalCard.ansTapFeedback{animation:ansTapCard .34s cubic-bezier(.2,.8,.2,1) both!important}
-@keyframes ansPressControl{0%{transform:scale(1)}40%{transform:scale(.9);filter:brightness(1.22)}100%{transform:scale(1)}}
-.ansControlPressed{animation:ansPressControl .32s cubic-bezier(.2,.8,.2,1) both!important}
-.detailMainPhoto,.imageLightboxStage{overflow:hidden}
-.detailMainPhoto>img.ansGalleryPrevious,.imageLightboxStage>img.ansGalleryPrevious{transition:none!important}
-@media(prefers-reduced-motion:reduce){.publicProductCard.ansTapFeedback,.publicAdditionalCard.ansTapFeedback,.ansControlPressed{animation:none!important}}
+/* V7.13.1 - Álbum elegante: movimiento únicamente dentro de la fotografía */
+.detailMainPhoto,.imageLightboxStage{position:relative;overflow:hidden}
+.detailMainPhoto > img#detailMainImage,.imageLightboxStage > img{transition:none!important;animation:none!important;transform:none!important;opacity:1!important}
+.ansAlbumOutgoing{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;max-width:none!important;z-index:4!important;pointer-events:none!important;margin:0!important;transform-origin:50% 50%;}
+.ansDetailReveal .detailShell{animation:ansElegantDetail .62s cubic-bezier(.22,1,.36,1) both!important}
+@keyframes ansElegantDetail{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.ansDetailReveal .detailShell{animation:none!important}}
