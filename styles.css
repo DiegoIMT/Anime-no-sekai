@@ -1997,3 +1997,20 @@ a.whatsapp:active{transform:scale(.96)}a.whatsapp:active .whatsappIcon{transform
   backdrop-filter:blur(3px) saturate(1.12);
   -webkit-backdrop-filter:blur(3px) saturate(1.12);
 }
+
+/* V7.15.8: cristal de tres colores y resplandor independiente para partículas. */
+.ansVitrineLeft,.ansVitrineRight{
+ background-image:linear-gradient(115deg,
+  color-mix(in srgb,var(--ans-v-primary) 54%,transparent) 0%,
+  color-mix(in srgb,var(--ans-v-tertiary) 51%,transparent) 50%,
+  color-mix(in srgb,var(--ans-v-secondary) 48%,transparent) 100%);
+}
+.ansThemeParticle{
+ text-shadow:0 0 3px var(--ans-particle-glow,#ffcf65),0 0 9px var(--ans-particle-glow,#ffcf65);
+}
+.ansVitrine[data-intensity="equilibrada"] .ansThemeParticle{
+ filter:drop-shadow(0 0 4px var(--ans-particle-glow,#ffcf65));
+}
+.ansVitrine[data-intensity="llamativa"] .ansThemeParticle{
+ filter:drop-shadow(0 0 7px var(--ans-particle-glow,#ffcf65));
+}
