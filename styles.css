@@ -3852,3 +3852,45 @@ main .publicAdditionalCard .photo img {
   #app > header.ansSeasonHeader::before,
   #app > header.ansSeasonHeader::after {aspect-ratio: 430 / 145 !important;}
 }
+/* V7.19.9 — Relieve moderado del encabezado, sin alterar tarjetas ni navegación.
+   Ambas capas usan el mismo lienzo proporcional de la imagen; la capa frontal
+   solo muestra una franja limitada bajo el borde inferior del encabezado. */
+#app > header.ansSeasonHeader {
+  overflow: visible !important;
+  position: relative;
+  isolation: isolate;
+}
+#app > header.ansSeasonHeader::before,
+#app > header.ansSeasonHeader::after {
+  top: 0 !important;
+  right: 0 !important;
+  bottom: auto !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 1920 / 180 !important;
+  background-size: 100% 100% !important;
+  background-position: center top !important;
+  background-repeat: no-repeat !important;
+  pointer-events: none !important;
+}
+/* Barra de 120px: como máximo 28px de adorno por debajo. */
+#app > header.ansSeasonHeader::before {
+  clip-path: inset(0 0 max(0px, calc(100% - 120px)) 0) !important;
+}
+#app > header.ansSeasonHeader::after {
+  clip-path: inset(120px 0 max(0px, calc(100% - 148px)) 0) !important;
+}
+@media (max-width: 760px) {
+  #app > header.ansSeasonHeader::before,
+  #app > header.ansSeasonHeader::after {
+    aspect-ratio: 430 / 145 !important;
+  }
+  /* Barra de 100px: como máximo 24px de adorno por debajo. */
+  #app > header.ansSeasonHeader::before {
+    clip-path: inset(0 0 max(0px, calc(100% - 100px)) 0) !important;
+  }
+  #app > header.ansSeasonHeader::after {
+    clip-path: inset(100px 0 max(0px, calc(100% - 124px)) 0) !important;
+  }
+}
