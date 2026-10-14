@@ -3094,3 +3094,66 @@ html[data-theme="light"] .hero.ansSeasonHero .heroContent{
   animation-delay:0s!important;
   animation-fill-mode:both!important;
 }
+
+/* V7.17.39 — Contraste de subtítulo del hero en modo claro */
+html[data-theme="light"] .hero .eyebrow{color:#5b21b6!important;text-shadow:0 1px 1px rgba(255,255,255,.5)!important}
+html[data-theme="dark"] .hero .eyebrow{color:#a78bfa}
+
+/* Decoradores estacionales adicionales: funcionan con la configuración existente. */
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="marco"]{
+ padding:9px 18px;border:2px solid var(--ans-season-accent);
+ border-radius:12px;background:color-mix(in srgb,var(--ans-season-accent) 9%,transparent);
+ box-shadow:0 0 0 4px color-mix(in srgb,var(--ans-season-accent) 10%,transparent),0 0 20px color-mix(in srgb,var(--ans-season-accent) 25%,transparent)
+}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="marco"]::before,
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="marco"]::after{display:none}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="cinta"]{
+ padding:10px 22px;border-radius:4px 16px 16px 4px;
+ border-left:6px solid var(--ans-season-accent);
+ background:linear-gradient(90deg,color-mix(in srgb,var(--ans-season-accent) 29%,transparent),color-mix(in srgb,var(--ans-season-accent) 5%,transparent));
+ box-shadow:0 6px 18px rgba(0,0,0,.09)
+}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="cinta"]::before,
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="cinta"]::after{display:none}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="neon"]{
+ padding-left:0;text-shadow:0 0 4px var(--ans-season-accent),0 0 18px color-mix(in srgb,var(--ans-season-accent) 70%,transparent);
+ border-bottom:3px solid var(--ans-season-accent)
+}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="neon"]::before,
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="neon"]::after{display:none}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="insignia"]{
+ padding:9px 18px 9px 48px;border-radius:999px;
+ background:color-mix(in srgb,var(--ans-season-accent) 15%,transparent);
+ border:1px solid color-mix(in srgb,var(--ans-season-accent) 55%,transparent)
+}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="insignia"]::before{
+ content:'✦';display:grid;place-items:center;position:absolute;left:9px;top:50%;transform:translateY(-50%);
+ width:31px;height:31px;border-radius:50%;background:var(--ans-season-accent);color:#fff;
+ font-size:18px;text-shadow:none;box-shadow:0 0 12px color-mix(in srgb,var(--ans-season-accent) 60%,transparent)
+}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="insignia"]::after{display:none}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="doble"]{padding-left:0}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="doble"]::before{display:none}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="doble"]::after{
+ display:block;width:100%;max-width:none;height:7px;margin-top:10px;
+ background:linear-gradient(to bottom,var(--ans-season-accent) 0 2px,transparent 2px 5px,var(--ans-season-accent) 5px 7px);
+ box-shadow:none
+}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="aurora"]{
+ padding:8px 14px;border-radius:9px;
+ background:linear-gradient(100deg,color-mix(in srgb,var(--ans-season-accent) 25%,transparent),transparent 85%);
+ border-bottom:2px solid color-mix(in srgb,var(--ans-season-accent) 65%,transparent)
+}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="aurora"]::before,
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="aurora"]::after{display:none}
+#ansSeasonAmbient[data-ambient-style="petalos"] span,
+#ansSeasonAmbient[data-ambient-style="hojas"] span{font-size:clamp(12px,1.3vw,19px)}
+#ansSeasonAmbient[data-ambient-style="luciernagas"] span,
+#ansSeasonAmbient[data-ambient-style="magia"] span{color:#ffd76b}
+#ansSeasonAmbient[data-ambient-style="corazones"] span{color:#ff7ba9}
+#ansSeasonAmbient[data-ambient-style="burbujas"] span{color:#7dd3fc}
+@media(max-width:600px){
+ .sectionHead h2.ansSeasonTitle[data-ans-title-style="marco"],
+ .sectionHead h2.ansSeasonTitle[data-ans-title-style="cinta"],
+ .sectionHead h2.ansSeasonTitle[data-ans-title-style="aurora"]{max-width:100%}
+}
