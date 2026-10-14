@@ -3660,3 +3660,37 @@ html[data-theme="light"] #app > footer .footerAuthor{color:#6331a0}
     height: auto !important;
   }
 }
+/* V7.18.20 — Marcos temáticos de escritorio: tamaño amplio sin deformación.
+   Se corrige el alto excesivo que provocaba que 'contain' redujera el fondo. */
+@media (min-width: 761px) {
+  .sectionHead h2.ansSeasonTitle:is(
+    [data-ans-title-style^="kawaii-"],
+    [data-ans-title-style="personalizado"]
+  ) {
+    box-sizing: border-box !important;
+    width: min(100%, 920px) !important;
+    max-width: 920px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    aspect-ratio: 5 / 1 !important;
+    padding: 22px clamp(105px, 15%, 145px) !important;
+    background-size: 100% 100% !important;
+    background-size: contain !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+  }
+  #amiHomeName.ansSeasonTitle:is(
+    [data-ans-title-style^="kawaii-"],
+    [data-ans-title-style="personalizado"]
+  ) {
+    box-sizing: border-box !important;
+    width: min(100%, 550px) !important;
+    height: auto !important;
+    min-height: 0 !important;
+    aspect-ratio: 5 / 1 !important;
+    padding: 16px 82px !important;
+    background-size: contain !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+  }
+}
