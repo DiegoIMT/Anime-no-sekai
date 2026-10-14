@@ -2785,3 +2785,35 @@ html:has(.adminView),body:has(.adminView){overflow:hidden !important;}
 .ansMiniStore.ansMiniMobile .ansMiniHeader img[data-mini-image="encabezado"]{aspect-ratio:430 / 130 !important}
 .ansMiniStore.ansMiniMobile .ansMiniFooter{height:auto !important;min-height:0 !important;aspect-ratio:430 / 340 !important}
 .ansMiniStore.ansMiniMobile .ansMiniFooter img[data-mini-image="pie"]{object-fit:contain !important}
+
+/* V7.17.25 — corrección de la franja negra: ambos planos usan exactamente
+   el lienzo proporcional de la imagen, no un contenedor artificial de 150px.
+   El corte entre planos ocurre en el borde REAL del header. */
+#app > header.ansSeasonHeader::before,
+#app > header.ansSeasonHeader::after{
+  top:0 !important;right:0 !important;bottom:auto !important;left:0 !important;
+  width:100% !important;height:auto !important;
+  aspect-ratio:1920 / 150 !important;
+  background-size:100% 100% !important;
+  background-position:center top !important;
+  background-repeat:no-repeat !important;
+}
+#app > header.ansSeasonHeader::before{
+  clip-path:inset(0 0 calc(100% - 90px) 0) !important;
+}
+#app > header.ansSeasonHeader::after{
+  clip-path:inset(90px 0 0 0) !important;
+}
+@media(max-width:760px){
+  #app > header.ansSeasonHeader::before,
+  #app > header.ansSeasonHeader::after{
+    aspect-ratio:430 / 130 !important;
+    background-size:100% 100% !important;
+  }
+  #app > header.ansSeasonHeader::before{
+    clip-path:inset(0 0 calc(100% - 85px) 0) !important;
+  }
+  #app > header.ansSeasonHeader::after{
+    clip-path:inset(85px 0 0 0) !important;
+  }
+}
