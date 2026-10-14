@@ -3215,3 +3215,18 @@ html[data-theme="light"] .sectionHead h2.ansSeasonTitle::after{
   box-shadow:0 1px 3px rgba(45,18,58,.17)
 }
 @media(prefers-reduced-motion:reduce){#ansSeasonAmbient{display:none!important}}
+
+/* V7.18.1 — Texto nítido en hero temático claro.
+   Neutraliza sombras heredadas sin alterar botones ni el modo oscuro. */
+html[data-theme="light"] .hero.ansSeasonHero .heroContent,
+html[data-theme="light"] .hero.ansSeasonHero .heroContent h1,
+html[data-theme="light"] .hero.ansSeasonHero .heroContent h1 em,
+html[data-theme="light"] .hero.ansSeasonHero .heroContent p,
+html[data-theme="light"] .hero.ansSeasonHero .heroContent .eyebrow{
+  text-shadow:none!important;
+  -webkit-text-stroke:0!important;
+  filter:none!important;
+}
+html[data-theme="light"] .hero.ansSeasonHero .heroContent h1{color:#17131e!important}
+html[data-theme="light"] .hero.ansSeasonHero .heroContent p{color:#211b28!important}
+html[data-theme="light"] .hero.ansSeasonHero .heroContent .eyebrow{color:#5b21b6!important}
