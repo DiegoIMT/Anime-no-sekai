@@ -2493,3 +2493,44 @@ html[data-theme="light"] .hero.ansSeasonHero{background-image:linear-gradient(90
  .ansThemeEditorPanel[data-theme-panel="header"] > .ansSeasonUpload,.ansThemeEditorPanel[data-theme-panel="footer"] > .ansSeasonUpload{grid-column:1;grid-row:3}
  #ansThemeForm > .formActions.ansThemeFooter{padding:10px}
 }
+
+/* V7.17.16 — Panoramas proporcionales: nunca estirar los píxeles. */
+#app > header.ansSeasonHeader::before,
+#app > footer.ansSeasonFooter::before {
+  inset:0 !important;
+  width:100% !important;
+  height:100% !important;
+  background-size:contain !important;
+  background-position:center center !important;
+  background-repeat:no-repeat !important;
+}
+/* El header es bajo: la imagen se ajusta sin deformarse ni cubrir la navegación. */
+#app > header.ansSeasonHeader::before {background-size:100% auto !important}
+/* En el footer se conserva la decoración completa en pantallas estrechas. */
+@media(max-width:760px){
+ #app > header.ansSeasonHeader::before{background-size:contain !important}
+ #app > footer.ansSeasonFooter::before{background-size:contain !important}
+}
+/* La miniatura representa el mismo escalado proporcional. */
+.ansMiniHeader img[data-mini-image="encabezado"],
+.ansMiniFooter img[data-mini-image="pie"]{
+ inset:0 !important;
+ width:100% !important;
+ height:100% !important;
+ object-fit:contain !important;
+ object-position:center center !important;
+}
+.ansMiniStore.ansMiniMobile .ansMiniFooter img[data-mini-image="pie"]{
+ inset:0 !important;width:100% !important;height:100% !important;
+ object-fit:contain !important;
+}
+/* Mostrar también el pie de página en la vista previa sin necesitar desplazamiento interno. */
+.ansThemeEditorPanel[data-theme-panel="preview"] .ansMiniPreviewViewport{
+ max-height:none !important;
+ overflow:visible !important;
+}
+.ansThemeEditorPanel[data-theme-panel="preview"] .ansMiniHero{height:100px}
+.ansThemeEditorPanel[data-theme-panel="preview"] .ansMiniContent{padding:10px}
+.ansThemeEditorPanel[data-theme-panel="preview"] .ansMiniCards>div{height:54px}
+.ansThemeEditorPanel[data-theme-panel="preview"] .ansMiniFooter{min-height:76px}
+.ansThemeEditorPanel[data-theme-panel="preview"] .ansMiniStore.ansMiniMobile .ansMiniHero{height:95px}
