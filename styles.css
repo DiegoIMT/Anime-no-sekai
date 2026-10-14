@@ -2954,3 +2954,63 @@ html[data-theme="light"] .hero.ansSeasonHero::before{
     background-image:linear-gradient(180deg,rgba(246,243,250,.22),rgba(246,243,250,.37)),var(--ans-season-hero-mobile,var(--ans-season-hero))!important;
   }
 }
+
+/* V7.17.33 — Contraste de navegación y hero en modo claro. */
+html[data-theme="light"] #app > header > nav{
+  background:rgba(17,17,25,.76)!important;
+  border-color:rgba(255,255,255,.24)!important;
+}
+html[data-theme="light"] #app > header > nav a{
+  color:#f4f1fb!important;
+  text-shadow:0 1px 3px rgba(0,0,0,.7)!important;
+}
+html[data-theme="light"] #app > header > nav a:hover,
+html[data-theme="light"] #app > header > nav a.activeRoute{
+  color:#fff!important;
+}
+html[data-theme="light"] #app > header > nav a[href="/ami-no-sekai"]{
+  color:#ff9ec9!important;
+}
+html[data-theme="light"] .hero.ansSeasonHero{
+  background-image:linear-gradient(90deg,rgba(12,12,19,.10),rgba(12,12,19,.02)),var(--ans-season-hero)!important;
+}
+html[data-theme="light"] .hero.ansSeasonHero::before{
+  background:linear-gradient(180deg,rgba(12,12,19,.02),rgba(12,12,19,.08))!important;
+}
+html[data-theme="light"] .hero.ansSeasonHero .heroContent,
+html[data-theme="light"] .hero.ansSeasonHero h1,
+html[data-theme="light"] .hero.ansSeasonHero p{
+  text-shadow:0 1px 3px rgba(255,255,255,.65)!important;
+}
+@media(max-width:760px){
+  html[data-theme="light"] .hero.ansSeasonHero{
+    background-image:linear-gradient(180deg,rgba(12,12,19,.07),rgba(12,12,19,.19)),var(--ans-season-hero-mobile,var(--ans-season-hero))!important;
+  }
+}
+
+/* V7.17.34 — Controles del hero tipo cristal, con transparencia perceptible. */
+.hero.ansSeasonHero .heroBtns .primary,
+.hero.ansSeasonHero .heroBtns .secondary{
+  background-image:none!important;
+  -webkit-backdrop-filter:blur(2px) saturate(115%)!important;
+  backdrop-filter:blur(2px) saturate(115%)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 5px 18px rgba(0,0,0,.15);
+  color:#fff!important;
+  text-shadow:0 1px 3px rgba(0,0,0,.6);
+}
+.hero.ansSeasonHero .heroBtns .primary{background-color:rgba(113,55,223,.42)!important;border:1px solid rgba(210,180,255,.75)!important}
+.hero.ansSeasonHero .heroBtns .secondary{background-color:rgba(12,13,19,.27)!important;border:1px solid rgba(255,255,255,.52)!important}
+.hero.ansSeasonHero .heroBtns .primary:hover{background-color:rgba(113,55,223,.63)!important}
+.hero.ansSeasonHero .heroBtns .secondary:hover{background-color:rgba(12,13,19,.48)!important}
+/* Decoración de títulos más visible sin alterar títulos normales. */
+.sectionHead h2.ansSeasonTitle{padding-left:25px}
+.sectionHead h2.ansSeasonTitle::before{font-size:.72em;top:.08em;text-shadow:0 0 11px var(--ans-season-accent),0 0 20px var(--ans-season-accent)}
+.sectionHead h2.ansSeasonTitle::after{height:3px;width:65%;max-width:230px;margin-top:9px;border-radius:99px;background:linear-gradient(90deg,var(--ans-season-accent) 0%,color-mix(in srgb,var(--ans-season-accent) 70%,transparent) 65%,transparent 100%);box-shadow:0 0 9px color-mix(in srgb,var(--ans-season-accent) 55%,transparent)}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="halo"]{padding-left:0;text-shadow:0 0 7px color-mix(in srgb,var(--ans-season-accent) 70%,transparent),0 0 23px color-mix(in srgb,var(--ans-season-accent) 45%,transparent)}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="subrayado"]{padding-left:0}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="subrayado"]::after{width:80%;max-width:310px;height:4px}
+@media(max-width:760px){
+ .hero.ansSeasonHero .heroBtns .primary{background-color:rgba(113,55,223,.46)!important}
+ .hero.ansSeasonHero .heroBtns .secondary{background-color:rgba(12,13,19,.31)!important}
+ .sectionHead h2.ansSeasonTitle::after{max-width:170px}
+}
