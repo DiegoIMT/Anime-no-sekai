@@ -3790,3 +3790,45 @@ html[data-theme="light"] #app > footer .footerAuthor{color:#6331a0}
     background-size: 100% 100% !important;
   }
 }
+
+/* V7.18.23 — MARCOS WEB: proporción real del archivo personalizado.
+   Antes: aspect-ratio 5/1 fijo + contain encogían marcos de otra proporción
+   a ~500px, mientras el texto seguía midiendo hasta 920px. */
+@media (min-width: 761px) {
+  main .sectionHead > div:has(> h2.ansSeasonTitle:is([data-ans-title-style^="kawaii-"],[data-ans-title-style="personalizado"])) {
+    box-sizing: border-box !important;
+    flex: 0 1 920px !important;
+    width: min(920px, 100%) !important;
+    max-width: 920px !important;
+    min-width: 0 !important;
+  }
+  main .sectionHead > div > h2.ansSeasonTitle:is([data-ans-title-style^="kawaii-"],[data-ans-title-style="personalizado"]) {
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex: none !important;
+    width: 100% !important;
+    max-width: 920px !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    aspect-ratio: 5 / 1 !important;
+    margin-inline: 0 !important;
+    padding: 20px clamp(95px, 12%, 135px) !important;
+    background-size: contain !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+    font-size: clamp(24px, 2vw, 32px) !important;
+    line-height: 1.12 !important;
+    text-align: center !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+    white-space: normal !important;
+  }
+  /* La proporción se obtiene de naturalWidth/naturalHeight al cargar el marco. */
+  main .sectionHead > div > h2.ansSeasonTitle[data-ans-title-style="personalizado"] {
+    aspect-ratio: var(--ans-frame-ratio, 5 / 1) !important;
+  }
+  /* No modificar el encabezado propio de Ami ni las reglas móviles. */
+}

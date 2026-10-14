@@ -89,7 +89,18 @@ function ansApplySiteTheme(previewConfig){
   host.style.setProperty('--ans-decor-size',size+'px');host.style.setProperty('--ans-decor-opacity',opacity/100);host.style.setProperty('--ans-decor-position',pos==='izquierda'?'left center':pos==='centro'?'center center':'right center');host.style.setProperty('--ans-decor-mode','fill');if(key==='pie')host.style.setProperty('--ans-decor-mobile-mode','fill');
  }
  const customFrame=ansThemeAsset(c.marco_personalizado,!!previewConfig);
- document.querySelectorAll('main .sectionHead h2, main #amiHomeName').forEach(h=>{const active=!!(c.titulos||customFrame);h.classList.toggle('ansSeasonTitle',active);h.dataset.ansTitleStyle=customFrame?'personalizado':c.titulos===true?'si':String(c.titulos||'no');if(customFrame)h.style.setProperty('--ans-custom-frame',`url("${customFrame}")`);else h.style.removeProperty('--ans-custom-frame')});
+ document.querySelectorAll('main .sectionHead h2, main #amiHomeName').forEach(h=>{const active=!!(c.titulos||customFrame);h.classList.toggle('ansSeasonTitle',active);h.dataset.ansTitleStyle=customFrame?'personalizado':c.titulos===true?'si':String(c.titulos||'no');if(customFrame){
+  h.style.setProperty('--ans-custom-frame',`url("${customFrame}")`);
+  // El marco personalizado conserva su relación ancho/alto real, no una 5:1 forzada.
+  // El token impide que una carga anterior sobrescriba una temática más reciente.
+  const token=(h._ansFrameToken||0)+1;h._ansFrameToken=token;
+  const frameImage=new Image();
+  frameImage.onload=()=>{if(h._ansFrameToken===token&&frameImage.naturalWidth&&frameImage.naturalHeight){
+    h.style.setProperty('--ans-frame-ratio',`${frameImage.naturalWidth} / ${frameImage.naturalHeight}`);
+  }};
+  frameImage.onerror=()=>{if(h._ansFrameToken===token)h.style.removeProperty('--ans-frame-ratio')};
+  frameImage.src=customFrame;
+ }else{h._ansFrameToken=(h._ansFrameToken||0)+1;h.style.removeProperty('--ans-custom-frame');h.style.removeProperty('--ans-frame-ratio')}});
  document.getElementById('ansSeasonAmbient')?.remove();
  const ambientKinds=Array.isArray(c.ambientes)?c.ambientes:(c.ambiente?[c.ambiente]:[]);
  const glyphs={nieve:'❄️',estrellas:'⭐',destellos:'✧',petalos:'🌸',hojas:'🍁',luciernagas:'✺',corazones:'💗',burbujas:'🫧',magia:'✵',calabazas:'🎃',calaveras:'💀',fantasmas:'👻',murcielagos:'🦇',regalos:'🎁',arboles:'🎄',caramelos:'🍬',cartas:'💌',mariposas:'🦋',confeti:'🎊'};
