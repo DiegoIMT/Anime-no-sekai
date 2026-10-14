@@ -3014,3 +3014,17 @@ html[data-theme="light"] .hero.ansSeasonHero p{
  .hero.ansSeasonHero .heroBtns .secondary{background-color:rgba(12,13,19,.31)!important}
  .sectionHead h2.ansSeasonTitle::after{max-width:170px}
 }
+
+/* V7.17.35 — Puertas y partículas: misma línea de tiempo, apertura más pausada. */
+.ansVitrineOpen .ansVitrineLeft,
+.ansVitrineOpen .ansVitrineRight{
+  animation-duration:1.65s!important;
+  animation-delay:.15s!important;
+  animation-timing-function:cubic-bezier(.42,0,.58,1)!important;
+  animation-fill-mode:forwards!important;
+}
+.ansVitrineOpen .ansThemeParticle{
+  animation-duration:1.65s!important;
+  animation-delay:.15s!important;
+  animation-fill-mode:both!important;
+}
