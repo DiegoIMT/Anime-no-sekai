@@ -3674,3 +3674,35 @@ html[data-theme="light"] #app > footer .footerAuthor{color:#6331a0}
   white-space:normal!important; overflow-wrap:normal!important; word-break:normal!important; text-align:center!important;
  }
 }
+
+/* V7.19.1 — Marcos completos en escritorio (sin recortes).
+   Conserva el ancho recuperado en V7.19.0 y cambia únicamente el
+   encaje de la imagen. También incluye el título independiente de Ami. */
+@media (min-width: 761px) {
+  main .sectionHead h2.ansSeasonTitle:is(
+    [data-ans-title-style^="kawaii-"],
+    [data-ans-title-style="personalizado"]
+  ) {
+    background-size: contain !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+  }
+  #amiHomeName.ansSeasonTitle:is(
+    [data-ans-title-style^="kawaii-"],
+    [data-ans-title-style="personalizado"]
+  ) {
+    box-sizing: border-box !important;
+    width: min(100%, 550px) !important;
+    max-width: 550px !important;
+    min-height: 110px !important;
+    height: auto !important;
+    aspect-ratio: 5 / 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 18px 80px !important;
+    background-size: contain !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+  }
+}
