@@ -3694,3 +3694,42 @@ html[data-theme="light"] #app > footer .footerAuthor{color:#6331a0}
     background-repeat: no-repeat !important;
   }
 }
+
+/* V7.18.21 — Corrige la causa real: el contenedor flex del encabezado
+   se encogía al ancho del texto e impedía crecer al marco.
+   Solo escritorio; conserva el diseño móvil y la proporción 5:1. */
+@media (min-width: 761px) {
+  .sectionHead:has(> div > h2.ansSeasonTitle:is(
+    [data-ans-title-style^="kawaii-"],
+    [data-ans-title-style="personalizado"]
+  )) > div:first-child {
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+
+  .sectionHead > div:first-child > h2.ansSeasonTitle:is(
+    [data-ans-title-style^="kawaii-"],
+    [data-ans-title-style="personalizado"]
+  ) {
+    display: flex !important;
+    width: min(100%, 920px) !important;
+    max-width: 920px !important;
+    min-width: 0 !important;
+    aspect-ratio: 5 / 1 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 20px clamp(95px, 14%, 145px) !important;
+    background-size: contain !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+  }
+
+  .sectionHead:has(> div > h2.ansSeasonTitle:is(
+    [data-ans-title-style^="kawaii-"],
+    [data-ans-title-style="personalizado"]
+  )) > .sectionLinkButton {
+    flex: 0 0 auto !important;
+  }
+}
