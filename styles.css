@@ -2728,3 +2728,60 @@ html:has(.adminView),body:has(.adminView){overflow:hidden !important;}
   background-position:center bottom !important;
   background-size:100% auto !important;
 }
+
+/* V7.17.24 — composición estacional con recursos independientes y relieve. */
+#app > header.ansSeasonHeader {height:90px !important;min-height:90px !important;overflow:visible !important;position:relative;z-index:50;isolation:isolate}
+#app > header.ansSeasonHeader::before,
+#app > header.ansSeasonHeader::after {
+ content:"" !important;position:absolute !important;
+ inset:0 0 -60px 0 !important;
+ background-image:var(--ans-season-decoration) !important;
+ background-size:100% auto !important;background-position:center top !important;
+ background-repeat:no-repeat !important;
+ opacity:var(--ans-decor-opacity,.75) !important;
+ pointer-events:none !important;
+}
+#app > header.ansSeasonHeader::before{z-index:0 !important;clip-path:inset(0 0 60px 0) !important}
+#app > header.ansSeasonHeader::after{z-index:3 !important;clip-path:inset(calc(100% - 60px) 0 0 0) !important}
+#app > header.ansSeasonHeader > :not(.ansSeasonDecoration){position:relative;z-index:2 !important}
+#app > header.ansSeasonHeader > .headerSearch,
+#app > header.ansSeasonHeader > .mobileNav{position:absolute}
+#app > footer.ansSeasonFooter{min-height:220px !important;position:relative;overflow:visible !important;isolation:isolate}
+#app > footer.ansSeasonFooter::before{
+ content:"" !important;position:absolute !important;inset:0 !important;
+ background-image:var(--ans-season-decoration) !important;
+ background-repeat:no-repeat !important;background-position:center bottom !important;
+ background-size:contain !important;opacity:var(--ans-decor-opacity,.75) !important;
+ pointer-events:none !important;z-index:0 !important;
+}
+#app > footer.ansSeasonFooter > :not(.ansSeasonDecoration){position:relative;z-index:1}
+#app > footer.ansSeasonFooter > .reviewsTab{position:fixed}
+@media(max-width:760px){
+ #app > header.ansSeasonHeader{height:85px !important;min-height:85px !important}
+ #app > header.ansSeasonHeader::before,#app > header.ansSeasonHeader::after{
+  inset:0 0 -45px 0 !important;
+  background-image:var(--ans-season-decoration-mobile,var(--ans-season-decoration)) !important;
+  background-size:100% auto !important;background-position:center top !important;
+ }
+ #app > header.ansSeasonHeader::before{clip-path:inset(0 0 45px 0) !important}
+ #app > header.ansSeasonHeader::after{clip-path:inset(calc(100% - 45px) 0 0 0) !important}
+ #app > footer.ansSeasonFooter{min-height:340px !important}
+ #app > footer.ansSeasonFooter::before{
+  background-image:var(--ans-season-decoration-mobile,var(--ans-season-decoration)) !important;
+  background-size:contain !important;background-position:center bottom !important;
+ }
+}
+/* Vista previa: simula las mismas alturas relativas y recursos por dispositivo. */
+.ansMiniHeader{height:auto !important;min-height:0 !important;aspect-ratio:1920 / 90 !important;overflow:visible !important;isolation:isolate}
+.ansMiniHeader img[data-mini-image="encabezado"]{
+ inset:0 0 auto 0 !important;width:100% !important;height:auto !important;
+ aspect-ratio:1920 / 150 !important;object-fit:contain !important;object-position:center top !important;
+ z-index:0 !important;
+}
+.ansMiniHeader > b,.ansMiniHeader > span{position:relative;z-index:1}
+.ansMiniFooter{height:auto !important;min-height:0 !important;aspect-ratio:1920 / 220 !important;overflow:hidden !important}
+.ansMiniFooter img[data-mini-image="pie"]{inset:0 !important;width:100% !important;height:100% !important;object-fit:contain !important;object-position:center bottom !important}
+.ansMiniStore.ansMiniMobile .ansMiniHeader{height:auto !important;min-height:0 !important;aspect-ratio:430 / 85 !important}
+.ansMiniStore.ansMiniMobile .ansMiniHeader img[data-mini-image="encabezado"]{aspect-ratio:430 / 130 !important}
+.ansMiniStore.ansMiniMobile .ansMiniFooter{height:auto !important;min-height:0 !important;aspect-ratio:430 / 340 !important}
+.ansMiniStore.ansMiniMobile .ansMiniFooter img[data-mini-image="pie"]{object-fit:contain !important}
