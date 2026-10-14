@@ -3289,3 +3289,20 @@ html[data-theme="light"] .sectionHead h2.ansSeasonTitle[data-ans-title-style^="k
  box-shadow:0 5px 16px rgba(50,25,75,.12);
 }
 @media(max-width:600px){.sectionHead h2.ansSeasonTitle[data-ans-title-style^="kawaii-"]{gap:5px;padding:7px 9px}.sectionHead h2.ansSeasonTitle[data-ans-title-style^="kawaii-"]::before,.sectionHead h2.ansSeasonTitle[data-ans-title-style^="kawaii-"]::after{font-size:18px}}
+
+/* V7.18.4: ilustraciones kawaii originales SVG, no emojis ni fuentes del sistema. */
+#ansSeasonAmbient[data-ambient-style="combinado"] span,.ansMiniAmbient span{display:block;background-repeat:no-repeat;background-position:center;background-size:contain;filter:drop-shadow(0 2px 3px rgba(35,12,45,.23));text-shadow:none!important}
+.ansMiniAmbient span{width:22px;height:22px}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style^="kawaii-"]{overflow:visible;isolation:isolate;padding:12px clamp(35px,5vw,65px);border-radius:22px;background:color-mix(in srgb,var(--ans-season-accent) 10%,var(--card,#18131f));border:1px solid color-mix(in srgb,var(--ans-season-accent) 40%,transparent)}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style^="kawaii-"]::before,.sectionHead h2.ansSeasonTitle[data-ans-title-style^="kawaii-"]::after{content:""!important;display:block!important;flex:0 0 auto;width:clamp(32px,4vw,53px)!important;height:clamp(32px,4vw,53px)!important;background-repeat:no-repeat!important;background-position:center!important;background-size:contain!important;filter:drop-shadow(0 2px 2px rgba(0,0,0,.15));margin:0!important}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="kawaii-halloween"]::before{background-image:url('assets/season-kawaii/calabazas.svg')!important}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="kawaii-halloween"]::after{background-image:url('assets/season-kawaii/fantasmas.svg')!important}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="kawaii-navidad"]::before{background-image:url('assets/season-kawaii/arboles.svg')!important}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="kawaii-navidad"]::after{background-image:url('assets/season-kawaii/regalos.svg')!important}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="kawaii-amor"]::before{background-image:url('assets/season-kawaii/corazones.svg')!important}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="kawaii-amor"]::after{background-image:url('assets/season-kawaii/cartas.svg')!important}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="kawaii-sakura"]::before{background-image:url('assets/season-kawaii/petalos.svg')!important}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="kawaii-sakura"]::after{background-image:url('assets/season-kawaii/mariposas.svg')!important}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="kawaii-fiesta"]::before{background-image:url('assets/season-kawaii/confeti.svg')!important}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="kawaii-fiesta"]::after{background-image:url('assets/season-kawaii/estrellas.svg')!important}
+@media(max-width:600px){.sectionHead h2.ansSeasonTitle[data-ans-title-style^="kawaii-"]{padding:7px 9px;gap:5px}.sectionHead h2.ansSeasonTitle[data-ans-title-style^="kawaii-"]::before,.sectionHead h2.ansSeasonTitle[data-ans-title-style^="kawaii-"]::after{width:29px!important;height:29px!important}}
