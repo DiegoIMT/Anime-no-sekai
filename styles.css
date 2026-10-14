@@ -3247,3 +3247,45 @@ html[data-theme="light"] .hero.ansSeasonHero .heroContent .eyebrow{
     letter-spacing:.55px!important;
   }
 }
+
+/* V7.18.3: selección combinable de ambiente y títulos ilustrados kawaii. */
+.ansAmbientEditor{grid-column:1/-1;display:grid;gap:12px;padding:18px;border:1px solid var(--border,rgba(145,130,175,.25));border-radius:16px;min-width:0}
+.ansAmbientEditor>small{color:var(--muted,#999)}
+.ansAmbientChoices{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:9px}
+.ansAmbientChoice{display:flex!important;align-items:center;gap:8px;padding:10px;border:1px solid rgba(140,120,170,.3);border-radius:10px;cursor:pointer;min-width:0}
+.ansAmbientChoice input{width:17px!important;height:17px!important;flex:none;accent-color:#8b5cf6}
+.ansAmbientChoice span{font-size:13px;line-height:1.3}
+.ansAmbientSettings{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media(max-width:640px){.ansAmbientSettings{grid-template-columns:1fr}.ansAmbientChoices{grid-template-columns:repeat(2,minmax(0,1fr))}}
+#ansSeasonAmbient[data-ambient-style="combinado"] span{font-family:"Apple Color Emoji","Segoe UI Emoji",sans-serif;text-shadow:0 1px 2px rgba(0,0,0,.2);filter:none}
+html[data-theme="light"] #ansSeasonAmbient[data-ambient-style="combinado"] span{text-shadow:0 1px 2px rgba(20,10,30,.18);filter:drop-shadow(0 1px 1px rgba(0,0,0,.12))}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style^="kawaii-"]{
+  display:inline-flex;align-items:center;gap:9px;position:relative;
+  max-width:100%;padding:9px 18px;border-radius:18px;
+  background:color-mix(in srgb,var(--ans-season-accent) 13%,var(--card,#18131f));
+  border:2px solid color-mix(in srgb,var(--ans-season-accent) 58%,transparent);
+  box-shadow:0 5px 18px rgba(0,0,0,.10);
+}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style^="kawaii-"]::before,
+.sectionHead h2.ansSeasonTitle[data-ans-title-style^="kawaii-"]::after{
+  display:inline-block;position:static;width:auto;height:auto;max-width:none;margin:0;
+  transform:none;background:none;border:0;box-shadow:none;
+  font-family:"Apple Color Emoji","Segoe UI Emoji",sans-serif;
+  font-size:clamp(20px,2.2vw,30px);line-height:1;text-shadow:none;flex:none;
+}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="kawaii-halloween"]::before{content:'🎃'}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="kawaii-halloween"]::after{content:'👻'}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="kawaii-navidad"]::before{content:'🎄'}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="kawaii-navidad"]::after{content:'⛄'}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="kawaii-amor"]::before{content:'💝'}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="kawaii-amor"]::after{content:'💗'}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="kawaii-sakura"]::before{content:'🌸'}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="kawaii-sakura"]::after{content:'🌷'}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="kawaii-fiesta"]::before{content:'🎉'}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="kawaii-fiesta"]::after{content:'🎊'}
+html[data-theme="light"] .sectionHead h2.ansSeasonTitle[data-ans-title-style^="kawaii-"]{
+ background:color-mix(in srgb,var(--ans-season-accent) 18%,#fff);
+ border-color:color-mix(in srgb,var(--ans-season-accent) 78%,#352050);
+ box-shadow:0 5px 16px rgba(50,25,75,.12);
+}
+@media(max-width:600px){.sectionHead h2.ansSeasonTitle[data-ans-title-style^="kawaii-"]{gap:5px;padding:7px 9px}.sectionHead h2.ansSeasonTitle[data-ans-title-style^="kawaii-"]::before,.sectionHead h2.ansSeasonTitle[data-ans-title-style^="kawaii-"]::after{font-size:18px}}
