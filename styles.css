@@ -3500,3 +3500,23 @@ html[data-theme="light"] #app > footer .footerAuthor{color:#6331a0}
   #app > footer .footerCopyright{max-width:100%;padding:0 12px}
   #app > footer .footerAuthor{display:block}
 }
+
+
+/* V7.18.13 — Vista previa fiel al marco temático seleccionado. */
+.ansMiniPreviewWrap .ansMiniHasFrame .ansMiniTitle{
+  box-sizing:border-box!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  width:min(100%,460px)!important;min-height:88px!important;
+  margin:7px 0 12px!important;padding:18px 72px!important;
+  background-image:var(--ans-mini-title-frame)!important;
+  background-size:100% 100%!important;background-repeat:no-repeat!important;
+  background-position:center!important;background-color:transparent!important;
+  border:0!important;text-align:center!important;
+  font-size:clamp(10px,1.5vw,16px)!important;line-height:1.16!important;
+  white-space:normal!important;overflow-wrap:break-word!important;
+}
+.ansMiniPreviewWrap .ansMiniHasFrame .ansMiniTitle:first-letter{color:inherit!important}
+.ansMiniPreviewWrap .ansMiniMobile.ansMiniHasFrame .ansMiniTitle{
+  min-height:72px!important;width:100%!important;
+  padding:13px 49px!important;font-size:10px!important;
+}
