@@ -3520,3 +3520,33 @@ html[data-theme="light"] #app > footer .footerAuthor{color:#6331a0}
   min-height:72px!important;width:100%!important;
   padding:13px 49px!important;font-size:10px!important;
 }
+
+/* V7.18.15 — Evitar doble decoración en marcos temáticos */
+
+.sectionHead h2.ansSeasonTitle:is(
+  [data-ans-title-style^="kawaii-"],
+  [data-ans-title-style="personalizado"]
+)::before,
+.sectionHead h2.ansSeasonTitle:is(
+  [data-ans-title-style^="kawaii-"],
+  [data-ans-title-style="personalizado"]
+)::after,
+#amiHomeName.ansSeasonTitle:is(
+  [data-ans-title-style^="kawaii-"],
+  [data-ans-title-style="personalizado"]
+)::before,
+#amiHomeName.ansSeasonTitle:is(
+  [data-ans-title-style^="kawaii-"],
+  [data-ans-title-style="personalizado"]
+)::after {
+  content: none !important;
+  display: none !important;
+  background: none !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
