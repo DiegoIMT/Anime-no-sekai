@@ -3361,3 +3361,38 @@ html[data-theme="light"] .sectionHead h2.ansSeasonTitle[data-ans-title-style^="k
     font-size:clamp(16px,4.4vw,20px)!important;
   }
 }
+
+
+/* V7.18.7 — Encabezado de Ami no Sekai y margen interior del panel rosa. */
+#mas-coleccion.amiHomeSection{
+  padding-left:clamp(22px,3vw,44px);
+  padding-right:clamp(22px,3vw,44px);
+}
+/* El título de Ami comparte la temática activa sin alterar logo, descripción ni botón. */
+#amiHomeName.ansSeasonTitle[data-ans-title-style^="kawaii-"]{
+  --ans-kawaii-left:none;--ans-kawaii-right:none;
+  display:inline-block;position:relative;box-sizing:border-box;
+  max-width:100%;min-height:52px;
+  margin:0 0 2px!important;
+  padding:9px 53px!important;
+  background-image:var(--ans-kawaii-left),var(--ans-kawaii-right)!important;
+  background-repeat:no-repeat!important;
+  background-size:47px auto!important;
+  background-position:left center,right center!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;
+  background-color:transparent!important;
+  line-height:1.3;
+}
+#amiHomeName.ansSeasonTitle[data-ans-title-style="kawaii-halloween"]{--ans-kawaii-left:url('assets/season-kawaii/ornament-halloween-left.svg');--ans-kawaii-right:url('assets/season-kawaii/ornament-halloween-right.svg')}
+#amiHomeName.ansSeasonTitle[data-ans-title-style="kawaii-navidad"]{--ans-kawaii-left:url('assets/season-kawaii/ornament-navidad-left.svg');--ans-kawaii-right:url('assets/season-kawaii/ornament-navidad-right.svg')}
+#amiHomeName.ansSeasonTitle[data-ans-title-style="kawaii-amor"]{--ans-kawaii-left:url('assets/season-kawaii/ornament-amor-left.svg');--ans-kawaii-right:url('assets/season-kawaii/ornament-amor-right.svg')}
+#amiHomeName.ansSeasonTitle[data-ans-title-style="kawaii-sakura"]{--ans-kawaii-left:url('assets/season-kawaii/ornament-sakura-left.svg');--ans-kawaii-right:url('assets/season-kawaii/ornament-sakura-right.svg')}
+#amiHomeName.ansSeasonTitle[data-ans-title-style="kawaii-fiesta"]{--ans-kawaii-left:url('assets/season-kawaii/ornament-fiesta-left.svg');--ans-kawaii-right:url('assets/season-kawaii/ornament-fiesta-right.svg')}
+@media(max-width:800px){
+ #mas-coleccion.amiHomeSection{padding-left:22px;padding-right:22px}
+ #amiHomeName.ansSeasonTitle[data-ans-title-style^="kawaii-"]{padding-left:43px!important;padding-right:43px!important;background-size:38px auto!important;min-height:45px}
+}
+@media(max-width:560px){
+ #mas-coleccion.amiHomeSection{padding-left:16px;padding-right:16px}
+ #amiHomeName.ansSeasonTitle[data-ans-title-style^="kawaii-"]{padding-left:30px!important;padding-right:30px!important;background-size:27px auto!important;min-height:38px;font-size:clamp(19px,5vw,26px)!important}
+}

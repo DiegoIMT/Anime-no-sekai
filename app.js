@@ -88,7 +88,7 @@ function ansApplySiteTheme(previewConfig){
   const pos='centro';const size=Math.max(20,Math.min(180,Number(c[key+'_tamano'])|| (key==='encabezado'?64:85)));const opacity=Math.max(0,Math.min(100,Number(c[key+'_opacidad']??75)));
   host.style.setProperty('--ans-decor-size',size+'px');host.style.setProperty('--ans-decor-opacity',opacity/100);host.style.setProperty('--ans-decor-position',pos==='izquierda'?'left center':pos==='centro'?'center center':'right center');host.style.setProperty('--ans-decor-mode','fill');if(key==='pie')host.style.setProperty('--ans-decor-mobile-mode','fill');
  }
- document.querySelectorAll('main .sectionHead h2').forEach(h=>{h.classList.toggle('ansSeasonTitle',!!c.titulos);h.dataset.ansTitleStyle=c.titulos===true?'si':String(c.titulos||'no')});
+ document.querySelectorAll('main .sectionHead h2, main #amiHomeName').forEach(h=>{h.classList.toggle('ansSeasonTitle',!!c.titulos);h.dataset.ansTitleStyle=c.titulos===true?'si':String(c.titulos||'no')});
  document.getElementById('ansSeasonAmbient')?.remove();
  const ambientKinds=Array.isArray(c.ambientes)?c.ambientes:(c.ambiente?[c.ambiente]:[]);
  const glyphs={nieve:'❄️',estrellas:'⭐',destellos:'✧',petalos:'🌸',hojas:'🍁',luciernagas:'✺',corazones:'💗',burbujas:'🫧',magia:'✵',calabazas:'🎃',calaveras:'💀',fantasmas:'👻',murcielagos:'🦇',regalos:'🎁',arboles:'🎄',caramelos:'🍬',cartas:'💌',mariposas:'🦋',confeti:'🎊'};
