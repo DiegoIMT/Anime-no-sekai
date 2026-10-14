@@ -3306,3 +3306,30 @@ html[data-theme="light"] .sectionHead h2.ansSeasonTitle[data-ans-title-style^="k
 .sectionHead h2.ansSeasonTitle[data-ans-title-style="kawaii-fiesta"]::before{background-image:url('assets/season-kawaii/confeti.svg')!important}
 .sectionHead h2.ansSeasonTitle[data-ans-title-style="kawaii-fiesta"]::after{background-image:url('assets/season-kawaii/estrellas.svg')!important}
 @media(max-width:600px){.sectionHead h2.ansSeasonTitle[data-ans-title-style^="kawaii-"]{padding:7px 9px;gap:5px}.sectionHead h2.ansSeasonTitle[data-ans-title-style^="kawaii-"]::before,.sectionHead h2.ansSeasonTitle[data-ans-title-style^="kawaii-"]::after{width:29px!important;height:29px!important}}
+
+/* V7.18.5: composiciones temáticas ilustradas, sin placas ni marcos rectangulares. */
+.sectionHead h2.ansSeasonTitle[data-ans-title-style^="kawaii-"]{
+ --ans-kawaii-left:none;--ans-kawaii-right:none;
+ display:inline-block!important;position:relative!important;isolation:visible!important;
+ overflow:visible!important;max-width:min(100%,860px)!important;
+ margin:16px 0 19px!important;padding:22px clamp(64px,10vw,135px)!important;
+ border:0!important;border-radius:0!important;background-color:transparent!important;
+ background-image:var(--ans-kawaii-left),var(--ans-kawaii-right)!important;
+ background-repeat:no-repeat!important;background-size:clamp(100px,14vw,170px) auto!important;
+ background-position:left center,right center!important;
+ box-shadow:none!important;text-shadow:0 2px 10px rgba(0,0,0,.12)!important;
+ line-height:1.25!important;min-height:94px!important;
+}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style^="kawaii-"]::before,
+.sectionHead h2.ansSeasonTitle[data-ans-title-style^="kawaii-"]::after{content:none!important;display:none!important;background-image:none!important}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="kawaii-halloween"]{--ans-kawaii-left:url('assets/season-kawaii/ornament-halloween-left.svg');--ans-kawaii-right:url('assets/season-kawaii/ornament-halloween-right.svg')}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="kawaii-navidad"]{--ans-kawaii-left:url('assets/season-kawaii/ornament-navidad-left.svg');--ans-kawaii-right:url('assets/season-kawaii/ornament-navidad-right.svg')}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="kawaii-amor"]{--ans-kawaii-left:url('assets/season-kawaii/ornament-amor-left.svg');--ans-kawaii-right:url('assets/season-kawaii/ornament-amor-right.svg')}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="kawaii-sakura"]{--ans-kawaii-left:url('assets/season-kawaii/ornament-sakura-left.svg');--ans-kawaii-right:url('assets/season-kawaii/ornament-sakura-right.svg')}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="kawaii-fiesta"]{--ans-kawaii-left:url('assets/season-kawaii/ornament-fiesta-left.svg');--ans-kawaii-right:url('assets/season-kawaii/ornament-fiesta-right.svg')}
+html[data-theme="light"] .sectionHead h2.ansSeasonTitle[data-ans-title-style^="kawaii-"]{background-color:transparent!important;border:0!important;box-shadow:none!important;text-shadow:none!important}
+@media(max-width:600px){.sectionHead h2.ansSeasonTitle[data-ans-title-style^="kawaii-"]{margin:10px 0 12px!important;padding:12px 46px!important;min-height:70px!important;background-size:82px auto!important;font-size:clamp(17px,4.2vw,23px)!important;line-height:1.25!important}}
+@media(max-width:390px){.sectionHead h2.ansSeasonTitle[data-ans-title-style^="kawaii-"]{padding-left:37px!important;padding-right:37px!important;background-size:65px auto!important}}
+/* Partículas ilustradas reconocibles sin bloquear interacciones. */
+#ansSeasonAmbient[data-ambient-style="combinado"]{pointer-events:none!important}
+#ansSeasonAmbient[data-ambient-style="combinado"] span{background-size:contain!important;background-repeat:no-repeat!important;opacity:.88;filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))!important}

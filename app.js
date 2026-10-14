@@ -102,7 +102,7 @@ function ansApplySiteTheme(previewConfig){
    el.style.setProperty('--ans-drift-x',((Math.random()-.5)*110).toFixed(1)+'px');
    el.style.setProperty('--ans-drift-y',(-25-Math.random()*75).toFixed(1)+'px');
    const kind=kinds[Math.floor(Math.random()*kinds.length)];el.textContent='';el.style.backgroundImage=`url(assets/season-kawaii/${kind}.svg)`;
-   const size=({pequeno:20,mediano:30,variado:19+Math.random()*17}[c.ambiente_tamano]||26);el.style.width=size+'px';el.style.height=size+'px';
+   const size=({pequeno:27,mediano:39,variado:29+Math.random()*21}[c.ambiente_tamano]||37);el.style.width=size+'px';el.style.height=size+'px';
   };
   layer.addEventListener('animationiteration',e=>{if(e.target instanceof HTMLElement&&e.target.parentElement===layer)place(e.target)});
   for(let i=0;i<quantity;i++){
