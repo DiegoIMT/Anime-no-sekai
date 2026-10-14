@@ -3067,3 +3067,21 @@ html[data-theme="light"] #app > header .headActions button:hover{background:rgba
 @media(max-width:760px){
  .hero.ansSeasonHero .heroContent{padding:15px;border-radius:14px}
 }
+
+/* V7.17.37 — Modo claro: panel de lectura discreto; CTA del hero sólidos. */
+html[data-theme="light"] .hero.ansSeasonHero .heroContent{
+  background:rgba(255,255,255,.20)!important;
+  -webkit-backdrop-filter:blur(1px)!important;backdrop-filter:blur(1px)!important;
+  box-shadow:0 2px 18px rgba(0,0,0,.08)!important;
+}
+/* La transparencia se solicita en los controles del encabezado, no en los CTA del hero. */
+.hero.ansSeasonHero .heroBtns .primary,
+.hero.ansSeasonHero .heroBtns .secondary{
+  background-image:none!important;
+  -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+  box-shadow:none!important;
+}
+.hero.ansSeasonHero .heroBtns .primary{background:#8B5CF6!important;border:1px solid #8B5CF6!important;color:#fff!important}
+.hero.ansSeasonHero .heroBtns .secondary{background:#14161b!important;border:1px solid #343741!important;color:#fff!important}
+.hero.ansSeasonHero .heroBtns .primary:hover{background:#7C3AED!important}
+.hero.ansSeasonHero .heroBtns .secondary:hover{background:#252831!important}
