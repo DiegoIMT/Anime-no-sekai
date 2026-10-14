@@ -2868,3 +2868,20 @@ html:has(.adminView),body:has(.adminView){overflow:hidden !important;}
 /* La miniatura conserva el lienzo completo de la decoración, incluido el relieve. */
 .ansMiniHeader img[data-mini-image="encabezado"]{object-fit:fill!important}
 .ansMiniFooter img[data-mini-image="pie"]{object-fit:fill!important}
+
+/* V7.17.29 — La apertura de puertas y partículas comparte inicio y duración.
+   Se reserva un margen al final antes de mostrar el detalle. */
+.ansVitrineOpen .ansVitrineLeft,
+.ansVitrineOpen .ansVitrineRight{
+  animation-duration:1.15s!important;
+  animation-delay:.10s!important;
+  animation-fill-mode:forwards!important;
+}
+.ansVitrineOpen .ansThemeParticle{
+  animation-duration:1.15s!important;
+  animation-delay:.10s!important;
+  animation-fill-mode:both!important;
+}
+@media(prefers-reduced-motion:reduce){
+  .ansVitrineOpen .ansThemeParticle{animation:none!important}
+}
