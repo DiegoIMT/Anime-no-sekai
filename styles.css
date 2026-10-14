@@ -2817,3 +2817,26 @@ html:has(.adminView),body:has(.adminView){overflow:hidden !important;}
     clip-path:inset(85px 0 0 0) !important;
   }
 }
+
+/* V7.17.26 — header más alto, navegación legible y relieve coherente. */
+#app > header {height:120px;min-height:120px;display:flex;align-items:center}
+#app > header.ansSeasonHeader{height:120px !important;min-height:120px !important}
+#app > header > .brand,#app > header > nav,#app > header > .headActions{align-self:center;flex-shrink:0}
+#app > header > nav{padding:12px 16px;border-radius:13px;background:rgba(8,9,15,.70);border:1px solid rgba(255,255,255,.10);box-shadow:0 6px 24px rgba(0,0,0,.25);backdrop-filter:blur(9px)}
+#app > header > nav a{text-shadow:0 1px 4px rgba(0,0,0,.85)}
+#app > header > .headActions button{background:rgba(11,12,19,.84);backdrop-filter:blur(8px);text-shadow:0 1px 3px #000}
+#app > header.ansSeasonHeader::before,#app > header.ansSeasonHeader::after{aspect-ratio:1920 / 180 !important;background-size:100% 100% !important}
+#app > header.ansSeasonHeader::before{clip-path:inset(0 0 calc(100% - 120px) 0) !important}
+#app > header.ansSeasonHeader::after{clip-path:inset(120px 0 0 0) !important}
+.ansMiniHeader{aspect-ratio:1920 / 120 !important}
+.ansMiniHeader img[data-mini-image="encabezado"]{aspect-ratio:1920 / 180 !important}
+@media(max-width:900px){#app > header > nav{display:none}}
+@media(max-width:760px){
+ #app > header{height:100px;min-height:100px}
+ #app > header.ansSeasonHeader{height:100px !important;min-height:100px !important}
+ #app > header.ansSeasonHeader::before,#app > header.ansSeasonHeader::after{aspect-ratio:430 / 145 !important}
+ #app > header.ansSeasonHeader::before{clip-path:inset(0 0 calc(100% - 100px) 0) !important}
+ #app > header.ansSeasonHeader::after{clip-path:inset(100px 0 0 0) !important}
+ .ansMiniStore.ansMiniMobile .ansMiniHeader{aspect-ratio:430 / 100 !important}
+ .ansMiniStore.ansMiniMobile .ansMiniHeader img[data-mini-image="encabezado"]{aspect-ratio:430 / 145 !important}
+}
