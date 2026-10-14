@@ -3737,3 +3737,74 @@ main .sectionHead h2.ansSeasonTitle:is([data-ans-title-style^="kawaii-"], [data-
     min-width: 0;
   }
 }
+
+/* V7.19.6 — Acciones debajo de los encabezados, sin reducir los marcos. */
+@media (min-width: 761px) {
+  main #ofertas > .sectionHead,
+  main #homeReviews > .sectionHead {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 14px !important;
+  }
+  main #ofertas > .sectionHead > div,
+  main #homeReviews > .sectionHead > div {
+    box-sizing: border-box;
+    width: 100% !important;
+    max-width: none !important;
+    flex: 0 0 auto !important;
+    min-width: 0;
+  }
+  main #ofertas > .sectionHead > .sectionLinkButton,
+  main #homeReviews > .sectionHead > .sectionLinkButton {
+    align-self: flex-end !important;
+    flex: 0 0 auto !important;
+    margin: 0 !important;
+  }
+  /* Ami conserva el logo en la primera fila y desplaza solo su enlace. */
+  main #mas-coleccion .amiHomeIdentity {
+    grid-template-columns: 112px minmax(0, 1fr) !important;
+  }
+  main #mas-coleccion .amiHomeIdentity > .sectionLinkButton {
+    grid-column: 2 !important;
+    justify-self: end !important;
+    margin: 0 !important;
+  }
+}
+/* Botones de acceso visibles tanto en tema oscuro como claro. */
+main #ofertas > .sectionHead > .sectionLinkButton,
+main #homeReviews > .sectionHead > .sectionLinkButton,
+main #mas-coleccion .amiHomeIdentity > .sectionLinkButton {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: fit-content;
+  max-width: 100%;
+  min-height: 44px;
+  padding: 11px 20px !important;
+  border: 1px solid var(--brand-primary, #8b5cf6) !important;
+  border-radius: 999px !important;
+  background: color-mix(in srgb, var(--brand-primary, #8b5cf6) 24%, var(--surface, #111318)) !important;
+  color: var(--text, #f6f4fb) !important;
+  font-weight: 750 !important;
+  font-size: 14px !important;
+  line-height: 1.3;
+  text-decoration: none !important;
+  box-shadow: 0 4px 18px rgba(108, 65, 188, .18);
+  transition: background-color .2s, box-shadow .2s, transform .2s;
+}
+main #ofertas > .sectionHead > .sectionLinkButton:hover,
+main #homeReviews > .sectionHead > .sectionLinkButton:hover,
+main #mas-coleccion .amiHomeIdentity > .sectionLinkButton:hover {
+  background: color-mix(in srgb, var(--brand-primary, #8b5cf6) 38%, var(--surface, #111318)) !important;
+  box-shadow: 0 6px 22px rgba(108, 65, 188, .3);
+  transform: translateY(-1px);
+}
+main #ofertas > .sectionHead > .sectionLinkButton:focus-visible,
+main #homeReviews > .sectionHead > .sectionLinkButton:focus-visible,
+main #mas-coleccion .amiHomeIdentity > .sectionLinkButton:focus-visible {
+  outline: 3px solid var(--brand-secondary, #a78bfa);
+  outline-offset: 3px;
+}
