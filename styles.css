@@ -3333,3 +3333,31 @@ html[data-theme="light"] .sectionHead h2.ansSeasonTitle[data-ans-title-style^="k
 /* Partículas ilustradas reconocibles sin bloquear interacciones. */
 #ansSeasonAmbient[data-ambient-style="combinado"]{pointer-events:none!important}
 #ansSeasonAmbient[data-ambient-style="combinado"] span{background-size:contain!important;background-repeat:no-repeat!important;opacity:.88;filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))!important}
+
+
+/* V7.18.6 — Espacio reservado para cada ilustración: no invadir el texto. */
+.sectionHead h2.ansSeasonTitle[data-ans-title-style^="kawaii-"]{
+  box-sizing:border-box!important;
+  padding-left:155px!important;
+  padding-right:155px!important;
+  background-size:125px auto!important;
+  background-position:left center,right center!important;
+  min-width:0!important;
+  overflow-wrap:normal!important;
+}
+@media(max-width:760px){
+  .sectionHead h2.ansSeasonTitle[data-ans-title-style^="kawaii-"]{
+    padding-left:78px!important;
+    padding-right:78px!important;
+    background-size:66px auto!important;
+    font-size:clamp(18px,3.5vw,27px)!important;
+  }
+}
+@media(max-width:420px){
+  .sectionHead h2.ansSeasonTitle[data-ans-title-style^="kawaii-"]{
+    padding-left:52px!important;
+    padding-right:52px!important;
+    background-size:44px auto!important;
+    font-size:clamp(16px,4.4vw,20px)!important;
+  }
+}
