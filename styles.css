@@ -3450,3 +3450,53 @@ html[data-theme="light"] .sectionHead h2.ansSeasonTitle[data-ans-title-style^="k
     font-size:clamp(16px,4.7vw,21px)!important;
   }
 }
+
+/* V7.18.9 — Marco personalizado con zona central segura y título HTML real. */
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="personalizado"]{--ans-season-frame:var(--ans-custom-frame)!important;display:flex!important;align-items:center!important;justify-content:center!important;width:min(100%,920px)!important;min-height:150px!important;padding:35px clamp(132px,17%,170px)!important;text-align:center!important;line-height:1.15!important;background-image:var(--ans-custom-frame)!important;background-size:100% 100%!important;background-position:center!important;background-repeat:no-repeat!important;border:0!important;box-shadow:none!important;}
+#amiHomeName.ansSeasonTitle[data-ans-title-style="personalizado"]{display:flex!important;align-items:center!important;justify-content:center!important;width:min(100%,550px)!important;min-height:105px!important;padding:28px 88px!important;text-align:center!important;background-image:var(--ans-custom-frame)!important;background-size:100% 100%!important;background-repeat:no-repeat!important;background-position:center!important;}
+@media(max-width:760px){.sectionHead h2.ansSeasonTitle[data-ans-title-style="personalizado"]{min-height:116px!important;padding:24px 85px!important}#amiHomeName.ansSeasonTitle[data-ans-title-style="personalizado"]{min-height:85px!important;padding:20px 70px!important}}
+@media(max-width:460px){.sectionHead h2.ansSeasonTitle[data-ans-title-style="personalizado"]{min-height:100px!important;padding:18px 57px!important}#amiHomeName.ansSeasonTitle[data-ans-title-style="personalizado"]{min-height:75px!important;padding:16px 55px!important}}
+
+
+/* V7.18.10 — El marco de reseñas utiliza todo el ancho disponible en móvil. */
+@media(max-width:760px){
+  .homeReviewsSection .sectionHead{
+    display:flex!important;flex-direction:column!important;
+    align-items:stretch!important;gap:14px!important;
+  }
+  .homeReviewsSection .sectionHead>div{
+    width:100%!important;min-width:0!important;max-width:none!important;
+    flex:0 0 auto!important;
+  }
+  .homeReviewsSection .sectionHead h2.ansSeasonTitle[data-ans-title-style^="kawaii-"],
+  .homeReviewsSection .sectionHead h2.ansSeasonTitle[data-ans-title-style="personalizado"]{
+    box-sizing:border-box!important;display:flex!important;
+    width:100%!important;max-width:100%!important;
+    min-height:126px!important;padding:23px 68px!important;
+    margin:8px 0 12px!important;
+    font-size:clamp(18px,4.5vw,26px)!important;
+    line-height:1.17!important;overflow-wrap:normal!important;
+    word-break:normal!important;hyphens:none!important;
+  }
+  .homeReviewsSection .sectionHead .sectionLinkButton{
+    align-self:flex-start!important;max-width:100%!important;
+  }
+}
+@media(max-width:420px){
+  .homeReviewsSection .sectionHead h2.ansSeasonTitle[data-ans-title-style^="kawaii-"],
+  .homeReviewsSection .sectionHead h2.ansSeasonTitle[data-ans-title-style="personalizado"]{
+    min-height:116px!important;padding:20px 52px!important;
+    font-size:clamp(17px,4.8vw,21px)!important;
+  }
+}
+/* Crédito de autor legible en el pie de página y por encima de los adornos. */
+#app > footer .footerCopyright{
+  position:relative;z-index:2;display:block;text-align:center;
+  line-height:1.6;white-space:normal;
+}
+#app > footer .footerAuthor{display:inline;color:#b8a0e8;font-weight:600}
+html[data-theme="light"] #app > footer .footerAuthor{color:#6331a0}
+@media(max-width:560px){
+  #app > footer .footerCopyright{max-width:100%;padding:0 12px}
+  #app > footer .footerAuthor{display:block}
+}
