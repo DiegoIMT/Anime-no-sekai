@@ -2446,3 +2446,50 @@ html[data-theme="light"] .hero.ansSeasonHero{background-image:linear-gradient(90
    top:6px !important;
  }
 }
+
+/* V7.17.15 — Temáticas: decoración panorámica sin opciones redundantes. */
+#app > header.ansSeasonHeader::before,
+#app > footer.ansSeasonFooter::before {
+  background-size:100% 100% !important;
+  background-position:center center !important;
+  background-repeat:no-repeat !important;
+}
+@media(max-width:760px){
+ #app > header.ansSeasonHeader::before,
+ #app > footer.ansSeasonFooter::before {
+  background-size:100% 100% !important;
+  background-position:center center !important;
+ }
+}
+/* El encabezado público sigue visible durante el desplazamiento. */
+#app > header{position:sticky !important;top:0;z-index:50}
+/* Un solo campo de opacidad y su imagen en cada panel. */
+.ansThemeEditorPanel[data-theme-panel="header"],
+.ansThemeEditorPanel[data-theme-panel="footer"] {grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);align-items:start}
+.ansThemeEditorPanel[data-theme-panel="header"] > label,
+.ansThemeEditorPanel[data-theme-panel="footer"] > label{grid-column:1;grid-row:2}
+.ansThemeEditorPanel[data-theme-panel="header"] > .ansSeasonUpload,
+.ansThemeEditorPanel[data-theme-panel="footer"] > .ansSeasonUpload{grid-column:2;grid-row:2}
+.ansThemeEditorPanel .ansSeasonUpload img{max-height:210px;object-fit:contain}
+.ansThemeEditorPanel [data-season-preview="encabezado"] img,
+.ansThemeEditorPanel [data-season-preview="pie"] img{transition:opacity .12s ease}
+/* Vista previa compacta: los botones permanecen accesibles. */
+.ansThemeEditorPanel[data-theme-panel="preview"] .ansMiniPreviewWrap{max-width:760px;margin:4px auto;width:100%;padding:10px}
+.ansThemeEditorPanel[data-theme-panel="preview"] .ansMiniPreviewViewport{max-height:410px;overflow:auto;padding:5px}
+.ansThemeEditorPanel[data-theme-panel="preview"] .ansMiniPreview{transform-origin:top center}
+#ansThemeForm > .formActions.ansThemeFooter{position:sticky;bottom:0;z-index:12;background:rgba(15,16,21,.97);border-top:1px solid #30313a;padding:14px 18px;backdrop-filter:blur(10px)}
+/* Efectos de ambiente deliberadamente discretos. */
+#ansSeasonAmbient span{font-size:clamp(8px,.9vw,13px);opacity:0;text-shadow:0 0 4px currentColor}
+@keyframes ansSeasonFloatSubtle{0%{opacity:0;transform:translate3d(0,8px,0)}30%{opacity:.20}75%{opacity:.13}100%{opacity:0;transform:translate3d(8px,-28px,0)}}
+#ansSeasonAmbient span{animation-name:ansSeasonFloatSubtle!important}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="halo"]{padding-left:0;text-shadow:0 0 13px color-mix(in srgb,var(--ans-season-accent) 35%,transparent)}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="halo"]:before,
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="halo"]:after{display:none}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="subrayado"]{padding-left:0}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="subrayado"]:before{display:none}
+@media(max-width:720px){
+ .ansThemeEditorPanel[data-theme-panel="header"],.ansThemeEditorPanel[data-theme-panel="footer"]{grid-template-columns:1fr}
+ .ansThemeEditorPanel[data-theme-panel="header"] > label,.ansThemeEditorPanel[data-theme-panel="footer"] > label{grid-column:1;grid-row:2}
+ .ansThemeEditorPanel[data-theme-panel="header"] > .ansSeasonUpload,.ansThemeEditorPanel[data-theme-panel="footer"] > .ansSeasonUpload{grid-column:1;grid-row:3}
+ #ansThemeForm > .formActions.ansThemeFooter{padding:10px}
+}
