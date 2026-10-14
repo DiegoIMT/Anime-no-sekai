@@ -3598,8 +3598,8 @@ html[data-theme="light"] #app > footer .footerAuthor{color:#6331a0}
     font-size: 18px !important;
   }
 }
-
-/* V7.18.18 — Ofertas en móvil */
+/* V7.18.18 — Restaurar el encabezado de Ofertas en móvil.
+   Mantiene los tamaños de letra de V7.18.17. */
 @media (max-width: 760px) {
   #ofertas > .sectionHead {
     display: flex !important;
@@ -3608,7 +3608,6 @@ html[data-theme="light"] #app > footer .footerAuthor{color:#6331a0}
     justify-content: flex-start !important;
     gap: 14px !important;
   }
-
   #ofertas > .sectionHead > div {
     box-sizing: border-box !important;
     display: block !important;
@@ -3617,19 +3616,47 @@ html[data-theme="light"] #app > footer .footerAuthor{color:#6331a0}
     min-width: 0 !important;
     flex: none !important;
   }
-
   #ofertas > .sectionHead h2.ansSeasonTitle {
     box-sizing: border-box !important;
     width: 100% !important;
     max-width: 100% !important;
     margin-inline: 0 !important;
   }
-
   #ofertas > .sectionHead > .sectionLinkButton {
     align-self: flex-start !important;
     flex: none !important;
     width: auto !important;
     max-width: 100% !important;
     margin: 0 !important;
+  }
+}
+
+/* V7.18.19 — Marcos temáticos sin deformación.
+   Se conserva la proporción original del SVG, PNG o WebP. */
+.sectionHead h2.ansSeasonTitle:is(
+  [data-ans-title-style^="kawaii-"],
+  [data-ans-title-style="personalizado"]
+),
+#amiHomeName.ansSeasonTitle:is(
+  [data-ans-title-style^="kawaii-"],
+  [data-ans-title-style="personalizado"]
+) {
+  background-size: contain !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+}
+
+/* En escritorio los marcos prediseñados usan proporción 5:1.
+   Los personalizados conservan su imagen sin estirarla. */
+@media (min-width: 761px) {
+  .sectionHead h2.ansSeasonTitle[data-ans-title-style^="kawaii-"] {
+    box-sizing: border-box !important;
+    aspect-ratio: 5 / 1;
+    height: auto !important;
+  }
+  #amiHomeName.ansSeasonTitle[data-ans-title-style^="kawaii-"] {
+    box-sizing: border-box !important;
+    aspect-ratio: 5 / 1;
+    height: auto !important;
   }
 }
