@@ -2624,3 +2624,67 @@ html:has(.adminView),body:has(.adminView){overflow:hidden !important;}
  .ansThemeEditorPanel[data-theme-panel="header"] > .ansSeasonUpload:nth-of-type(1),.ansThemeEditorPanel[data-theme-panel="footer"] > .ansSeasonUpload:nth-of-type(1){grid-column:1;grid-row:3}
  .ansThemeEditorPanel[data-theme-panel="header"] > .ansSeasonUpload:nth-of-type(2),.ansThemeEditorPanel[data-theme-panel="footer"] > .ansSeasonUpload:nth-of-type(2){grid-column:1;grid-row:4}
 }
+
+/* V7.17.20 — Áreas estacionales amplias, independientes y proporcionales. */
+#app > header{height:120px;min-height:120px;flex-shrink:0}
+#app > footer{min-height:220px;box-sizing:border-box}
+#app > header.ansSeasonHeader::before,
+#app > footer.ansSeasonFooter::before{
+ background-size:100% auto !important;
+ background-position:center center !important;
+ background-repeat:no-repeat !important;
+}
+@media(max-width:760px){
+ #app > header{height:120px;min-height:120px}
+ #app > footer{min-height:340px}
+ #app > header.ansSeasonHeader::before,
+ #app > footer.ansSeasonFooter::before{
+  background-size:100% auto !important;
+  background-position:center center !important;
+ }
+}
+/* La vista previa reproduce las proporciones de las áreas reales. */
+.ansMiniHeader{height:auto;aspect-ratio:16 / 1;min-height:48px}
+.ansMiniFooter{min-height:0;aspect-ratio:1920 / 220;justify-content:center}
+.ansMiniStore.ansMiniMobile .ansMiniHeader{height:auto;aspect-ratio:430 / 120;min-height:0}
+.ansMiniStore.ansMiniMobile .ansMiniFooter{height:auto;min-height:0;aspect-ratio:430 / 340;justify-content:center}
+.ansMiniHeader img[data-mini-image="encabezado"],
+.ansMiniFooter img[data-mini-image="pie"],
+.ansMiniStore.ansMiniMobile .ansMiniFooter img[data-mini-image="pie"]{
+ position:absolute !important;inset:0 !important;
+ width:100% !important;height:100% !important;
+ object-fit:contain !important;object-position:center center !important;
+}
+.ansThemeEditorPanel[data-theme-panel="preview"] .ansMiniFooter{min-height:0;aspect-ratio:1920 / 220}
+.ansThemeEditorPanel[data-theme-panel="preview"] .ansMiniStore.ansMiniMobile .ansMiniFooter{min-height:0;aspect-ratio:430 / 340}
+/* V7.17.21 — prueba de decoración con profundidad, sin alterar la geometría de la tienda. */
+#app > header.ansSeasonHeader,
+#app > footer.ansSeasonFooter { overflow:visible !important; }
+#app > header.ansSeasonHeader { z-index:50; }
+#app > footer.ansSeasonFooter { z-index:2; }
+/* La capa decorativa conserva su relación de aspecto y puede sobresalir.
+   No captura interacciones ni modifica el tamaño de la barra o el footer. */
+#app > header.ansSeasonHeader::before {
+  inset:0 0 -48px 0 !important;
+  background-size:100% auto !important;
+  background-position:center top !important;
+  pointer-events:none !important;
+}
+#app > footer.ansSeasonFooter::before {
+  inset:-44px 0 0 0 !important;
+  background-size:100% auto !important;
+  background-position:center bottom !important;
+  pointer-events:none !important;
+}
+@media(max-width:760px){
+  #app > header.ansSeasonHeader::before {
+    inset:0 0 -30px 0 !important;
+    background-size:100% auto !important;
+    background-position:center top !important;
+  }
+  #app > footer.ansSeasonFooter::before {
+    inset:-30px 0 0 0 !important;
+    background-size:100% auto !important;
+    background-position:center bottom !important;
+  }
+}
