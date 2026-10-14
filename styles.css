@@ -3894,3 +3894,43 @@ main .publicAdditionalCard .photo img {
     clip-path: inset(100px 0 max(0px, calc(100% - 124px)) 0) !important;
   }
 }
+/* V7.19.10 — Relieve real y acotado de la decoración estacional.
+   Las dos capas comparten el MISMO lienzo y se recortan en el borde de la barra.
+   El lienzo mantiene la proporción de la imagen (100% auto) y se ancla abajo;
+   no se añade altura al header ni se modifican las tarjetas. */
+#app > header.ansSeasonHeader {
+  overflow: visible !important;
+  isolation: isolate;
+}
+#app > header.ansSeasonHeader::before,
+#app > header.ansSeasonHeader::after {
+  inset: 0 0 auto 0 !important;
+  width: 100% !important;
+  height: 148px !important; /* 120px de barra + 28px de relieve */
+  aspect-ratio: auto !important;
+  background-size: 100% auto !important;
+  background-position: center bottom !important;
+  background-repeat: no-repeat !important;
+  pointer-events: none !important;
+}
+#app > header.ansSeasonHeader::before {
+  clip-path: inset(0 0 28px 0) !important;
+}
+#app > header.ansSeasonHeader::after {
+  clip-path: inset(120px 0 0 0) !important;
+}
+@media (max-width: 760px) {
+  #app > header.ansSeasonHeader::before,
+  #app > header.ansSeasonHeader::after {
+    height: 124px !important; /* 100px de barra + 24px de relieve */
+    aspect-ratio: auto !important;
+    background-size: 100% auto !important;
+    background-position: center bottom !important;
+  }
+  #app > header.ansSeasonHeader::before {
+    clip-path: inset(0 0 24px 0) !important;
+  }
+  #app > header.ansSeasonHeader::after {
+    clip-path: inset(100px 0 0 0) !important;
+  }
+}
