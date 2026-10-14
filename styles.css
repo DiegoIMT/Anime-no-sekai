@@ -3396,3 +3396,57 @@ html[data-theme="light"] .sectionHead h2.ansSeasonTitle[data-ans-title-style^="k
  #mas-coleccion.amiHomeSection{padding-left:16px;padding-right:16px}
  #amiHomeName.ansSeasonTitle[data-ans-title-style^="kawaii-"]{padding-left:30px!important;padding-right:30px!important;background-size:27px auto!important;min-height:38px;font-size:clamp(19px,5vw,26px)!important}
 }
+
+
+/* V7.18.8: marcos de temporada completos. El texto queda dentro de una zona central segura. */
+.sectionHead h2.ansSeasonTitle[data-ans-title-style^="kawaii-"]{
+  --ans-season-frame:none;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  width:min(100%,920px)!important;max-width:100%!important;
+  min-height:150px!important;margin:8px 0 10px!important;
+  padding:39px clamp(132px,17%,170px)!important;
+  text-align:center!important;line-height:1.15!important;
+  background-image:var(--ans-season-frame)!important;
+  background-size:100% 100%!important;background-position:center!important;
+  background-repeat:no-repeat!important;background-color:transparent!important;
+  border:0!important;box-shadow:none!important;border-radius:0!important;
+  overflow:visible!important;white-space:normal!important;
+}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style^="kawaii-"]::before,
+.sectionHead h2.ansSeasonTitle[data-ans-title-style^="kawaii-"]::after{display:none!important;content:none!important}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="kawaii-halloween"],#amiHomeName.ansSeasonTitle[data-ans-title-style="kawaii-halloween"]{--ans-season-frame:url("assets/season-kawaii/frame-halloween.svg")}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="kawaii-navidad"],#amiHomeName.ansSeasonTitle[data-ans-title-style="kawaii-navidad"]{--ans-season-frame:url("assets/season-kawaii/frame-navidad.svg")}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="kawaii-amor"],#amiHomeName.ansSeasonTitle[data-ans-title-style="kawaii-amor"]{--ans-season-frame:url("assets/season-kawaii/frame-amor.svg")}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="kawaii-sakura"],#amiHomeName.ansSeasonTitle[data-ans-title-style="kawaii-sakura"]{--ans-season-frame:url("assets/season-kawaii/frame-sakura.svg")}
+.sectionHead h2.ansSeasonTitle[data-ans-title-style="kawaii-fiesta"],#amiHomeName.ansSeasonTitle[data-ans-title-style="kawaii-fiesta"]{--ans-season-frame:url("assets/season-kawaii/frame-fiesta.svg")}
+
+/* El encabezado de Ami tiene el mismo marco pero conserva su propio grid y logotipo. */
+#amiHomeName.ansSeasonTitle[data-ans-title-style^="kawaii-"]{
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  width:min(100%,550px)!important;min-height:105px!important;
+  padding:28px 88px!important;margin:0!important;
+  text-align:center!important;line-height:1.2!important;
+  background-image:var(--ans-season-frame)!important;
+  background-size:100% 100%!important;background-position:center!important;
+  background-repeat:no-repeat!important;background-color:transparent!important;
+  border:0!important;box-shadow:none!important;border-radius:0!important;
+}
+@media(max-width:760px){
+  .sectionHead h2.ansSeasonTitle[data-ans-title-style^="kawaii-"]{
+    width:100%!important;min-height:116px!important;
+    padding:24px 85px!important;font-size:clamp(19px,4vw,27px)!important;
+  }
+  #amiHomeName.ansSeasonTitle[data-ans-title-style^="kawaii-"]{
+    min-height:85px!important;padding:20px 70px!important;
+  }
+}
+@media(max-width:460px){
+  .sectionHead h2.ansSeasonTitle[data-ans-title-style^="kawaii-"]{
+    min-height:100px!important;padding:18px 57px!important;
+    font-size:clamp(15px,4.4vw,20px)!important;
+  }
+  #amiHomeName.ansSeasonTitle[data-ans-title-style^="kawaii-"]{
+    min-height:75px!important;padding:16px 55px!important;
+    font-size:clamp(16px,4.7vw,21px)!important;
+  }
+}
