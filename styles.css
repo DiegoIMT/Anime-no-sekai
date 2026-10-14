@@ -3808,52 +3808,47 @@ main #mas-coleccion .amiHomeIdentity > .sectionLinkButton:focus-visible {
   outline: 3px solid var(--brand-secondary, #a78bfa);
   outline-offset: 3px;
 }
-/* V7.19.7 — Catálogo: tarjetas compactas en escritorio e imágenes completas.
-   Solo tarjetas públicas; no afecta imágenes de detalle ni del administrador. */
+
+/* V7.19.8 — Tarjetas publicas compactas; imagen completa sin recortes. */
 @media (min-width: 901px) {
-  main .grid:has(> .publicProductCard),
-  main .grid:has(> .publicAdditionalCard) {
-    grid-template-columns: repeat(auto-fill, minmax(220px, 260px));
-    justify-content: center;
-    align-items: stretch;
-    gap: 18px;
+  main .grid:has(.publicProductCard),
+  main .grid:has(.publicAdditionalCard) {
+    grid-template-columns: repeat(auto-fill, minmax(210px, 250px)) !important;
+    justify-content: center !important;
+    align-items: start !important;
+    gap: 18px !important;
   }
   main .publicProductCard .photo,
-  main .publicAdditionalCard .photo {height: 245px;}
-}
-@media (min-width: 561px) and (max-width: 900px) {
-  main .grid:has(> .publicProductCard),
-  main .grid:has(> .publicAdditionalCard) {
-    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  main .publicAdditionalCard .photo {
+    height: 205px !important;
+    aspect-ratio: auto !important;
   }
+  main .publicProductCard .cardBody,
+  main .publicAdditionalCard .cardBody {
+    min-height: 0 !important;
+    padding: 12px !important;
+  }
+  main .publicProductCard .prices,
+  main .publicAdditionalCard .prices {margin-top: 8px !important; min-height: 0 !important;}
+  main .publicProductCard h3,
+  main .publicAdditionalCard h3 {min-height: 0 !important;}
 }
+/* En todas las resoluciones: la imagen se ve entera. */
 main .publicProductCard .photo img,
 main .publicAdditionalCard .photo img {
-  display: block;
-  width: 100%;
-  height: 100%;
   object-fit: contain !important;
-  object-position: center;
+  object-position: center !important;
 }
-@media (max-width: 560px) {
-  main .publicProductCard .photo,
-  main .publicAdditionalCard .photo {height: clamp(145px, 42vw, 190px);}
-}
-/* Encabezado: conservar la proporción de la imagen y darle un relieve visible.
-   Los dos planos siguen recortados en el borde de la navegación. */
+/* Se revierte la expansion artificial de 95px de V7.19.7 que
+   hacia que la decoracion invadiera las tarjetas. */
 #app > header.ansSeasonHeader::before,
 #app > header.ansSeasonHeader::after {
-  height: calc(100% + 95px) !important;
-  aspect-ratio: auto !important;
-  background-size: 100% auto !important;
-  background-position: center 22px !important;
-  background-repeat: no-repeat !important;
+  height: auto !important;
+  aspect-ratio: 1920 / 180 !important;
+  background-size: 100% 100% !important;
+  background-position: center top !important;
 }
-#app > header.ansSeasonHeader::before {clip-path: inset(0 0 calc(100% - 120px) 0) !important;}
-#app > header.ansSeasonHeader::after {clip-path: inset(120px 0 0 0) !important;}
 @media (max-width: 760px) {
   #app > header.ansSeasonHeader::before,
-  #app > header.ansSeasonHeader::after {background-position: center 28px !important;}
-  #app > header.ansSeasonHeader::before {clip-path: inset(0 0 calc(100% - 100px) 0) !important;}
-  #app > header.ansSeasonHeader::after {clip-path: inset(100px 0 0 0) !important;}
+  #app > header.ansSeasonHeader::after {aspect-ratio: 430 / 145 !important;}
 }
