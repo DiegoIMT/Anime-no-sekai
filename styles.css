@@ -3085,3 +3085,12 @@ html[data-theme="light"] .hero.ansSeasonHero .heroContent{
 .hero.ansSeasonHero .heroBtns .secondary{background:#14161b!important;border:1px solid #343741!important;color:#fff!important}
 .hero.ansSeasonHero .heroBtns .primary:hover{background:#7C3AED!important}
 .hero.ansSeasonHero .heroBtns .secondary:hover{background:#252831!important}
+
+/* V7.17.38 — Una sola duración total de 1 s para puertas y partículas. */
+.ansVitrineOpen .ansVitrineLeft,
+.ansVitrineOpen .ansVitrineRight,
+.ansVitrineOpen .ansThemeParticle{
+  animation-duration:1s!important;
+  animation-delay:0s!important;
+  animation-fill-mode:both!important;
+}
