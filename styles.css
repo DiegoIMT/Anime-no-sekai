@@ -2688,3 +2688,35 @@ html:has(.adminView),body:has(.adminView){overflow:hidden !important;}
     background-position:center bottom !important;
   }
 }
+/* V7.17.22 — dos planos de la misma decoración: detrás de navegación,
+   delante del hero únicamente en la franja que sobresale. */
+#app > header.ansSeasonHeader::before,
+#app > header.ansSeasonHeader::after {
+  content:"";
+  position:absolute !important;
+  inset:0 0 -48px 0 !important;
+  background-image:var(--ans-season-decoration) !important;
+  background-repeat:no-repeat !important;
+  background-size:100% auto !important;
+  background-position:center top !important;
+  opacity:var(--ans-decor-opacity,.75) !important;
+  pointer-events:none !important;
+}
+#app > header.ansSeasonHeader::before {
+  z-index:0 !important;
+  clip-path:inset(0 0 48px 0);
+}
+#app > header.ansSeasonHeader::after {
+  z-index:3 !important;
+  clip-path:inset(calc(100% - 48px) 0 0 0);
+}
+#app > header.ansSeasonHeader > :not(.ansSeasonDecoration){z-index:2 !important}
+@media(max-width:760px){
+ #app > header.ansSeasonHeader::before,
+ #app > header.ansSeasonHeader::after{
+   inset:0 0 -30px 0 !important;
+   background-image:var(--ans-season-decoration-mobile,var(--ans-season-decoration)) !important;
+ }
+ #app > header.ansSeasonHeader::before{clip-path:inset(0 0 30px 0)}
+ #app > header.ansSeasonHeader::after{clip-path:inset(calc(100% - 30px) 0 0 0)}
+}
