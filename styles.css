@@ -3157,3 +3157,61 @@ html[data-theme="dark"] .hero .eyebrow{color:#a78bfa}
  .sectionHead h2.ansSeasonTitle[data-ans-title-style="cinta"],
  .sectionHead h2.ansSeasonTitle[data-ans-title-style="aurora"]{max-width:100%}
 }
+
+
+/* V7.18.0 — Partículas itinerantes, colores adaptados al tema. */
+@keyframes ansSeasonRoam{
+  0%{opacity:0;transform:translate3d(0,14px,0) scale(.75)}
+  14%{opacity:var(--ans-particle-peak,.52)}
+  54%{opacity:var(--ans-particle-mid,.42);transform:translate3d(calc(var(--ans-drift-x,0px)*.55),calc(var(--ans-drift-y,-50px)*.55),0) scale(1)}
+  85%{opacity:var(--ans-particle-peak,.52)}
+  100%{opacity:0;transform:translate3d(var(--ans-drift-x,0px),var(--ans-drift-y,-50px),0) scale(.72)}
+}
+#ansSeasonAmbient span{
+  animation-name:ansSeasonRoam!important;
+  animation-timing-function:linear!important;
+  animation-iteration-count:infinite!important;
+  will-change:transform,opacity;
+  --ans-particle-peak:.48;--ans-particle-mid:.35;
+}
+html[data-theme="light"] #ansSeasonAmbient span{
+  color:color-mix(in srgb,var(--ans-season-accent) 78%,#261044);
+  --ans-particle-peak:.76;--ans-particle-mid:.60;
+  text-shadow:0 1px 2px rgba(15,8,30,.40),0 0 4px currentColor;
+}
+html[data-theme="light"] #ansSeasonAmbient[data-ambient-style="luciernagas"] span,
+html[data-theme="light"] #ansSeasonAmbient[data-ambient-style="magia"] span{color:#9b5800}
+html[data-theme="light"] #ansSeasonAmbient[data-ambient-style="corazones"] span{color:#b20b56}
+html[data-theme="light"] #ansSeasonAmbient[data-ambient-style="burbujas"] span{color:#036a9b}
+html[data-theme="light"] #ansSeasonAmbient[data-ambient-style="nieve"] span{color:#4166a5}
+html[data-theme="light"] .sectionHead h2.ansSeasonTitle[data-ans-title-style="marco"]{
+  border-color:color-mix(in srgb,var(--ans-season-accent) 85%,#4b1a60);
+  background:color-mix(in srgb,var(--ans-season-accent) 17%,transparent);
+  box-shadow:0 0 0 2px color-mix(in srgb,var(--ans-season-accent) 22%,transparent),0 5px 16px rgba(32,16,55,.13)
+}
+html[data-theme="light"] .sectionHead h2.ansSeasonTitle[data-ans-title-style="cinta"]{
+  background:linear-gradient(90deg,color-mix(in srgb,var(--ans-season-accent) 38%,transparent),color-mix(in srgb,var(--ans-season-accent) 10%,transparent));
+  border-left-color:color-mix(in srgb,var(--ans-season-accent) 80%,#61244d)
+}
+html[data-theme="light"] .sectionHead h2.ansSeasonTitle[data-ans-title-style="aurora"]{
+  background:linear-gradient(100deg,color-mix(in srgb,var(--ans-season-accent) 36%,transparent),transparent 90%);
+  border-bottom-color:color-mix(in srgb,var(--ans-season-accent) 85%,#58265e)
+}
+html[data-theme="light"] .sectionHead h2.ansSeasonTitle[data-ans-title-style="insignia"]{
+  background:color-mix(in srgb,var(--ans-season-accent) 25%,transparent);
+  border-color:color-mix(in srgb,var(--ans-season-accent) 80%,#56225d)
+}
+html[data-theme="light"] .sectionHead h2.ansSeasonTitle[data-ans-title-style="neon"]{
+  text-shadow:0 1px 1px rgba(35,14,47,.25),0 0 8px color-mix(in srgb,var(--ans-season-accent) 48%,transparent)
+}
+html[data-theme="light"] .sectionHead h2.ansSeasonTitle[data-ans-title-style="halo"]{
+  text-shadow:0 1px 1px rgba(35,14,47,.2),0 0 8px color-mix(in srgb,var(--ans-season-accent) 60%,transparent)
+}
+html[data-theme="light"] .sectionHead h2.ansSeasonTitle::before{
+  color:color-mix(in srgb,var(--ans-season-accent) 80%,#5a1b66);
+  text-shadow:0 1px 3px rgba(44,15,52,.22)
+}
+html[data-theme="light"] .sectionHead h2.ansSeasonTitle::after{
+  box-shadow:0 1px 3px rgba(45,18,58,.17)
+}
+@media(prefers-reduced-motion:reduce){#ansSeasonAmbient{display:none!important}}

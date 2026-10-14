@@ -93,7 +93,24 @@ function ansApplySiteTheme(previewConfig){
  if(c.ambiente&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
   const layer=document.createElement('div');layer.id='ansSeasonAmbient';layer.setAttribute('aria-hidden','true');layer.dataset.ambientStyle=c.ambiente;
   const ambientGlyphs={nieve:'❄',estrellas:'✦',destellos:'✧',petalos:'❀',hojas:'🍁',luciernagas:'✺',corazones:'♥',burbujas:'◌',magia:'✵'};const glyph=ambientGlyphs[c.ambiente]||'✧';
-  for(let i=0;i<12;i++){const el=document.createElement('span');el.textContent=glyph;el.style.left=((i*37+13)%96)+'%';el.style.top=((i*29+9)%85)+'%';el.style.animationDelay=(-(i*1.43))+'s';el.style.animationDuration=(10+(i%5)*2)+'s';layer.appendChild(el)}
+  // Posiciones independientes; se renuevan al terminar cada ciclo CSS.
+  // Un único evento delegado, sin timers ni MutationObserver.
+  const placeParticle=(el)=>{
+   el.style.left=(3+Math.random()*94).toFixed(2)+'%';
+   el.style.top=(4+Math.random()*89).toFixed(2)+'%';
+   el.style.setProperty('--ans-drift-x',((Math.random()-.5)*110).toFixed(1)+'px');
+   el.style.setProperty('--ans-drift-y',(-25-Math.random()*75).toFixed(1)+'px');
+  };
+  layer.addEventListener('animationiteration',(event)=>{
+   if(event.target instanceof HTMLElement&&event.target.parentElement===layer)placeParticle(event.target);
+  });
+  for(let i=0;i<12;i++){
+   const el=document.createElement('span');el.textContent=glyph;
+   placeParticle(el);
+   el.style.animationDelay=(-(i*1.31))+'s';
+   el.style.animationDuration=(9+(i%5)*2.3).toFixed(1)+'s';
+   layer.appendChild(el);
+  }
   document.body.appendChild(layer);
  }
 }
