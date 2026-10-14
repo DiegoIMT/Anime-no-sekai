@@ -3028,3 +3028,42 @@ html[data-theme="light"] .hero.ansSeasonHero p{
   animation-delay:.15s!important;
   animation-fill-mode:both!important;
 }
+
+/* V7.17.36: sincronización más ágil, legibilidad localizada y controles translúcidos. */
+.ansVitrineOpen .ansVitrineLeft,.ansVitrineOpen .ansVitrineRight,
+.ansVitrineOpen .ansThemeParticle{animation-duration:1.18s!important;animation-delay:.10s!important}
+/* El fondo de lectura afecta sólo al bloque de contenido, no a todo el hero. */
+.hero.ansSeasonHero .heroContent{
+  padding:clamp(15px,2vw,26px);border-radius:18px;
+  background:rgba(5,6,12,.43)!important;
+  -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);
+  color:#fff!important;
+}
+.hero.ansSeasonHero .heroContent h1,
+.hero.ansSeasonHero .heroContent p{color:#fff!important;text-shadow:0 2px 5px rgba(0,0,0,.72)!important}
+html[data-theme="light"] .hero.ansSeasonHero .heroContent{
+  background:rgba(255,255,255,.67)!important;color:#17131e!important;
+}
+html[data-theme="light"] .hero.ansSeasonHero .heroContent h1,
+html[data-theme="light"] .hero.ansSeasonHero .heroContent p{
+  color:#17131e!important;text-shadow:0 1px 1px rgba(255,255,255,.5)!important;
+}
+/* Tema / Mi lista / Buscar / menú: misma translucidez en escritorio y móvil. */
+#app > header .headActions button{
+  background:rgba(18,19,29,.38)!important;
+  border:1px solid rgba(255,255,255,.32)!important;
+  color:#fff!important;
+  -webkit-backdrop-filter:blur(4px) saturate(115%)!important;
+  backdrop-filter:blur(4px) saturate(115%)!important;
+  box-shadow:0 2px 10px rgba(0,0,0,.12)!important;
+}
+html[data-theme="light"] #app > header .headActions button{
+  background:rgba(255,255,255,.42)!important;
+  border-color:rgba(40,33,56,.23)!important;
+  color:#201b2b!important;text-shadow:none!important;
+}
+#app > header .headActions button:hover{background:rgba(35,29,54,.58)!important}
+html[data-theme="light"] #app > header .headActions button:hover{background:rgba(255,255,255,.64)!important}
+@media(max-width:760px){
+ .hero.ansSeasonHero .heroContent{padding:15px;border-radius:14px}
+}
