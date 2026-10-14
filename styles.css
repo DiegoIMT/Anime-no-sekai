@@ -2914,3 +2914,43 @@ html:has(.adminView),body:has(.adminView){overflow:hidden !important;}
    grid-column:1!important;grid-row:5!important;
  }
 }
+
+/* V7.17.32 — Hero temático más visible; botones translúcidos. */
+.hero.ansSeasonHero{
+  background-image:linear-gradient(90deg,rgba(9,10,13,.42),rgba(9,10,13,.12)),var(--ans-season-hero)!important;
+}
+.hero.ansSeasonHero::before{
+  background:linear-gradient(180deg,rgba(9,10,13,.10),rgba(9,10,13,.25))!important;
+}
+.hero.ansSeasonHero .heroContent{text-shadow:0 2px 8px rgba(0,0,0,.65)}
+.hero.ansSeasonHero .heroBtns .primary{
+  background:rgba(139,92,246,.76)!important;
+  border:1px solid rgba(196,168,255,.45);
+  backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
+}
+.hero.ansSeasonHero .heroBtns .secondary{
+  background:rgba(12,13,19,.58)!important;
+  border:1px solid rgba(255,255,255,.22);
+  backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
+}
+.hero.ansSeasonHero .heroBtns .primary:hover{background:rgba(139,92,246,.90)!important}
+.hero.ansSeasonHero .heroBtns .secondary:hover{background:rgba(12,13,19,.75)!important}
+@media(max-width:760px){
+  .hero.ansSeasonHero{
+    background-image:linear-gradient(180deg,rgba(9,10,13,.18),rgba(9,10,13,.35)),var(--ans-season-hero-mobile,var(--ans-season-hero))!important;
+  }
+  .hero.ansSeasonHero::before{
+    background:linear-gradient(180deg,rgba(9,10,13,.08),rgba(9,10,13,.17) 60%,rgba(9,10,13,.23))!important;
+  }
+}
+html[data-theme="light"] .hero.ansSeasonHero{
+  background-image:linear-gradient(90deg,rgba(246,243,250,.42),rgba(246,243,250,.10)),var(--ans-season-hero)!important;
+}
+html[data-theme="light"] .hero.ansSeasonHero::before{
+  background:linear-gradient(180deg,rgba(246,243,250,.08),rgba(246,243,250,.20))!important;
+}
+@media(max-width:760px){
+  html[data-theme="light"] .hero.ansSeasonHero{
+    background-image:linear-gradient(180deg,rgba(246,243,250,.22),rgba(246,243,250,.37)),var(--ans-season-hero-mobile,var(--ans-season-hero))!important;
+  }
+}
