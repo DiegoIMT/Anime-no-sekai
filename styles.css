@@ -3832,3 +3832,10 @@ html[data-theme="light"] #app > footer .footerAuthor{color:#6331a0}
   }
   /* No modificar el encabezado propio de Ami ni las reglas móviles. */
 }
+
+/* V7.18.24 — Marco temático web: cubrir el contenedor sin deformar. */
+@media (min-width: 761px) {
+  main .sectionHead > div > h2.ansSeasonTitle:is([data-ans-title-style^="kawaii-"],[data-ans-title-style="personalizado"]) {
+    background-size: cover !important;
+  }
+}
