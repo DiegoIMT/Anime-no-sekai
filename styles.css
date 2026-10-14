@@ -2840,3 +2840,31 @@ html:has(.adminView),body:has(.adminView){overflow:hidden !important;}
  .ansMiniStore.ansMiniMobile .ansMiniHeader{aspect-ratio:430 / 100 !important}
  .ansMiniStore.ansMiniMobile .ansMiniHeader img[data-mini-image="encabezado"]{aspect-ratio:430 / 145 !important}
 }
+
+/* V7.17.27 — Apertura y partículas sincronizadas (máximo 1.2 s).
+   Mantener esta regla al final para prevalecer sobre versiones anteriores. */
+.ansVitrineOpen .ansVitrineLeft,.ansVitrineOpen .ansVitrineRight{animation-duration:.84s!important;animation-delay:.14s!important}
+.ansVitrineOpen .ansVitrineLock,.ansVitrineOpen .ansVitrineSeam{animation-duration:.30s!important}
+.ansVitrineOpen .ansThemeParticle{animation-duration:var(--p-duration,1.05s)!important;animation-delay:var(--p-delay,0s)!important;animation-fill-mode:both!important}
+@media(prefers-reduced-motion:reduce){.ansVitrineOpen .ansThemeParticle{animation:none!important}}
+/* V7.17.28 — vistas contextuales de decoraciones, sin salir del editor. */
+.ansSeasonInlinePreview{margin:20px 0;padding:16px;border:1px solid rgba(150,150,170,.24);border-radius:14px;overflow:hidden}
+.ansSeasonInlinePreviewTitle{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.ansSeasonInlinePreviewTitle>div{display:flex;gap:8px}
+.ansSeasonInlineCanvas{width:100%;overflow:hidden;border-radius:10px;background:#14131e}
+.ansSeasonInlineArt{position:relative;width:100%;background:linear-gradient(110deg,#15101f,#251b36);isolation:isolate}
+.ansSeasonInlineHeader{aspect-ratio:1920/180;min-height:55px}
+.ansSeasonInlineFooter{aspect-ratio:1920/220;min-height:75px}
+.ansSeasonInlineArt>img{display:block;position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:0}
+.ansSeasonInlineArt>img[hidden]{display:none}
+.ansSeasonInlineCopy{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-around;gap:10px;z-index:1;pointer-events:none;color:#fff;text-shadow:0 1px 4px #000}
+.ansSeasonInlineCopy>b,.ansSeasonInlineCopy>small{padding:6px 10px;border-radius:9px;background:rgba(8,9,15,.7);backdrop-filter:blur(7px)}
+.ansSeasonInlineFooter .ansSeasonInlineCopy{flex-direction:column;justify-content:center}
+.ansInlineMobile .ansSeasonInlineCanvas{max-width:300px;margin:auto}
+.ansInlineMobile .ansSeasonInlineHeader{aspect-ratio:430/145;min-height:0}
+.ansInlineMobile .ansSeasonInlineFooter{aspect-ratio:430/340;min-height:0}
+.ansInlineMobile .ansSeasonInlineCopy{flex-direction:column;justify-content:center;font-size:12px}
+.ansInlineMobile .ansSeasonInlineCopy>small{font-size:10px}
+/* La miniatura conserva el lienzo completo de la decoración, incluido el relieve. */
+.ansMiniHeader img[data-mini-image="encabezado"]{object-fit:fill!important}
+.ansMiniFooter img[data-mini-image="pie"]{object-fit:fill!important}
