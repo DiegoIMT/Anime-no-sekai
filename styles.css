@@ -2720,3 +2720,11 @@ html:has(.adminView),body:has(.adminView){overflow:hidden !important;}
  #app > header.ansSeasonHeader::before{clip-path:inset(0 0 30px 0)}
  #app > header.ansSeasonHeader::after{clip-path:inset(calc(100% - 30px) 0 0 0)}
 }
+/* V7.17.23 — la imagen de ambas capas comparte un mismo anclaje inferior.
+   Antes se dibujaba desde arriba y se agotaba antes de la zona sobresaliente,
+   provocando la banda negra y la decoración duplicada. */
+#app > header.ansSeasonHeader::before,
+#app > header.ansSeasonHeader::after {
+  background-position:center bottom !important;
+  background-size:100% auto !important;
+}
