@@ -3230,3 +3230,20 @@ html[data-theme="light"] .hero.ansSeasonHero .heroContent .eyebrow{
 html[data-theme="light"] .hero.ansSeasonHero .heroContent h1{color:#17131e!important}
 html[data-theme="light"] .hero.ansSeasonHero .heroContent p{color:#211b28!important}
 html[data-theme="light"] .hero.ansSeasonHero .heroContent .eyebrow{color:#5b21b6!important}
+
+/* V7.18.2 — Subtítulo del hero legible en modo claro (web y móvil). */
+html[data-theme="light"] .hero.ansSeasonHero .heroContent .eyebrow{
+  color:#32105f!important;
+  font-size:15px!important;
+  font-weight:800!important;
+  letter-spacing:.85px!important;
+  line-height:1.45!important;
+  text-shadow:none!important;
+  -webkit-text-stroke:0!important;
+}
+@media(max-width:600px){
+  html[data-theme="light"] .hero.ansSeasonHero .heroContent .eyebrow{
+    font-size:14px!important;
+    letter-spacing:.55px!important;
+  }
+}
