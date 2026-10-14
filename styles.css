@@ -3550,3 +3550,62 @@ html[data-theme="light"] #app > footer .footerAuthor{color:#6331a0}
   margin: 0 !important;
   padding: 0 !important;
 }
+
+/* V7.18.16 — Ofertas: marco completo y botón debajo en móvil */
+
+@media (max-width: 760px) {
+
+  #ofertas .sectionHead {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 14px !important;
+  }
+
+  #ofertas .sectionHead > div {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    flex: 0 0 auto !important;
+  }
+
+  #ofertas .sectionHead h2.ansSeasonTitle[
+    data-ans-title-style^="kawaii-"
+  ],
+  #ofertas .sectionHead h2.ansSeasonTitle[
+    data-ans-title-style="personalizado"
+  ] {
+    box-sizing: border-box !important;
+    display: flex !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 126px !important;
+    padding: 23px 68px !important;
+    margin: 8px 0 12px !important;
+    font-size: clamp(18px, 4.5vw, 26px) !important;
+    line-height: 1.17 !important;
+    text-align: center !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+    hyphens: none !important;
+  }
+
+  #ofertas .sectionHead .sectionLinkButton {
+    align-self: flex-start !important;
+    max-width: 100% !important;
+  }
+}
+
+@media (max-width: 420px) {
+
+  #ofertas .sectionHead h2.ansSeasonTitle[
+    data-ans-title-style^="kawaii-"
+  ],
+  #ofertas .sectionHead h2.ansSeasonTitle[
+    data-ans-title-style="personalizado"
+  ] {
+    min-height: 116px !important;
+    padding: 20px 52px !important;
+    font-size: clamp(17px, 4.8vw, 21px) !important;
+  }
+}
