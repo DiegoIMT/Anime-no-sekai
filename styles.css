@@ -3719,3 +3719,21 @@ html[data-theme="light"] #app > footer .footerAuthor{color:#6331a0}
     text-align: center !important;
   }
 }
+
+/* V7.19.5 — Centrado horizontal uniforme de los marcos temáticos.
+   Centra el marco como elemento, no solamente su texto. */
+main .sectionHead > div:has(> h2.ansSeasonTitle:is([data-ans-title-style^="kawaii-"], [data-ans-title-style="personalizado"])) {
+  margin-inline: auto;
+}
+main .sectionHead h2.ansSeasonTitle:is([data-ans-title-style^="kawaii-"], [data-ans-title-style="personalizado"]) {
+  margin-inline: auto !important;
+  text-align: center !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+@media (max-width: 760px) {
+  main .sectionHead > div:has(> h2.ansSeasonTitle:is([data-ans-title-style^="kawaii-"], [data-ans-title-style="personalizado"])) {
+    width: 100%;
+    min-width: 0;
+  }
+}
