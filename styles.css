@@ -3733,3 +3733,60 @@ html[data-theme="light"] #app > footer .footerAuthor{color:#6331a0}
     flex: 0 0 auto !important;
   }
 }
+
+/* V7.18.22 — Marcos de títulos en WEB. El marco y el texto usan el
+   MISMO ancho real. Se evita el shrink del flex y la reducción de contain.
+   No afecta móvil ni el administrador. */
+@media (min-width: 761px) {
+  .sectionHead:has(h2.ansSeasonTitle:is([data-ans-title-style^="kawaii-"],[data-ans-title-style="personalizado"])) {
+    flex-wrap: wrap !important;
+  }
+  .sectionHead > div:has(> h2.ansSeasonTitle:is([data-ans-title-style^="kawaii-"],[data-ans-title-style="personalizado"])) {
+    flex: 0 1 920px !important;
+    box-sizing: border-box !important;
+    width: min(920px, 100%) !important;
+    max-width: 920px !important;
+    min-width: 0 !important;
+  }
+  .sectionHead > div > h2.ansSeasonTitle:is([data-ans-title-style^="kawaii-"],[data-ans-title-style="personalizado"]) {
+    box-sizing: border-box !important;
+    flex: none !important;
+    display: flex !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    aspect-ratio: 5 / 1 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 24px 125px !important;
+    background-size: 100% 100% !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    font-size: clamp(24px, 2.2vw, 34px) !important;
+    line-height: 1.1 !important;
+    text-align: center !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+  }
+  .sectionHead > h2.ansSeasonTitle:is([data-ans-title-style^="kawaii-"],[data-ans-title-style="personalizado"]) {
+    box-sizing: border-box !important;
+    flex: 0 1 920px !important;
+    width: min(920px, 100%) !important;
+    max-width: 920px !important;
+    min-width: 0 !important;
+    aspect-ratio: 5 / 1 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 24px 125px !important;
+    background-size: 100% 100% !important;
+    font-size: clamp(24px, 2.2vw, 34px) !important;
+  }
+  #amiHomeName.ansSeasonTitle:is([data-ans-title-style^="kawaii-"],[data-ans-title-style="personalizado"]) {
+    width: min(550px, 100%) !important;
+    max-width: 550px !important;
+    aspect-ratio: 5 / 1 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    background-size: 100% 100% !important;
+  }
+}
