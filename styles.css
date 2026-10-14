@@ -2885,3 +2885,32 @@ html:has(.adminView),body:has(.adminView){overflow:hidden !important;}
 @media(prefers-reduced-motion:reduce){
   .ansVitrineOpen .ansThemeParticle{animation:none!important}
 }
+
+/* V7.17.30 — Corregir superposición de tarjetas web/móvil en editor.
+   nth-of-type contaba también el título y la vista previa (div). */
+.ansThemeEditorPanel[data-theme-panel="header"] > .ansSeasonUpload:has([data-season-file="encabezado"]),
+.ansThemeEditorPanel[data-theme-panel="footer"] > .ansSeasonUpload:has([data-season-file="pie"]){
+  grid-column:2!important;grid-row:2!important;
+}
+.ansThemeEditorPanel[data-theme-panel="header"] > .ansSeasonUpload:has([data-season-file="encabezado_movil"]),
+.ansThemeEditorPanel[data-theme-panel="footer"] > .ansSeasonUpload:has([data-season-file="pie_movil"]){
+  grid-column:2!important;grid-row:3!important;
+}
+.ansThemeEditorPanel[data-theme-panel="header"] > .ansSeasonInlinePreview,
+.ansThemeEditorPanel[data-theme-panel="footer"] > .ansSeasonInlinePreview{
+  grid-column:1!important;grid-row:3 / span 2!important;min-width:0;
+}
+@media(max-width:720px){
+ .ansThemeEditorPanel[data-theme-panel="header"] > .ansSeasonUpload:has([data-season-file="encabezado"]),
+ .ansThemeEditorPanel[data-theme-panel="footer"] > .ansSeasonUpload:has([data-season-file="pie"]){
+   grid-column:1!important;grid-row:3!important;
+ }
+ .ansThemeEditorPanel[data-theme-panel="header"] > .ansSeasonUpload:has([data-season-file="encabezado_movil"]),
+ .ansThemeEditorPanel[data-theme-panel="footer"] > .ansSeasonUpload:has([data-season-file="pie_movil"]){
+   grid-column:1!important;grid-row:4!important;
+ }
+ .ansThemeEditorPanel[data-theme-panel="header"] > .ansSeasonInlinePreview,
+ .ansThemeEditorPanel[data-theme-panel="footer"] > .ansSeasonInlinePreview{
+   grid-column:1!important;grid-row:5!important;
+ }
+}
