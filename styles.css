@@ -3691,7 +3691,7 @@ html[data-theme="light"] #app > footer .footerAuthor{color:#6331a0}
     background-size: contain !important;
     background-position: center center !important;
     background-repeat: no-repeat !important;
-    font-size: clamp(19px, 1.75vw, 27px) !important;
+    font-size: clamp(29px, 2.7vw, 38px) !important;
     line-height: 1.16 !important;
     text-align: center !important;
     white-space: normal !important;
@@ -3714,7 +3714,7 @@ html[data-theme="light"] #app > footer .footerAuthor{color:#6331a0}
     background-size: contain !important;
     background-position: center center !important;
     background-repeat: no-repeat !important;
-    font-size: clamp(19px, 1.8vw, 27px) !important;
+    font-size: clamp(27px, 2.45vw, 35px) !important;
     line-height: 1.15 !important;
     text-align: center !important;
   }
