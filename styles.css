@@ -2657,95 +2657,11 @@ html:has(.adminView),body:has(.adminView){overflow:hidden !important;}
 }
 .ansThemeEditorPanel[data-theme-panel="preview"] .ansMiniFooter{min-height:0;aspect-ratio:1920 / 220}
 .ansThemeEditorPanel[data-theme-panel="preview"] .ansMiniStore.ansMiniMobile .ansMiniFooter{min-height:0;aspect-ratio:430 / 340}
-/* V7.17.21 — prueba de decoración con profundidad, sin alterar la geometría de la tienda. */
-#app > header.ansSeasonHeader,
-#app > footer.ansSeasonFooter { overflow:visible !important; }
-#app > header.ansSeasonHeader { z-index:50; }
-#app > footer.ansSeasonFooter { z-index:2; }
-/* La capa decorativa conserva su relación de aspecto y puede sobresalir.
-   No captura interacciones ni modifica el tamaño de la barra o el footer. */
-#app > header.ansSeasonHeader::before {
-  inset:0 0 -48px 0 !important;
-  background-size:100% auto !important;
-  background-position:center top !important;
-  pointer-events:none !important;
-}
-#app > footer.ansSeasonFooter::before {
-  inset:-44px 0 0 0 !important;
-  background-size:100% auto !important;
-  background-position:center bottom !important;
-  pointer-events:none !important;
-}
-@media(max-width:760px){
-  #app > header.ansSeasonHeader::before {
-    inset:0 0 -30px 0 !important;
-    background-size:100% auto !important;
-    background-position:center top !important;
-  }
-  #app > footer.ansSeasonFooter::before {
-    inset:-30px 0 0 0 !important;
-    background-size:100% auto !important;
-    background-position:center bottom !important;
-  }
-}
-/* V7.17.22 — dos planos de la misma decoración: detrás de navegación,
-   delante del hero únicamente en la franja que sobresale. */
-#app > header.ansSeasonHeader::before,
-#app > header.ansSeasonHeader::after {
-  content:"";
-  position:absolute !important;
-  inset:0 0 -48px 0 !important;
-  background-image:var(--ans-season-decoration) !important;
-  background-repeat:no-repeat !important;
-  background-size:100% auto !important;
-  background-position:center top !important;
-  opacity:var(--ans-decor-opacity,.75) !important;
-  pointer-events:none !important;
-}
-#app > header.ansSeasonHeader::before {
-  z-index:0 !important;
-  clip-path:inset(0 0 48px 0);
-}
-#app > header.ansSeasonHeader::after {
-  z-index:3 !important;
-  clip-path:inset(calc(100% - 48px) 0 0 0);
-}
-#app > header.ansSeasonHeader > :not(.ansSeasonDecoration){z-index:2 !important}
-@media(max-width:760px){
- #app > header.ansSeasonHeader::before,
- #app > header.ansSeasonHeader::after{
-   inset:0 0 -30px 0 !important;
-   background-image:var(--ans-season-decoration-mobile,var(--ans-season-decoration)) !important;
- }
- #app > header.ansSeasonHeader::before{clip-path:inset(0 0 30px 0)}
- #app > header.ansSeasonHeader::after{clip-path:inset(calc(100% - 30px) 0 0 0)}
-}
-/* V7.17.23 — la imagen de ambas capas comparte un mismo anclaje inferior.
-   Antes se dibujaba desde arriba y se agotaba antes de la zona sobresaliente,
-   provocando la banda negra y la decoración duplicada. */
-#app > header.ansSeasonHeader::before,
-#app > header.ansSeasonHeader::after {
-  background-position:center bottom !important;
-  background-size:100% auto !important;
-}
-
-/* V7.17.24 — composición estacional con recursos independientes y relieve. */
-#app > header.ansSeasonHeader {height:90px !important;min-height:90px !important;overflow:visible !important;position:relative;z-index:50;isolation:isolate}
-#app > header.ansSeasonHeader::before,
-#app > header.ansSeasonHeader::after {
- content:"" !important;position:absolute !important;
- inset:0 0 -60px 0 !important;
- background-image:var(--ans-season-decoration) !important;
- background-size:100% auto !important;background-position:center top !important;
- background-repeat:no-repeat !important;
- opacity:var(--ans-decor-opacity,.75) !important;
- pointer-events:none !important;
-}
-#app > header.ansSeasonHeader::before{z-index:0 !important;clip-path:inset(0 0 60px 0) !important}
-#app > header.ansSeasonHeader::after{z-index:3 !important;clip-path:inset(calc(100% - 60px) 0 0 0) !important}
+/* V7.19.11 — Consolidación del encabezado: navegación y decoraciones.
+   Se retiran reglas históricas V7.17.21–V7.17.26 que se sobrescribían. */
+#app > header.ansSeasonHeader{position:relative;isolation:isolate;overflow:visible !important;z-index:50}
 #app > header.ansSeasonHeader > :not(.ansSeasonDecoration){position:relative;z-index:2 !important}
-#app > header.ansSeasonHeader > .headerSearch,
-#app > header.ansSeasonHeader > .mobileNav{position:absolute}
+#app > header.ansSeasonHeader > .headerSearch,#app > header.ansSeasonHeader > .mobileNav{position:absolute}
 #app > footer.ansSeasonFooter{min-height:220px !important;position:relative;overflow:visible !important;isolation:isolate}
 #app > footer.ansSeasonFooter::before{
  content:"" !important;position:absolute !important;inset:0 !important;
@@ -2786,38 +2702,6 @@ html:has(.adminView),body:has(.adminView){overflow:hidden !important;}
 .ansMiniStore.ansMiniMobile .ansMiniFooter{height:auto !important;min-height:0 !important;aspect-ratio:430 / 340 !important}
 .ansMiniStore.ansMiniMobile .ansMiniFooter img[data-mini-image="pie"]{object-fit:contain !important}
 
-/* V7.17.25 — corrección de la franja negra: ambos planos usan exactamente
-   el lienzo proporcional de la imagen, no un contenedor artificial de 150px.
-   El corte entre planos ocurre en el borde REAL del header. */
-#app > header.ansSeasonHeader::before,
-#app > header.ansSeasonHeader::after{
-  top:0 !important;right:0 !important;bottom:auto !important;left:0 !important;
-  width:100% !important;height:auto !important;
-  aspect-ratio:1920 / 150 !important;
-  background-size:100% 100% !important;
-  background-position:center top !important;
-  background-repeat:no-repeat !important;
-}
-#app > header.ansSeasonHeader::before{
-  clip-path:inset(0 0 calc(100% - 90px) 0) !important;
-}
-#app > header.ansSeasonHeader::after{
-  clip-path:inset(90px 0 0 0) !important;
-}
-@media(max-width:760px){
-  #app > header.ansSeasonHeader::before,
-  #app > header.ansSeasonHeader::after{
-    aspect-ratio:430 / 130 !important;
-    background-size:100% 100% !important;
-  }
-  #app > header.ansSeasonHeader::before{
-    clip-path:inset(0 0 calc(100% - 85px) 0) !important;
-  }
-  #app > header.ansSeasonHeader::after{
-    clip-path:inset(85px 0 0 0) !important;
-  }
-}
-
 /* V7.17.26 — header más alto, navegación legible y relieve coherente. */
 #app > header {height:120px;min-height:120px;display:flex;align-items:center}
 #app > header.ansSeasonHeader{height:120px !important;min-height:120px !important}
@@ -2825,22 +2709,9 @@ html:has(.adminView),body:has(.adminView){overflow:hidden !important;}
 #app > header > nav{padding:12px 16px;border-radius:13px;background:rgba(8,9,15,.70);border:1px solid rgba(255,255,255,.10);box-shadow:0 6px 24px rgba(0,0,0,.25);backdrop-filter:blur(9px)}
 #app > header > nav a{text-shadow:0 1px 4px rgba(0,0,0,.85)}
 #app > header > .headActions button{background:rgba(11,12,19,.84);backdrop-filter:blur(8px);text-shadow:0 1px 3px #000}
-#app > header.ansSeasonHeader::before,#app > header.ansSeasonHeader::after{aspect-ratio:1920 / 180 !important;background-size:100% 100% !important}
-#app > header.ansSeasonHeader::before{clip-path:inset(0 0 calc(100% - 120px) 0) !important}
-#app > header.ansSeasonHeader::after{clip-path:inset(120px 0 0 0) !important}
-.ansMiniHeader{aspect-ratio:1920 / 120 !important}
-.ansMiniHeader img[data-mini-image="encabezado"]{aspect-ratio:1920 / 180 !important}
-@media(max-width:900px){#app > header > nav{display:none}}
-@media(max-width:760px){
- #app > header{height:100px;min-height:100px}
- #app > header.ansSeasonHeader{height:100px !important;min-height:100px !important}
- #app > header.ansSeasonHeader::before,#app > header.ansSeasonHeader::after{aspect-ratio:430 / 145 !important}
- #app > header.ansSeasonHeader::before{clip-path:inset(0 0 calc(100% - 100px) 0) !important}
- #app > header.ansSeasonHeader::after{clip-path:inset(100px 0 0 0) !important}
- .ansMiniStore.ansMiniMobile .ansMiniHeader{aspect-ratio:430 / 100 !important}
- .ansMiniStore.ansMiniMobile .ansMiniHeader img[data-mini-image="encabezado"]{aspect-ratio:430 / 145 !important}
-}
 
+@media(max-width:900px){#app > header > nav{display:none}}
+@media(max-width:760px){#app > header{height:100px;min-height:100px}#app > header.ansSeasonHeader{height:100px !important;min-height:100px !important}}
 /* V7.17.27 — Apertura y partículas sincronizadas (máximo 1.2 s).
    Mantener esta regla al final para prevalecer sobre versiones anteriores. */
 .ansVitrineOpen .ansVitrineLeft,.ansVitrineOpen .ansVitrineRight{animation-duration:.84s!important;animation-delay:.14s!important}
@@ -3839,98 +3710,39 @@ main .publicAdditionalCard .photo img {
   object-fit: contain !important;
   object-position: center !important;
 }
-/* Se revierte la expansion artificial de 95px de V7.19.7 que
-   hacia que la decoracion invadiera las tarjetas. */
+/* V7.19.11 — Decoración independiente de la altura de navegación.
+   Un solo lienzo proporcional, duplicado en dos planos: debajo de los controles
+   y encima del contenido únicamente en la franja de relieve.
+   El desplazamiento asegura contenido visible en la franja, sin alterar el header. */
 #app > header.ansSeasonHeader::before,
 #app > header.ansSeasonHeader::after {
-  height: auto !important;
-  aspect-ratio: 1920 / 180 !important;
-  background-size: 100% 100% !important;
-  background-position: center top !important;
+  content:"" !important; position:absolute !important;
+  top:var(--ans-header-art-shift,0px) !important;right:0 !important;bottom:auto !important;left:0 !important;
+  width:100% !important; height:auto !important;aspect-ratio:1920 / 180 !important;
+  background-image:var(--ans-season-decoration) !important;
+  background-size:100% 100% !important;background-position:center top !important;
+  background-repeat:no-repeat !important;opacity:var(--ans-decor-opacity,.75) !important;
+  pointer-events:none !important;
 }
-@media (max-width: 760px) {
-  #app > header.ansSeasonHeader::before,
-  #app > header.ansSeasonHeader::after {aspect-ratio: 430 / 145 !important;}
-}
-/* V7.19.9 — Relieve moderado del encabezado, sin alterar tarjetas ni navegación.
-   Ambas capas usan el mismo lienzo proporcional de la imagen; la capa frontal
-   solo muestra una franja limitada bajo el borde inferior del encabezado. */
-#app > header.ansSeasonHeader {
-  overflow: visible !important;
-  position: relative;
-  isolation: isolate;
-}
-#app > header.ansSeasonHeader::before,
-#app > header.ansSeasonHeader::after {
-  top: 0 !important;
-  right: 0 !important;
-  bottom: auto !important;
-  left: 0 !important;
-  width: 100% !important;
-  height: auto !important;
-  aspect-ratio: 1920 / 180 !important;
-  background-size: 100% 100% !important;
-  background-position: center top !important;
-  background-repeat: no-repeat !important;
-  pointer-events: none !important;
-}
-/* Barra de 120px: como máximo 28px de adorno por debajo. */
+#app > header.ansSeasonHeader {--ans-header-art-shift:clamp(0px, calc(148px - 9.375vw), 18px);}
 #app > header.ansSeasonHeader::before {
-  clip-path: inset(0 0 max(0px, calc(100% - 120px)) 0) !important;
+  z-index:0 !important;
+  clip-path:inset(0 0 max(0px,calc(100% - (120px - var(--ans-header-art-shift)))) 0) !important;
 }
 #app > header.ansSeasonHeader::after {
-  clip-path: inset(120px 0 max(0px, calc(100% - 148px)) 0) !important;
+  z-index:3 !important;
+  clip-path:inset(calc(120px - var(--ans-header-art-shift)) 0 max(0px,calc(100% - (148px - var(--ans-header-art-shift)))) 0) !important;
 }
-@media (max-width: 760px) {
-  #app > header.ansSeasonHeader::before,
-  #app > header.ansSeasonHeader::after {
-    aspect-ratio: 430 / 145 !important;
-  }
-  /* Barra de 100px: como máximo 24px de adorno por debajo. */
-  #app > header.ansSeasonHeader::before {
-    clip-path: inset(0 0 max(0px, calc(100% - 100px)) 0) !important;
-  }
-  #app > header.ansSeasonHeader::after {
-    clip-path: inset(100px 0 max(0px, calc(100% - 124px)) 0) !important;
-  }
-}
-/* V7.19.10 — Relieve real y acotado de la decoración estacional.
-   Las dos capas comparten el MISMO lienzo y se recortan en el borde de la barra.
-   El lienzo mantiene la proporción de la imagen (100% auto) y se ancla abajo;
-   no se añade altura al header ni se modifican las tarjetas. */
-#app > header.ansSeasonHeader {
-  overflow: visible !important;
-  isolation: isolate;
-}
-#app > header.ansSeasonHeader::before,
-#app > header.ansSeasonHeader::after {
-  inset: 0 0 auto 0 !important;
-  width: 100% !important;
-  height: 148px !important; /* 120px de barra + 28px de relieve */
-  aspect-ratio: auto !important;
-  background-size: 100% auto !important;
-  background-position: center bottom !important;
-  background-repeat: no-repeat !important;
-  pointer-events: none !important;
-}
-#app > header.ansSeasonHeader::before {
-  clip-path: inset(0 0 28px 0) !important;
-}
-#app > header.ansSeasonHeader::after {
-  clip-path: inset(120px 0 0 0) !important;
-}
-@media (max-width: 760px) {
-  #app > header.ansSeasonHeader::before,
-  #app > header.ansSeasonHeader::after {
-    height: 124px !important; /* 100px de barra + 24px de relieve */
-    aspect-ratio: auto !important;
-    background-size: 100% auto !important;
-    background-position: center bottom !important;
-  }
-  #app > header.ansSeasonHeader::before {
-    clip-path: inset(0 0 24px 0) !important;
-  }
-  #app > header.ansSeasonHeader::after {
-    clip-path: inset(100px 0 0 0) !important;
-  }
+@media(max-width:760px){
+ #app > header.ansSeasonHeader {--ans-header-art-shift:16px;}
+ #app > header.ansSeasonHeader::before,#app > header.ansSeasonHeader::after{
+  aspect-ratio:430 / 145 !important;
+  background-image:var(--ans-season-decoration-mobile,var(--ans-season-decoration)) !important;
+ }
+ #app > header.ansSeasonHeader::before{
+  clip-path:inset(0 0 max(0px,calc(100% - 84px)) 0) !important;
+ }
+ #app > header.ansSeasonHeader::after{
+  clip-path:inset(84px 0 max(0px,calc(100% - 108px)) 0) !important;
+ }
 }
