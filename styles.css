@@ -3794,3 +3794,20 @@ main .publicAdditionalCard .photo img {
     justify-self: start !important;
   }
 }
+
+/* V7.19.15 — El marco de Ami ocupa toda la primera fila disponible
+   (hasta el borde derecho del botón), manteniendo logo y segunda fila. */
+@media (min-width: 801px) {
+  main #mas-coleccion .amiHomeIdentity > div {
+    width: 100%;
+    max-width: none;
+    justify-self: stretch;
+  }
+  main #mas-coleccion #amiHomeName.ansSeasonTitle:is(
+    [data-ans-title-style^="kawaii-"],
+    [data-ans-title-style="personalizado"]
+  ) {
+    width: 100% !important;
+    max-width: none !important;
+  }
+}
