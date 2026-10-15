@@ -3746,3 +3746,51 @@ main .publicAdditionalCard .photo img {
   clip-path:inset(84px 0 max(0px,calc(100% - 108px)) 0) !important;
  }
 }
+
+/* V7.19.14 — Ami no Sekai: primera fila logo + marco/título; segunda fila texto + acceso.
+   Se mantiene el marco, sus medidas y las tarjetas existentes. */
+@media (min-width: 801px) {
+  main #mas-coleccion .amiHomeIdentity {
+    display: grid;
+    grid-template-columns: 112px minmax(0, 1fr) auto !important;
+    grid-template-rows: auto auto;
+    column-gap: 24px;
+    row-gap: 18px;
+    align-items: center;
+  }
+  main #mas-coleccion .amiHomeIdentity > img {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  main #mas-coleccion .amiHomeIdentity > div {
+    grid-column: 2 / 4;
+    grid-row: 1;
+    min-width: 0;
+  }
+  main #mas-coleccion .amiHomeIdentity > #amiHomeText {
+    grid-column: 2;
+    grid-row: 2;
+    min-width: 0;
+    margin: 0;
+  }
+  main #mas-coleccion .amiHomeIdentity > .sectionLinkButton {
+    grid-column: 3 !important;
+    grid-row: 2;
+    justify-self: end !important;
+    align-self: center;
+    margin: 0 !important;
+  }
+}
+@media (max-width: 800px) {
+  main #mas-coleccion .amiHomeIdentity > div {min-width: 0;}
+  main #mas-coleccion .amiHomeIdentity > #amiHomeText {
+    grid-column: 1 / -1;
+    grid-row: auto;
+    margin: 0;
+  }
+  main #mas-coleccion .amiHomeIdentity > .sectionLinkButton {
+    grid-column: 1 / -1 !important;
+    grid-row: auto;
+    justify-self: start !important;
+  }
+}
