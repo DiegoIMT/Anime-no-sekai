@@ -878,13 +878,14 @@ async function verifyAdminAndRender(){
  renderAdminPanel();
 }
 function renderAdminPanel(){
- document.getElementById('adminContent').innerHTML=`<div class="adminNav"><button class="active" id="adminProductsTab" type="button">Productos</button><button id="adminCatalogsTab" type="button">Catálogos</button><button id="adminReviewsTab" type="button">Reseñas</button><button id="adminContentTab" type="button">Contenido del sitio</button><button id="adminAnalyticsTab" type="button">Estadísticas</button><button id="adminThemesTab" type="button">Temáticas</button></div><div id="adminPanelBody"></div>`;
+ document.getElementById('adminContent').innerHTML=`<div class="adminNav"><button class="active" id="adminProductsTab" type="button">Productos</button><button id="adminCatalogsTab" type="button">Catálogos</button><button id="adminReviewsTab" type="button">Reseñas</button><button id="adminContentTab" type="button">Contenido del sitio</button><button id="adminAnalyticsTab" type="button">Estadísticas</button><button id="adminThemesTab" type="button">Temáticas</button><button id="adminMediaTab" type="button">Biblioteca de imágenes</button></div><div id="adminPanelBody"></div>`;
  document.getElementById('adminProductsTab').onclick=()=>showAdminProductsSection();
  document.getElementById('adminCatalogsTab').onclick=()=>showAdminCatalogsSection();
  document.getElementById('adminReviewsTab').onclick=()=>showAdminReviewsSection();
  document.getElementById('adminContentTab').onclick=()=>showSiteContentForm();
  document.getElementById('adminAnalyticsTab').onclick=()=>showAdminAnalytics();
  document.getElementById('adminThemesTab').onclick=()=>ansShowThemes();
+ document.getElementById('adminMediaTab').onclick=()=>ansShowMediaLibrary();
  showAdminProductsSection();
 }
 function setAdminTab(activeId){
@@ -1828,3 +1829,114 @@ mini.querySelectorAll('.ansMiniTitle').forEach(title=>{
 form.onsubmit=async e=>{e.preventDefault();const btn=document.getElementById('ansThemeSave');btn.disabled=true;msg.className='formMessage';msg.textContent='Guardando…';try{const upload=async entry=>{if(!entry)return null;if(!entry.file)return entry.url;const path='tematicas/'+crypto.randomUUID()+'.png';const {error}=await supabaseClient.storage.from('sitio').upload(path,entry.file,{contentType:'image/png',upsert:false});if(error)throw error;return supabaseClient.storage.from('sitio').getPublicUrl(path).data.publicUrl};const urls=[];for(const entry of dec)urls.push(await upload(entry));const emblemUrl=await upload(emblem);const c={...config(),decoraciones:urls,emblema:emblemUrl};const uploadedFrame=await (async()=>{if(!customFrameFile)return null;if(!customFrameFile.file)return customFrameFile.url;const f=customFrameFile.file;const svg=f.type==='image/svg+xml'||f.name.toLowerCase().endsWith('.svg');const ext=svg?'svg':f.type==='image/webp'?'webp':'png';const path='tematicas/'+crypto.randomUUID()+'.'+ext;const {error}=await supabaseClient.storage.from('sitio').upload(path,f,{contentType:svg?'image/svg+xml':f.type,upsert:false});if(error)throw error;return supabaseClient.storage.from('sitio').getPublicUrl(path).data.publicUrl})();const appearanceSaved={...appearance,marco_personalizado:uploadedFrame,acento:form.elements.seasonAccent.value,titulos:form.elements.seasonTitles.value==='no'?false:form.elements.seasonTitles.value,ambientes:[...form.querySelectorAll('[name="seasonAmbients"]:checked')].map(x=>x.value),ambiente:'',ambiente_cantidad:form.elements.ambientQuantity.value,ambiente_velocidad:form.elements.ambientSpeed.value,ambiente_tamano:form.elements.ambientSize.value};for(const k of ['encabezado','pie']){appearanceSaved[k+'_modo']='fill';appearanceSaved[k+'_posicion']='centro';appearanceSaved[k+'_opacidad']=Number(form.elements[k+'_opacidad'].value)}appearanceSaved.pie_movil_modo='fill';for(const k of seasonKeys){const x=seasonFiles[k];if(!x){appearanceSaved[k]=null;continue}if(!x.file){appearanceSaved[k]=x.url;continue}const ext=x.file.type==='image/png'?'png':x.file.type==='image/webp'?'webp':'jpg';const path='tematicas/'+crypto.randomUUID()+'.'+ext;const {error}=await supabaseClient.storage.from('sitio').upload(path,x.file,{contentType:x.file.type,upsert:false});if(error)throw error;appearanceSaved[k]=supabaseClient.storage.from('sitio').getPublicUrl(path).data.publicUrl}const payload={nombre:form.elements.nombre.value.trim(),descripcion:form.elements.descripcion.value.trim(),configuracion:{...(t?.configuracion||ansDefaultTheme()),vitrina:c,apariencia:appearanceSaved}};if(!payload.nombre)throw Error('Indica un nombre.');const query=t?.id?supabaseClient.from('tematicas_sitio').update(payload).eq('id',t.id):supabaseClient.from('tematicas_sitio').insert(payload);const {error}=await query;if(error)throw error;if(t?.activa){await ansLoadActiveTheme()}leave()}catch(err){showError(err.message)}finally{btn.disabled=false}}}
 async function ansActivateTheme(id){const t=ansThemesCache.find(x=>x.id===id);if(!t)return;if(t.activa){if(!confirm('¿Desactivar «'+t.nombre+'» y volver a la vitrina clásica?'))return;const {error}=await supabaseClient.from('tematicas_sitio').update({activa:false}).eq('id',id);if(error){alert('No se pudo desactivar: '+error.message);return}}else{if(!confirm('¿Activar «'+t.nombre+'» en la tienda?'))return;const {error}=await supabaseClient.rpc('activar_tematica_sitio',{p_id:id});if(error){alert('No se pudo activar: '+error.message);return}}await ansLoadActiveTheme();await ansLoadThemes()}
 async function ansDeleteTheme(id){const t=ansThemesCache.find(x=>x.id===id);if(!t||t.activa)return;if(!confirm('¿Eliminar la temática «'+t.nombre+'»? Las imágenes compartidas no se eliminarán.'))return;const {error}=await supabaseClient.from('tematicas_sitio').delete().eq('id',id).eq('activa',false);if(error)alert(error.message);else await ansLoadThemes()}
+
+
+/* V7.19.16 — Biblioteca global. Seguridad conservadora: ante lectura incompleta,
+   cualquier archivo queda protegido. La biblioteca no elimina automáticamente. */
+const ansMediaBuckets=['sitio','productos','resenas'];
+const ansMediaTables=['configuracion_sitio','tematicas_sitio','franquicias','personajes','fabricantes','tipos_producto','productos','producto_imagenes','productos_adicionales','producto_adicional_imagenes','resenas','resena_imagenes'];
+let ansMediaFiles=[],ansMediaReferences=new Map(),ansMediaVerified=false;
+function ansMediaKey(bucket,path){return bucket+'/'+path}
+function ansMediaExtract(value,label,map,seen=new WeakSet()){
+ if(value==null)return;
+ if(typeof value==='string'){
+  const rx=/\/storage\/v1\/object\/(?:public|sign|authenticated)\/(sitio|productos|resenas)\/([^\s"'<>?#]+)/g;
+  for(const m of value.matchAll(rx)){
+   let path;try{path=decodeURIComponent(m[2])}catch{continue}
+   const key=ansMediaKey(m[1],path);if(!map.has(key))map.set(key,new Set());map.get(key).add(label);
+  }
+  // Los JSON pueden estar serializados como texto.
+  if((value.startsWith('{')||value.startsWith('['))&&value.length<2000000){try{ansMediaExtract(JSON.parse(value),label,map,seen)}catch{}}
+ }else if(typeof value==='object'){
+  if(seen.has(value))return;seen.add(value);
+  for(const v of Object.values(value))ansMediaExtract(v,label,map,seen);
+ }
+}
+async function ansMediaScanReferences(){
+ const refs=new Map();
+ for(const table of ansMediaTables){
+  let offset=0;
+  while(true){
+   const {data,error}=await supabaseClient.from(table).select('*').range(offset,offset+499);
+   if(error)throw Error('No se pudo verificar '+table+': '+error.message);
+   for(const row of data||[])ansMediaExtract(row,table+(row.nombre?' · '+row.nombre:row.sku?' · '+row.sku:row.cliente?' · '+row.cliente:''),refs);
+   if(!data||data.length<500)break;
+   offset+=500;
+   if(offset>100000)throw Error('Demasiados registros en '+table+'. No se puede verificar la eliminación.');
+  }
+ }
+ return refs;
+}
+async function ansMediaListBucket(bucket,folder='',depth=0){
+ if(depth>12)throw Error('Carpetas demasiado profundas en '+bucket);
+ const all=[];let offset=0;
+ while(true){
+  const {data,error}=await supabaseClient.storage.from(bucket).list(folder,{limit:100,offset,sortBy:{column:'name',order:'asc'}});
+  if(error)throw Error('No se pudo consultar '+bucket+': '+error.message);
+  for(const item of data||[]){
+   const path=folder?folder+'/'+item.name:item.name;
+   if(item.id)all.push({bucket,path,name:item.name,size:item.metadata?.size||0});
+   else all.push(...await ansMediaListBucket(bucket,path,depth+1));
+  }
+  if(!data||data.length<100)break;
+  offset+=100;
+  if(offset>100000)throw Error('Listado incompleto en '+bucket);
+ }
+ return all;
+}
+function ansMediaRender(){
+ const root=document.getElementById('ansMediaResults');if(!root)return;
+ const filter=document.getElementById('ansMediaFilter')?.value||'all';
+ const search=(document.getElementById('ansMediaSearch')?.value||'').toLowerCase();
+ const items=ansMediaFiles.filter(f=>(filter==='all'||filter==='unused'&&!ansMediaReferences.has(ansMediaKey(f.bucket,f.path))||filter===f.bucket)&&ansMediaKey(f.bucket,f.path).toLowerCase().includes(search));
+ root.innerHTML=items.length?items.map(f=>{
+  const refs=[...(ansMediaReferences.get(ansMediaKey(f.bucket,f.path))||[])];
+  const url=supabaseClient.storage.from(f.bucket).getPublicUrl(f.path).data.publicUrl;
+  return `<article class="ansMediaCard"><label><input type="checkbox" class="ansMediaCheck" data-key="${escapeHtml(ansMediaKey(f.bucket,f.path))}" ${refs.length||!ansMediaVerified?'disabled':''}> Seleccionar</label><img src="${escapeHtml(url)}" alt="Vista previa" loading="lazy"><div><b title="${escapeHtml(f.path)}">${escapeHtml(f.name)}</b><small>${escapeHtml(f.bucket)} · ${(f.size/1024).toFixed(0)} KB</small><small>${refs.length?'Protegida: '+escapeHtml(refs.slice(0,3).join(', '))+(refs.length>3?'…':''):'Sin referencias detectadas'}</small></div><button type="button" class="secondary ansMediaReuse" data-url="${escapeHtml(url)}">Copiar URL</button></article>`;
+ }).join(''):'<p class="adminEmpty">No hay imágenes que coincidan con el filtro.</p>';
+ root.querySelectorAll('.ansMediaReuse').forEach(b=>b.onclick=async()=>{await copyText(b.dataset.url)});
+}
+async function ansShowMediaLibrary(){
+ setAdminTab('adminMediaTab');
+ const root=document.getElementById('adminPanelBody');
+ root.innerHTML=`<div class="adminHeader"><div><span class="kicker">ALMACENAMIENTO</span><h1>Biblioteca de imágenes</h1><p>Reutiliza imágenes y consulta qué contenido las utiliza. Las temporadas inactivas también quedan protegidas.</p></div></div><div class="adminToolbar"><button class="secondary" id="ansMediaReload" type="button">Actualizar análisis</button><select id="ansMediaFilter"><option value="all">Todas</option><option value="sitio">Sitio y temporadas</option><option value="productos">Productos y Ami no Sekai</option><option value="resenas">Reseñas</option><option value="unused">Sin referencias detectadas</option></select><input id="ansMediaSearch" placeholder="Buscar por ruta o nombre" type="search"><button class="danger" id="ansMediaDelete" type="button" disabled>Eliminar seleccionadas</button></div><p id="ansMediaStatus" class="formMessage">Comprobando archivos y referencias…</p><div id="ansMediaResults" class="ansMediaGrid"></div>`;
+ root.querySelector('#ansMediaFilter').onchange=ansMediaRender;
+ root.querySelector('#ansMediaSearch').oninput=ansMediaRender;
+ root.querySelector('#ansMediaReload').onclick=ansShowMediaLibrary;
+ root.querySelector('#ansMediaDelete').onclick=ansMediaDeleteSelected;
+ root.querySelector('#ansMediaResults').addEventListener('change',()=>{root.querySelector('#ansMediaDelete').disabled=!ansMediaVerified||!root.querySelector('.ansMediaCheck:checked')});
+ ansMediaVerified=false;ansMediaFiles=[];ansMediaReferences=new Map();
+ try{
+  const refs=await ansMediaScanReferences();
+  const files=[];for(const bucket of ansMediaBuckets)files.push(...await ansMediaListBucket(bucket));
+  if(!document.getElementById('ansMediaStatus'))return;
+  ansMediaReferences=refs;ansMediaFiles=files;ansMediaVerified=true;
+  root.querySelector('#ansMediaStatus').textContent=`${files.length} archivos revisados. ${files.filter(f=>!refs.has(ansMediaKey(f.bucket,f.path))).length} sin referencias detectadas. La eliminación requiere confirmación.`;
+  ansMediaRender();
+ }catch(err){const el=document.getElementById('ansMediaStatus');if(el){el.textContent='Análisis incompleto: '+err.message+'. Por seguridad, la eliminación está bloqueada.';el.className='formMessage error'}}
+}
+async function ansMediaDeleteSelected(){
+ const keys=[...document.querySelectorAll('.ansMediaCheck:checked')].map(x=>x.dataset.key);
+ if(!keys.length||!ansMediaVerified)return;
+ const button=document.getElementById('ansMediaDelete');button.disabled=true;
+ try{
+  // Segunda lectura justo antes de eliminar. Si alguna tabla falla, no se borra nada.
+  const refs=await ansMediaScanReferences();
+  const eligible=keys.filter(k=>!refs.has(k));
+  const protectedCount=keys.length-eligible.length;
+  if(!eligible.length){alert('Todas las imágenes seleccionadas están protegidas.');return}
+  if(!confirm(`Se eliminarán permanentemente ${eligible.length} imágenes sin referencias detectadas.${protectedCount?' Se excluirán '+protectedCount+' protegidas.':''}\n\n¿Confirmas la eliminación?`))return;
+  // Revalidación después de la confirmación.
+  const fresh=await ansMediaScanReferences();
+  const safe=eligible.filter(k=>!fresh.has(k));
+  let removed=0;
+  for(const key of safe){
+   const file=ansMediaFiles.find(f=>ansMediaKey(f.bucket,f.path)===key);if(!file)continue;
+   const {error}=await supabaseClient.storage.from(file.bucket).remove([file.path]);
+   if(error)throw Error('Se eliminaron '+removed+' archivos antes del error: '+error.message);
+   removed++;
+  }
+  alert(`Se eliminaron ${removed} imágenes. ${keys.length-removed} quedaron sin eliminar.`);
+ }catch(err){alert('No se completó la eliminación: '+err.message)}
+ finally{await ansShowMediaLibrary()}
+}
