@@ -1892,28 +1892,35 @@ function ansMediaRender(){
  root.innerHTML=items.length?items.map(f=>{
   const refs=[...(ansMediaReferences.get(ansMediaKey(f.bucket,f.path))||[])];
   const url=supabaseClient.storage.from(f.bucket).getPublicUrl(f.path).data.publicUrl;
-  return `<article class="ansMediaCard"><label><input type="checkbox" class="ansMediaCheck" data-key="${escapeHtml(ansMediaKey(f.bucket,f.path))}" ${refs.length||!ansMediaVerified?'disabled':''}> Seleccionar</label><img src="${escapeHtml(url)}" alt="Vista previa" loading="lazy"><div><b title="${escapeHtml(f.path)}">${escapeHtml(f.name)}</b><small>${escapeHtml(f.bucket)} · ${(f.size/1024).toFixed(0)} KB</small><small>${refs.length?'Protegida: '+escapeHtml(refs.slice(0,3).join(', '))+(refs.length>3?'…':''):'Sin referencias detectadas'}</small></div><button type="button" class="secondary ansMediaReuse" data-url="${escapeHtml(url)}">Copiar URL</button></article>`;
+  return `<article class="ansMediaCard"><label><input type="checkbox" class="ansMediaCheck" data-key="${escapeHtml(ansMediaKey(f.bucket,f.path))}" disabled> Seleccionar</label><img src="${escapeHtml(url)}" alt="Vista previa" loading="lazy"><div><b title="${escapeHtml(f.path)}">${escapeHtml(f.name)}</b><small>${escapeHtml(f.bucket)} · ${(f.size/1024).toFixed(0)} KB</small><small>${refs.length?'Protegida: '+escapeHtml(refs.slice(0,3).join(', '))+(refs.length>3?'…':''):'Sin referencias confirmadas (no implica que sea seguro eliminar)'}</small></div><button type="button" class="secondary ansMediaReuse" data-url="${escapeHtml(url)}">Copiar URL</button></article>`;
  }).join(''):'<p class="adminEmpty">No hay imágenes que coincidan con el filtro.</p>';
  root.querySelectorAll('.ansMediaReuse').forEach(b=>b.onclick=async()=>{await copyText(b.dataset.url)});
 }
 async function ansShowMediaLibrary(){
  setAdminTab('adminMediaTab');
  const root=document.getElementById('adminPanelBody');
- root.innerHTML=`<div class="adminHeader"><div><span class="kicker">ALMACENAMIENTO</span><h1>Biblioteca de imágenes</h1><p>Reutiliza imágenes y consulta qué contenido las utiliza. Las temporadas inactivas también quedan protegidas.</p></div></div><div class="adminToolbar"><button class="secondary" id="ansMediaReload" type="button">Actualizar análisis</button><select id="ansMediaFilter"><option value="all">Todas</option><option value="sitio">Sitio y temporadas</option><option value="productos">Productos y Ami no Sekai</option><option value="resenas">Reseñas</option><option value="unused">Sin referencias detectadas</option></select><input id="ansMediaSearch" placeholder="Buscar por ruta o nombre" type="search"><button class="danger" id="ansMediaDelete" type="button" disabled>Eliminar seleccionadas</button></div><p id="ansMediaStatus" class="formMessage">Comprobando archivos y referencias…</p><div id="ansMediaResults" class="ansMediaGrid"></div>`;
+ root.innerHTML=`<div class="adminHeader"><div><span class="kicker">ALMACENAMIENTO</span><h1>Biblioteca de imágenes</h1><p>Consulta archivos de Storage. Los archivos de temporadas inactivas también deben protegerse.</p></div></div><div class="ansMediaToolbar"><button class="secondary" id="ansMediaReload" type="button">Actualizar análisis</button><select id="ansMediaFilter"><option value="all">Todas</option><option value="sitio">Sitio y temporadas</option><option value="productos">Productos y Ami no Sekai</option><option value="resenas">Reseñas</option><option value="unused">Sin referencias detectadas</option></select><input id="ansMediaSearch" placeholder="Buscar por ruta o nombre" type="search"><button class="danger" id="ansMediaDelete" type="button" disabled title="Eliminación bloqueada hasta contar con verificación de referencias del servidor">Eliminar seleccionadas</button></div><p id="ansMediaStatus" class="formMessage" role="status">Consultando archivos…</p><div id="ansMediaResults" class="ansMediaGrid"></div>`;
  root.querySelector('#ansMediaFilter').onchange=ansMediaRender;
  root.querySelector('#ansMediaSearch').oninput=ansMediaRender;
  root.querySelector('#ansMediaReload').onclick=ansShowMediaLibrary;
- root.querySelector('#ansMediaDelete').onclick=ansMediaDeleteSelected;
- root.querySelector('#ansMediaResults').addEventListener('change',()=>{root.querySelector('#ansMediaDelete').disabled=!ansMediaVerified||!root.querySelector('.ansMediaCheck:checked')});
  ansMediaVerified=false;ansMediaFiles=[];ansMediaReferences=new Map();
- try{
-  const refs=await ansMediaScanReferences();
-  const files=[];for(const bucket of ansMediaBuckets)files.push(...await ansMediaListBucket(bucket));
-  if(!document.getElementById('ansMediaStatus'))return;
-  ansMediaReferences=refs;ansMediaFiles=files;ansMediaVerified=true;
-  root.querySelector('#ansMediaStatus').textContent=`${files.length} archivos revisados. ${files.filter(f=>!refs.has(ansMediaKey(f.bucket,f.path))).length} sin referencias detectadas. La eliminación requiere confirmación.`;
-  ansMediaRender();
- }catch(err){const el=document.getElementById('ansMediaStatus');if(el){el.textContent='Análisis incompleto: '+err.message+'. Por seguridad, la eliminación está bloqueada.';el.className='formMessage error'}}
+ const errors=[];const files=[];
+ for(const bucket of ansMediaBuckets){
+  try{files.push(...await ansMediaListBucket(bucket))}
+  catch(err){errors.push(bucket+': '+err.message)}
+ }
+ if(!document.getElementById('ansMediaStatus'))return;
+ ansMediaFiles=files;
+ // La consulta de referencias no debe impedir mostrar el inventario.
+ try{ansMediaReferences=await ansMediaScanReferences()}
+ catch(err){errors.push('Referencias: '+err.message)}
+ // La verificación de borrado requiere una operación privilegiada y atómica del servidor.
+ // Nunca habilitar eliminación desde el navegador basándose solo en consultas de cliente.
+ ansMediaVerified=false;
+ const status=root.querySelector('#ansMediaStatus');
+ status.textContent=files.length+' archivos encontrados. Eliminación deshabilitada por seguridad.'+(errors.length?' Problemas de lectura: '+errors.join(' | '):'');
+ status.className='formMessage'+(errors.length?' error':'');
+ ansMediaRender();
 }
 async function ansMediaDeleteSelected(){
  const keys=[...document.querySelectorAll('.ansMediaCheck:checked')].map(x=>x.dataset.key);
