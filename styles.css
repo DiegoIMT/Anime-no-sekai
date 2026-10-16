@@ -3821,3 +3821,8 @@ main .publicAdditionalCard .photo img {
 .ansMediaToolbar select,.ansMediaToolbar input{color:#f5f5f7;background:#15171c;border:1px solid #343741}
 .ansMediaToolbar button:disabled{opacity:.5;cursor:not-allowed}
 @media(max-width:760px){.ansMediaToolbar{grid-template-columns:1fr 1fr}.ansMediaToolbar input{grid-column:1/-1;width:100%}.ansMediaToolbar button:last-child{grid-column:1/-1}}
+
+/* V7.19.18 — Detalle de referencias */
+.ansMediaReferencesDetail{font-size:12px;overflow-wrap:anywhere}
+.ansMediaReferencesDetail summary{cursor:pointer;color:var(--accent,#a78bfa);padding:5px 0}
+.ansMediaReferencesDetail ul{padding-left:18px;margin:4px 0 0;max-height:170px;overflow:auto}

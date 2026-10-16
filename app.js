@@ -1835,7 +1835,7 @@ async function ansDeleteTheme(id){const t=ansThemesCache.find(x=>x.id===id);if(!
    cualquier archivo queda protegido. La biblioteca no elimina automáticamente. */
 const ansMediaBuckets=['sitio','productos','resenas'];
 const ansMediaTables=['configuracion_sitio','tematicas_sitio','franquicias','personajes','fabricantes','tipos_producto','productos','producto_imagenes','productos_adicionales','producto_adicional_imagenes','resenas','resena_imagenes'];
-let ansMediaFiles=[],ansMediaReferences=new Map(),ansMediaVerified=false;
+let ansMediaFiles=[],ansMediaReferences=new Map(),ansMediaVerified=false,ansMediaReferenceError='';
 function ansMediaKey(bucket,path){return bucket+'/'+path}
 function ansMediaExtract(value,label,map,seen=new WeakSet()){
  if(value==null)return;
@@ -1888,22 +1888,33 @@ function ansMediaRender(){
  const root=document.getElementById('ansMediaResults');if(!root)return;
  const filter=document.getElementById('ansMediaFilter')?.value||'all';
  const search=(document.getElementById('ansMediaSearch')?.value||'').toLowerCase();
- const items=ansMediaFiles.filter(f=>(filter==='all'||filter==='unused'&&!ansMediaReferences.has(ansMediaKey(f.bucket,f.path))||filter===f.bucket)&&ansMediaKey(f.bucket,f.path).toLowerCase().includes(search));
+ const items=ansMediaFiles.filter(f=>(filter==='all'||filter==='used'&&ansMediaReferences.has(ansMediaKey(f.bucket,f.path))||filter==='unverified'&&!ansMediaReferences.has(ansMediaKey(f.bucket,f.path))||filter===f.bucket)&&ansMediaKey(f.bucket,f.path).toLowerCase().includes(search));
  root.innerHTML=items.length?items.map(f=>{
   const refs=[...(ansMediaReferences.get(ansMediaKey(f.bucket,f.path))||[])];
   const url=supabaseClient.storage.from(f.bucket).getPublicUrl(f.path).data.publicUrl;
-  return `<article class="ansMediaCard"><label><input type="checkbox" class="ansMediaCheck" data-key="${escapeHtml(ansMediaKey(f.bucket,f.path))}" disabled> Seleccionar</label><img src="${escapeHtml(url)}" alt="Vista previa" loading="lazy"><div><b title="${escapeHtml(f.path)}">${escapeHtml(f.name)}</b><small>${escapeHtml(f.bucket)} · ${(f.size/1024).toFixed(0)} KB</small><small>${refs.length?'Protegida: '+escapeHtml(refs.slice(0,3).join(', '))+(refs.length>3?'…':''):'Sin referencias confirmadas (no implica que sea seguro eliminar)'}</small></div><button type="button" class="secondary ansMediaReuse" data-url="${escapeHtml(url)}">Copiar URL</button></article>`;
+  return `<article class="ansMediaCard"><label><input type="checkbox" class="ansMediaCheck" data-key="${escapeHtml(ansMediaKey(f.bucket,f.path))}" disabled> Seleccionar</label><img src="${escapeHtml(url)}" alt="Vista previa" loading="lazy"><div><b title="${escapeHtml(f.path)}">${escapeHtml(f.name)}</b><small>${escapeHtml(f.bucket)} · ${(f.size/1024).toFixed(0)} KB</small><small>${refs.length?'Protegida: '+escapeHtml(refs.slice(0,3).join(', '))+(refs.length>3?'…':''):'Sin referencia identificada · eliminación NO verificada'}</small></div><button type="button" class="secondary ansMediaReuse" data-url="${escapeHtml(url)}">Copiar URL</button></article>`;
  }).join(''):'<p class="adminEmpty">No hay imágenes que coincidan con el filtro.</p>';
  root.querySelectorAll('.ansMediaReuse').forEach(b=>b.onclick=async()=>{await copyText(b.dataset.url)});
+ root.querySelectorAll('.ansMediaCard').forEach(card=>{
+  const key=card.querySelector('.ansMediaCheck')?.dataset.key;
+  const refs=[...(ansMediaReferences.get(key)||[])];
+  if(refs.length){
+   const details=document.createElement('details');details.className='ansMediaReferencesDetail';
+   const summary=document.createElement('summary');summary.textContent='Ver '+refs.length+' referencia(s)';
+   const list=document.createElement('ul');
+   for(const ref of refs){const li=document.createElement('li');li.textContent=ref;list.appendChild(li)}
+   details.append(summary,list);card.querySelector('div')?.appendChild(details);
+  }
+ });
 }
 async function ansShowMediaLibrary(){
  setAdminTab('adminMediaTab');
  const root=document.getElementById('adminPanelBody');
- root.innerHTML=`<div class="adminHeader"><div><span class="kicker">ALMACENAMIENTO</span><h1>Biblioteca de imágenes</h1><p>Consulta archivos de Storage. Los archivos de temporadas inactivas también deben protegerse.</p></div></div><div class="ansMediaToolbar"><button class="secondary" id="ansMediaReload" type="button">Actualizar análisis</button><select id="ansMediaFilter"><option value="all">Todas</option><option value="sitio">Sitio y temporadas</option><option value="productos">Productos y Ami no Sekai</option><option value="resenas">Reseñas</option><option value="unused">Sin referencias detectadas</option></select><input id="ansMediaSearch" placeholder="Buscar por ruta o nombre" type="search"><button class="danger" id="ansMediaDelete" type="button" disabled title="Eliminación bloqueada hasta contar con verificación de referencias del servidor">Eliminar seleccionadas</button></div><p id="ansMediaStatus" class="formMessage" role="status">Consultando archivos…</p><div id="ansMediaResults" class="ansMediaGrid"></div>`;
+ root.innerHTML=`<div class="adminHeader"><div><span class="kicker">ALMACENAMIENTO</span><h1>Biblioteca de imágenes</h1><p>Consulta archivos de Storage. Los archivos de temporadas inactivas también deben protegerse.</p></div></div><div class="ansMediaToolbar"><button class="secondary" id="ansMediaReload" type="button">Actualizar análisis</button><select id="ansMediaFilter"><option value="all">Todas</option><option value="sitio">Sitio y temporadas</option><option value="productos">Productos y Ami no Sekai</option><option value="resenas">Reseñas</option><option value="used">Con referencias identificadas</option><option value="unverified">Sin referencia identificada (no verificada)</option></select><input id="ansMediaSearch" placeholder="Buscar por ruta o nombre" type="search"><button class="danger" id="ansMediaDelete" type="button" disabled title="Eliminación bloqueada hasta contar con verificación de referencias del servidor">Eliminar seleccionadas</button></div><p id="ansMediaStatus" class="formMessage" role="status">Consultando archivos…</p><div id="ansMediaResults" class="ansMediaGrid"></div>`;
  root.querySelector('#ansMediaFilter').onchange=ansMediaRender;
  root.querySelector('#ansMediaSearch').oninput=ansMediaRender;
  root.querySelector('#ansMediaReload').onclick=ansShowMediaLibrary;
- ansMediaVerified=false;ansMediaFiles=[];ansMediaReferences=new Map();
+ ansMediaVerified=false;ansMediaFiles=[];ansMediaReferences=new Map();ansMediaReferenceError='';
  const errors=[];const files=[];
  for(const bucket of ansMediaBuckets){
   try{files.push(...await ansMediaListBucket(bucket))}
@@ -1913,12 +1924,13 @@ async function ansShowMediaLibrary(){
  ansMediaFiles=files;
  // La consulta de referencias no debe impedir mostrar el inventario.
  try{ansMediaReferences=await ansMediaScanReferences()}
- catch(err){errors.push('Referencias: '+err.message)}
+ catch(err){ansMediaReferenceError=err.message;errors.push('Referencias: '+err.message)}
  // La verificación de borrado requiere una operación privilegiada y atómica del servidor.
  // Nunca habilitar eliminación desde el navegador basándose solo en consultas de cliente.
  ansMediaVerified=false;
  const status=root.querySelector('#ansMediaStatus');
- status.textContent=files.length+' archivos encontrados. Eliminación deshabilitada por seguridad.'+(errors.length?' Problemas de lectura: '+errors.join(' | '):'');
+ const referenced=files.filter(f=>ansMediaReferences.has(ansMediaKey(f.bucket,f.path))).length;
+ status.textContent=files.length+' archivos encontrados; '+referenced+' con referencias identificadas; '+(files.length-referenced)+' sin referencia identificada (NO verificados para borrar). Eliminación deshabilitada por seguridad.'+(errors.length?' Problemas de lectura: '+errors.join(' | '):'');
  status.className='formMessage'+(errors.length?' error':'');
  ansMediaRender();
 }
